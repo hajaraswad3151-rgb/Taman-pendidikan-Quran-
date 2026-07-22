@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Navigasi Beranda</title>
+    <style>
+        /* Modern Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            /* Warna latar belakang mint pucat dari gambar, ditingkatkan */
+            background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #263238;
+        }
+
+        /* Container Utama dengan Efek Keren */
+        .container {
+            /* Inspirasi warna hijau dari header gambar, dibuat gradient */
+            background: linear-gradient(135deg, #a7ffeb 0%, #64ffda 100%);
+            padding: 40px;
+            border-radius: 20px;
+            /* Efek bayangan yang lebih lembut dan premium */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            /* Transisi untuk interaksi container */
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Styling Judul dan Deskripsi */
+        h1 {
+            color: #1a237e;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            margin-bottom: 30px;
+            color: #424242;
+            font-weight: 300;
+        }
+
+        /* List Styling - Rangkaian Pilihan */
+        ul.menu-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul.menu-list li {
+            margin-bottom: 15px;
+        }
+
+        /* Styling Tombol Keren (Gabungan) */
+        .btn-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px; /* Spasi ikon dan teks */
+            padding: 16px 20px;
+            /* Warna oranye dari gambar, dibuat premium gradient */
+            background: linear-gradient(90deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            /* Efek timbul yang lebih modern */
+            box-shadow: 0 4px 15px rgba(245, 124, 0, 0.3);
+            /* Transisi halus */
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Teks Tombol */
+        .btn-text {
+            /* Mengambil teks dari coding asli dan mengubahnya menjadi kapital semua agar keren */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Efek Hover Tombol */
+        .btn-link:hover {
+            /* Hover dengan efek sedikit zoom out dan gelap */
+            transform: scale(0.98);
+            box-shadow: 0 2px 10px rgba(245, 124, 0, 0.2);
+            /* Menambahkan efek kilat overlay */
+            background: linear-gradient(90deg, #e68a00 0%, #db6d00 100%);
+        }
+
+        /* Menambahkan efek kilat overlay */
+        .btn-link::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease-in-out;
+        }
+
+        .btn-link:hover::after {
+            left: 100%;
+        }
+
+        /* Styling Ikon */
+        .icon {
+            font-size: 1.3rem;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+        }
+
+        /* Teks Penutup Bawah */
+        .footer-text {
+            margin-top: 30px;
+            color: #1a237e;
+            font-weight: bold;
+            font-style: italic;
+            text-transform: uppercase;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Elemen dari coding asli, dengan teks sambutan dari gambar -->
+        <h1>👋 Selamat Datang!</h1>
+        <p class="subtitle">Pilih portal yang ingin Anda tuju di bawah ini:</p>
+
+        <!-- Rangkaian Pilihan / Navigasi Menu yang Dimodernisasi -->
+        <ul class="menu-list">
+            <li>
+                <!-- Tombol 1: Beranda -->
+                <a href="1/AkunRemaja/Logo.html" class="btn-link">
+                    <span class="icon">📄</span>
+                    <span class="btn-text">AKUN REMAJA</span>
+                </a>
+            </li>
+            <li>
+                <!-- Tombol 2: Profil -->
+                <a href="1/Drive/Logo.html" class="btn-link">
+                    <span class="icon">👤</span>
+                    <span class="btn-text">DATA-DATA PESERTA</span>
+                </a>
+            </li>
+            <li>
+                <!-- Tombol 3: Laporan -->
+                <a href="1/BERKAS-BERKAS YANG ADA/file.html" class="btn-link">
+                    <span class="icon">📊</span>
+                    <span class="btn-text">BERKAS-BERKAS YANG ADA</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Teks penutup dari gambar -->
+        <p class="footer-text">SELAMAT BEKERJA</p>
+    </div>
+
+</body>
+</html>
