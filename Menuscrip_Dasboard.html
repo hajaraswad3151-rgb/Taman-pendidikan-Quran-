@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Digital Simulation Dashboard</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-purple: #c084fc;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      display: flex;
+      height: 100vh;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow: hidden;
+    }
+
+    /* --- SIDEBAR MENU --- */
+    .sidebar {
+      width: 280px;
+      background-color: var(--panel-bg);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #334155;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .sidebar-header h2 {
+      font-size: 1.2rem;
+      color: var(--accent-blue);
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .menu-list {
+      list-style: none;
+      padding: 15px 10px;
+      flex: 1;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .menu-item:hover {
+      background-color: rgba(56, 189, 248, 0.1);
+      color: var(--text-main);
+    }
+
+    .menu-item.active {
+      background-color: var(--accent-blue);
+      color: #000;
+      font-weight: 600;
+    }
+
+    .menu-item span {
+      margin-right: 12px;
+    }
+
+    /* --- MAIN CONTENT AREA --- */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .top-bar h1 {
+      font-size: 1.5rem;
+    }
+
+    .controls-card {
+      background-color: var(--panel-bg);
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+    }
+
+    .control-group input[type="range"] {
+      cursor: pointer;
+    }
+
+    .btn {
+      background-color: var(--accent-blue);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .canvas-container {
+      flex: 1;
+      background-color: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #334155;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigasi Menu -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>AI Engine Control</h2>
+      <p>Simulasi Digital & Kinematika</p>
+    </div>
+    <ul class="menu-list">
+      <li class="menu-item active" onclick="switchSimulation('particles', this)">
+        <span>🌌</span> Particle Swarm AI
+      </li>
+      <li class="menu-item" onclick="switchSimulation('neural', this)">
+        <span>🧠</span> Neural Network Flow
+      </li>
+      <li class="menu-item" onclick="switchSimulation('robot', this)">
+        <span>🤖</span> Robotic Kinematics
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Area Utama -->
+  <main class="main-content">
+    <div class="top-bar">
+      <h1 id="sim-title">Particle Swarm AI Simulation</h1>
+      <button class="btn" onclick="resetSimulation()">Reset View</button>
+    </div>
+
+    <!-- Panel Pengaturan parameter -->
+    <div class="controls-card">
+      <div class="control-group">
+        <label for="speed-slider">Kecepatan:</label>
+        <input type="range" id="speed-slider" min="1" max="10" value="5">
+      </div>
+      <div class="control-group">
+        <label for="count-slider">Kepadatan Agent:</label>
+        <input type="range" id="count-slider" min="20" max="200" value="80">
+      </div>
+    </div>
+
+    <!-- Canvas Tempat Simulasi Diberdayakan -->
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+    </div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const simTitle = document.getElementById('sim-title');
+    const speedSlider = document.getElementById('speed-slider');
+    const countSlider = document.getElementById('count-slider');
+
+    let currentSim = 'particles';
+    let animationFrameId;
+    let width, height;
+
+    // Resizing Canvas
+    function resizeCanvas() {
+      width = canvas.width = canvas.parentElement.clientWidth;
+      height = canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Mouse Tracking untuk Interaksi
+    let mouse = { x: width / 2, y: height / 2 };
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    });
+
+    // --- SIMULASI 1: PARTICLE SWARM AI ---
+    let particles = [];
+    function initParticles() {
+      particles = [];
+      const count = parseInt(countSlider.value);
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          size: Math.random() * 3 + 2
+        });
+      }
+    }
+
+    function drawParticles() {
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
+      ctx.fillRect(0, 0, width, height);
+
+      const speed = parseFloat(speedSlider.value) * 0.5;
+
+      particles.forEach(p => {
+        // AI Swarm: Agen bergerak tertarik ke posisi kursor mouse
+        let dx = mouse.x - p.x;
+        let dy = mouse.y - p.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist > 5) {
+          p.vx += (dx / dist) * 0.05 * speed;
+          p.vy += (dy / dist) * 0.05 * speed;
+        }
+
+        p.vx *= 0.95; // Hambatan udara (damping)
+        p.vy *= 0.95;
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fill();
+      });
+    }
+
+    // --- SIMULASI 2: NEURAL NETWORK FLOW ---
+    let nodes = [];
+    function initNeural() {
+      nodes = [];
+      const layers = 4;
+      const nodesPerLayer = [4, 6, 6, 3];
+      const layerGap = width / (layers + 1);
+
+      for (let l = 0; l < layers; l++) {
+        const x = layerGap * (l + 1);
+        const nodeGap = height / (nodesPerLayer[l] + 1);
+        for (let n = 0; n < nodesPerLayer[l]; n++) {
+          nodes.push({
+            x: x,
+            y: nodeGap * (n + 1),
+            layer: l,
+            val: Math.random()
+          });
+        }
+      }
+    }
+
+    function drawNeural() {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, width, height);
+
+      const speed = parseFloat(speedSlider.value) * 0.02;
+
+      // Draw Connections
+      nodes.forEach(n1 => {
+        nodes.forEach(n2 => {
+          if (n2.layer === n1.layer + 1) {
+            ctx.beginPath();
+            ctx.moveTo(n1.x, n1.y);
+            ctx.lineTo(n2.x, n2.y);
+            const alpha = (Math.sin(Date.now() * speed + n1.x) + 1) / 2;
+            ctx.strokeStyle = `rgba(192, 132, 252, ${alpha * 0.5})`;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+        });
+      });
+
+      // Draw Nodes
+      nodes.forEach(n => {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = '#c084fc';
+        ctx.fill();
+      });
+    }
+
+    // --- SIMULASI 3: ROBOTIC KINEMATICS ---
+    function drawRobot() {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, width, height);
+
+      const base = { x: width / 2, y: height - 50 };
+      const L1 = 120;
+      const L2 = 100;
+
+      // Simple Inverse Kinematics
+      let dx = mouse.x - base.x;
+      let dy = base.y - mouse.y;
+      let dist = Math.min(Math.sqrt(dx * dx + dy * dy), L1 + L2 - 2);
+      let angle = Math.atan2(dy, dx);
+
+      let theta2 = Math.acos((dist * dist - L1 * L1 - L2 * L2) / (2 * L1 * L2)) || 0;
+      let theta1 = angle - Math.atan2(L2 * Math.sin(theta2), L1 + L2 * Math.cos(theta2));
+
+      let joint1 = {
+        x: base.x + L1 * Math.cos(theta1),
+        y: base.y - L1 * Math.sin(theta1)
+      };
+
+      let joint2 = {
+        x: joint1.x + L2 * Math.cos(theta1 + theta2),
+        y: joint1.y - L2 * Math.sin(theta1 + theta2)
+      };
+
+      // Render Lengan
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = '#4ade80';
+      ctx.lineCap = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(base.x, base.y);
+      ctx.lineTo(joint1.x, joint1.y);
+      ctx.lineTo(joint2.x, joint2.y);
+      ctx.stroke();
+
+      // Base & Joints
+      [base, joint1, joint2].forEach(pt => {
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+      });
+    }
+
+    // --- ENGINE LOOP ---
+    function loop() {
+      if (currentSim === 'particles') drawParticles();
+      else if (currentSim === 'neural') drawNeural();
+      else if (currentSim === 'robot') drawRobot();
+
+      animationFrameId = requestAnimationFrame(loop);
+    }
+
+    // --- SWITCH SIMULASI MENU ---
+    function switchSimulation(type, element) {
+      currentSim = type;
+      
+      // Update UI Active Menu
+      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+
+      if (type === 'particles') {
+        simTitle.textContent = "Particle Swarm AI Simulation";
+        initParticles();
+      } else if (type === 'neural') {
+        simTitle.textContent = "Neural Network Flow Visualization";
+        initNeural();
+      } else if (type === 'robot') {
+        simTitle.textContent = "2-DOF Inverse Kinematics Robot Arm";
+      }
+    }
+
+    function resetSimulation() {
+      if (currentSim === 'particles') initParticles();
+      if (currentSim === 'neural') initNeural();
+    }
+
+    // Event listener slider untuk menambah/mengurangi particle
+    countSlider.addEventListener('input', () => {
+      if (currentSim === 'particles') initParticles();
+    });
+
+    // Inisialisasi awal
+    initParticles();
+    loop();
+  </script>
+</body>
+</html>
