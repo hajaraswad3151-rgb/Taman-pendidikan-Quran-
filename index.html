@@ -36,7 +36,6 @@
   @keyframes scaleIn { from { opacity:0; transform: scale(.96); } to { opacity:1; transform: scale(1); } } .animate-scale-in { animation: scaleIn .3s ease-out forwards; }
   @keyframes slideInRight { from { transform: translateX(110%); opacity:0; } to { transform: translateX(0); opacity:1; } } .toast { animation: slideInRight .35s ease-out forwards; }
   @keyframes pulse-qr { 0%,100% { box-shadow: 0 0 0 0 rgba(200,152,68,0.4); } 50% { box-shadow: 0 0 0 20px rgba(200,152,68,0); } } .pulse-qr { animation: pulse-qr 2s infinite; }
-  @keyframes scanLine { 0% { top: 5%; } 50% { top: 95%; } 100% { top: 5%; } } .scan-line { animation: scanLine 2s linear infinite; }
   ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-thumb { background: rgba(15,92,74,0.25); border-radius: 4px; }
   .input-field { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; transition: all .2s; width: 100%; }
   .input-field:focus { outline: none; border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(15,92,74,0.1); }
@@ -338,7 +337,6 @@ function handleLogin(e) {
 
 function logout() { if (state.currentUser) addLog('Logout', `${state.currentUser.nama} keluar`); stopCamera(); state.currentUser = null; state.currentRole = null; showSplash(); }
 
-// ===== REGISTER FLOW =====
 function showRegisterChoiceModal() {
   showModal(`
     <div class="text-center mb-5">
@@ -1697,5 +1695,77 @@ function submitAddSantri(e) { e.preventDefault(); const result = createSantriAcc
 function saveSettings(e) { e.preventDefault(); state.data.settings.namaTPQ = document.getElementById('set_namaTPQ').value.trim(); state.data.settings.tahunAjaran = document.getElementById('set_tahunAjaran').value.trim(); state.data.settings.alamatTPQ = document.getElementById('set_alamatTPQ').value.trim(); state.data.settings.teleponTPQ = document.getElementById('set_teleponTPQ').value.trim(); state.data.settings.linkWebsite = document.getElementById('set_linkWebsite').value.trim(); saveData(); addLog('Ubah Pengaturan', 'Pengaturan sistem diperbarui'); toast('Pengaturan berhasil disimpan', 'success'); }
 function changeOwnerPassword(e) { e.preventDefault(); const oldPass = document.getElementById('old_pass').value.trim(); const newPass = document.getElementById('new_pass').value.trim(); const confirmPass = document.getElementById('confirm_pass').value.trim(); if (oldPass !== state.data.accounts.admin.password) { toast('Password lama salah', 'error'); return; } if (newPass.length < 4) { toast('Password baru minimal 4 karakter', 'error'); return; } if (newPass !== confirmPass) { toast('Konfirmasi password tidak cocok', 'error'); return; } state.data.accounts.admin.password = newPass; saveData(); addLog('Ubah Password Owner', 'Password pemegang website diubah'); toast('Password owner berhasil diubah', 'success'); document.getElementById('old_pass').value = ''; document.getElementById('new_pass').value = ''; document.getElementById('confirm_pass').value = ''; }
 
-function openAddPaymentModal() { const santriOptions = state.data.santri.length > 0 ? state.data.santri.map(s => { const g = getGuru(s.guru_id); return `<option value="${s.id}">${s.nama} — ${g?.nama||''} (${s.kelas})</option>`; }).join('') : ''; const metodeOpts = METODE_PEMBAYARAN.map(m=>`<option value="${m}">${m}</option>`).join(''); showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Tambah Pembayaran</h3><form onsubmit="submitAddPayment(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Santri</label><select id="pay_santri" required class="input-field" onchange="updateTagihanOptions()"><option value="">— Pilih Santri —</option>${santriOptions}</select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tagihan Belum Lunas</label><select id="pay_tagihan" required class="input-field" disabled><option value="">Pilih santri dulu</option></select></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Pembayaran</label><input id="pay_tanggal" type="date" required class="input-field"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Metode</label><select id="pay_metode" required class="input-field">${metodeOpts}</select></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Keterangan (opsional)</label><input id="pay_ket" type="text" class="input-field" placeholder="Catatan tambahan"></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); document.getElementById('pay_tanggal').value = new Date().toISOString().split('T')[0]; }
-function updateTagihanOptions() { const sid = document.getElementById('pay_santri').value; const sel = document.getElementById('pay_tagihan'); if (!sid) { sel.disabled = true; sel.innerHTML = '<option value="">Pilih santri dulu</option>'; return;
+function openAddPaymentModal() { 
+  const santriOptions = state.data.santri.length > 0 ? state.data.santri.map(s => { const g = getGuru(s.guru_id); return `<option value="${s.id}">${s.nama} — ${g?.nama||''} (${s.kelas})</option>`; }).join('') : ''; 
+  const metodeOpts = METODE_PEMBAYARAN.map(m=>`<option value="${m}">${m}</option>`).join(''); 
+  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Tambah Pembayaran</h3><form onsubmit="submitAddPayment(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Santri</label><select id="pay_santri" required class="input-field" onchange="updateTagihanOptions()"><option value="">— Pilih Santri —</option>${santriOptions}</select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tagihan Belum Lunas</label><select id="pay_tagihan" required class="input-field" disabled><option value="">Pilih santri dulu</option></select></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Pembayaran</label><input id="pay_tanggal" type="date" required class="input-field"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Metode</label><select id="pay_metode" required class="input-field">${metodeOpts}</select></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Keterangan (opsional)</label><input id="pay_ket" type="text" class="input-field" placeholder="Catatan tambahan"></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); 
+  document.getElementById('pay_tanggal').value = new Date().toISOString().split('T')[0]; 
+}
+function updateTagihanOptions() { 
+  const sid = document.getElementById('pay_santri').value; const sel = document.getElementById('pay_tagihan'); 
+  if (!sid) { sel.disabled = true; sel.innerHTML = '<option value="">Pilih santri dulu</option>'; return; } 
+  const belum = state.data.tagihan.filter(t => t.santri_id===sid && t.status!=='lunas'); 
+  if (belum.length===0) { sel.disabled = true; sel.innerHTML = '<option value="">Tidak ada tagihan belum lunas</option>'; } 
+  else { sel.disabled = false; sel.innerHTML = belum.map(t => `<option value="${t.id}">${t.jenis} — ${t.periode} — ${formatRupiah(t.nominal)}</option>`).join(''); } 
+}
+function submitAddPayment(e) { 
+  e.preventDefault(); const sid = document.getElementById('pay_santri').value; const tid = document.getElementById('pay_tagihan').value; const tanggal = document.getElementById('pay_tanggal').value; const metode = document.getElementById('pay_metode').value; const ket = document.getElementById('pay_ket').value; 
+  if (!sid || !tid) { toast('Lengkapi data pembayaran','error'); return; } 
+  const success = processPayment(tid, metode, tanggal, state.currentUser?.nama || 'Admin', ket); 
+  if (success) { 
+    const t = state.data.tagihan.find(x=>x.id===tid); 
+    addLog('Tambah Pembayaran', `Pembayaran ${formatRupiah(t.nominal)} untuk santri ${getSantri(sid).nama} via ${metode}`); 
+    closeModal(); toast(`Pembayaran ${formatRupiah(t.nominal)} berhasil dicatat`,'success'); navigateGuru(state.guruPage); 
+  } 
+}
+function quickPay(tagihanId) { 
+  const t = state.data.tagihan.find(x=>x.id===tagihanId); if (!t) return; const s = getSantri(t.santri_id); 
+  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Konfirmasi Pembayaran</h3><div class="bg-stone-50 rounded-xl p-4 mb-5 mt-4 space-y-2 text-sm"><div class="flex justify-between"><span class="text-gray-500">Santri</span><span class="font-semibold">${s.nama}</span></div><div class="flex justify-between"><span class="text-gray-500">Tagihan</span><span class="font-semibold">${t.jenis} ${t.periode}</span></div><div class="flex justify-between"><span class="text-gray-500">Nominal</span><span class="font-semibold">${formatRupiah(t.nominal)}</span></div></div><div class="space-y-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Metode Pembayaran</label><select id="quick_metode" class="input-field">${METODE_PEMBAYARAN.map(m=>`<option value="${m}">${m}</option>`).join('')}</select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Pembayaran</label><input id="quick_tanggal" type="date" class="input-field" value="${new Date().toISOString().split('T')[0]}"></div></div><div class="flex gap-3 pt-5"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmQuickPay('${tagihanId}')" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Konfirmasi Bayar</button></div>`); 
+}
+function confirmQuickPay(tagihanId) { 
+  const metode = document.getElementById('quick_metode').value; const tglInput = document.getElementById('quick_tanggal').value; const t = state.data.tagihan.find(x=>x.id===tagihanId); 
+  const success = processPayment(tagihanId, metode, tglInput, state.currentUser?.nama || 'Admin', 'Pembayaran cepat'); 
+  if (success) { 
+    addLog('Pembayaran Cepat', `Pembayaran ${formatRupiah(t.nominal)} - ${getSantri(t.santri_id).nama} via ${metode}`); 
+    closeModal(); toast('Pembayaran berhasil dikonfirmasi','success'); navigateGuru(state.guruPage); 
+  } 
+}
+function viewReceipt(tagihanId) { 
+  const t = state.data.tagihan.find(x=>x.id===tagihanId); if (!t) return; const p = state.data.pembayaran.find(x=>x.tagihan_id===tagihanId); if (!p) return; const s = getSantri(t.santri_id); const g = getGuru(s.guru_id); 
+  showModal(`<div class="text-center mb-5"><div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-50 mb-3"><i data-lucide="file-check" class="text-emerald-600" style="width:28px;height:28px"></i></div><h3 class="text-xl font-bold text-gray-800">Kwitansi Pembayaran</h3></div><div class="border-2 border-dashed border-stone-300 rounded-xl p-5 mb-4"><div class="flex justify-between text-xs text-gray-500 mb-4 pb-3 border-b border-stone-200"><span>No: <strong class="font-mono text-gray-700">${p.id}</strong></span><span>Tanggal: <strong class="text-gray-700">${p.tanggal}</strong></span></div><div class="space-y-2.5 text-sm"><div class="flex justify-between"><span class="text-gray-500">Nama Santri</span><span class="font-semibold text-gray-800">${s.nama}</span></div><div class="flex justify-between"><span class="text-gray-500">NIS</span><span class="font-mono text-gray-700">${s.nis}</span></div><div class="flex justify-between"><span class="text-gray-500">Kelas</span><span class="text-gray-700">${s.kelas}</span></div><div class="flex justify-between"><span class="text-gray-500">Guru Wali</span><span class="text-gray-700">${g?.nama||'-'}</span></div><div class="flex justify-between"><span class="text-gray-500">Pembayaran Untuk</span><span class="font-semibold text-gray-800 text-right">${t.jenis}<br><span class="text-xs font-normal text-gray-500">Periode ${t.periode}</span></span></div><div class="flex justify-between"><span class="text-gray-500">Metode</span><span class="text-gray-700">${p.metode}</span></div><div class="flex justify-between"><span class="text-gray-500">Petugas</span><span class="text-gray-700">${p.petugas}</span></div><div class="flex justify-between pt-3 mt-3 border-t border-stone-200"><span class="font-bold text-gray-800">Total Dibayar</span><span class="font-black text-emerald-700 text-lg">${formatRupiah(p.jumlah)}</span></div></div></div><div class="flex gap-3"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Tutup</button><button onclick="window.print()" class="btn-primary flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="printer" style="width:16px;height:16px"></i> Cetak</button></div>`); 
+}
+
+function showQRPendaftaranModal() { 
+  showModal(`<div class="text-center mb-5"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 mb-3 pulse-qr"><i data-lucide="qr-code" class="text-amber-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800">Pendaftaran Santri Baru</h3></div><div class="bg-gradient-to-br from-emerald-50 to-amber-50 border-2 border-emerald-200 rounded-2xl p-6 mb-4"><div id="modalQrCode" class="flex justify-center mb-4"></div><div class="text-center"><p class="font-mono font-bold text-lg text-emerald-700 tracking-wider">TPQ-ALQURAN-DAFTAR</p></div></div><div class="flex gap-3"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Tutup</button></div>`); 
+  generateQRCode('modalQrCode', 'TPQ_ALQURAN|REGISTER', 200); lucide.createIcons(); 
+}
+function initGuruQRCode() { 
+  generateQRCode('mainQrCode', 'TPQ_ALQURAN|REGISTER', 192); 
+  const webLink = state.data.settings.linkWebsite || WEBSITE_LINK_DEFAULT;
+  generateQRCode('linkQrCode', webLink + '#daftar', 192); 
+}
+function generateQRCode(elementId, text, size) { 
+  const el = document.getElementById(elementId); if (!el) return; el.innerHTML = ''; 
+  try { new QRCode(el, { text: text, width: size, height: size, colorDark: '#0a3d31', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H }); } 
+  catch(e) { el.innerHTML = `<div class="bg-stone-100 rounded-xl flex items-center justify-center text-xs text-gray-400" style="width:${size}px;height:${size}px">QR Error</div>`; } 
+}
+function downloadQR(elementId, fileName) { 
+  const canvas = document.querySelector(`#${elementId} canvas`); if (!canvas) { toast('QR Code belum siap', 'error'); return; } 
+  const link = document.createElement('a'); link.download = `${fileName}.png`; link.href = canvas.toDataURL(); link.click(); toast('QR Code berhasil diunduh', 'success'); 
+}
+
+// ===== INIT APLIKASI =====
+loadData(); 
+showSplash(); 
+updateClock(); 
+lucide.createIcons();
+
+if (window.location.hash.includes('daftar')) {
+  setTimeout(() => {
+    showRegisterChoiceModal();
+    history.replaceState(null, null, window.location.pathname);
+  }, 800);
+}
+</script>
+</body>
+</html>
