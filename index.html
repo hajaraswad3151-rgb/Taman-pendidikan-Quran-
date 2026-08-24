@@ -131,6 +131,7 @@
       <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="tagihan" onclick="navigateGuru('tagihan')"><i data-lucide="receipt" style="width:18px;height:18px"></i> Tagihan & SPP</a>
       <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="pembayaran" onclick="navigateGuru('pembayaran')"><i data-lucide="wallet" style="width:18px;height:18px"></i> Pembayaran</a>
       <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="tugas-materi" onclick="navigateGuru('tugas-materi')"><i data-lucide="book-up" style="width:18px;height:18px"></i> Tugas & Materi</a>
+      <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="sertifikat" onclick="navigateGuru('sertifikat')"><i data-lucide="award" style="width:18px;height:18px"></i> Buat Sertifikat</a>
       <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="meeting" onclick="navigateGuru('meeting')"><i data-lucide="video" style="width:18px;height:18px"></i> Room Meeting</a>
     </nav>
     <div class="p-4 border-t border-white/10"><div class="flex items-center gap-3 mb-3"><div id="guruAvatar" class="w-10 h-10 rounded-full bg-amber-400/30 border border-amber-400/40 flex items-center justify-center text-amber-200 font-bold text-sm">G</div><div class="flex-1 min-w-0"><p id="guruName" class="text-white text-sm font-semibold truncate">Guru</p><p class="text-emerald-100/50 text-xs">Administrator</p></div></div><button onclick="logout()" class="w-full text-xs text-red-300 hover:text-red-200 border border-red-400/20 hover:border-red-400/40 rounded-lg py-2 flex items-center justify-center gap-1.5 transition-colors"><i data-lucide="log-out" style="width:14px;height:14px"></i> Keluar</button></div>
@@ -186,20 +187,11 @@
 
 <script>
 const STORAGE_KEY = 'tpq_alquran_kontrol_v4';
-const WEBSITE_LINK = 'https://nutrisari3152-lab.github.io/Taman-Pendidikan-Quran/';
+const WEBSITE_LINK_DEFAULT = 'https://hajaraswad3151-rgb.github.io/Taman-pendidikan-Quran-/';
 const METODE_PEMBAYARAN = ['Tunai', 'Transfer Bank (BSI)', 'Transfer Bank (BNI)', 'Transfer Bank (Mandiri)', 'Alfamart', 'Indomaret'];
-let state = { currentUser:null, currentRole:null, guruPage:'dashboard', santriPage:'beranda', adminPage:'dashboard', data:null, registerGuruId:null, registerRole:null, cameraStream:null, scanInterval:null };
+let state = { currentUser:null, currentRole:null, guruPage:'dashboard', santriPage:'beranda', adminPage:'dashboard', data:null, registerGuruId:null, registerRole:null, registerData:null, cameraStream:null, scanInterval:null, _santriSearch:'', _adminSantriSearch:'' };
 
-function hitungUmur(tglLahir) {
-  if (!tglLahir) return '-';
-  const lahir = new Date(tglLahir);
-  if (isNaN(lahir.getTime())) return '-';
-  const now = new Date();
-  let umur = now.getFullYear() - lahir.getFullYear();
-  const m = now.getMonth() - lahir.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < lahir.getDate())) umur--;
-  return umur + ' tahun';
-}
+function hitungUmur(tglLahir) { if (!tglLahir) return '-'; const lahir = new Date(tglLahir); if (isNaN(lahir.getTime())) return '-'; const now = new Date(); let umur = now.getFullYear() - lahir.getFullYear(); const m = now.getMonth() - lahir.getMonth(); if (m < 0 || (m === 0 && now.getDate() < lahir.getDate())) umur--; return umur + ' tahun'; }
 
 function loadData() {
   try {
@@ -208,7 +200,7 @@ function loadData() {
       state.data = JSON.parse(saved);
       if (!state.data.accounts) state.data.accounts = {};
       if (!state.data.accounts.admin) state.data.accounts.admin = { username:'hajar', password:'hajar2024', nama:"Hajar As'wad", role:'owner' };
-      if (!state.data.logs) state.data.logs = []; 
+      if (!state.data.logs) state.data.logs = [];
       if (!state.data.accounts.guru) state.data.accounts.guru = { username:'guru', password:'guru123', nama:'Administrator TPQ', role:'admin' };
       if (!state.data.accounts.santri) state.data.accounts.santri = [];
       if (!state.data.pendingSantri) state.data.pendingSantri = [];
@@ -216,7 +208,13 @@ function loadData() {
       if (!state.data.materi) state.data.materi = [];
       if (!state.data.pengumpulan) state.data.pengumpulan = [];
       if (!state.data.meetings) state.data.meetings = [];
-      saveData(); 
+      if (!state.data.guru) state.data.guru = [];
+      if (!state.data.santri) state.data.santri = [];
+      if (!state.data.tagihan) state.data.tagihan = [];
+      if (!state.data.pembayaran) state.data.pembayaran = [];
+      if (!state.data.settings) state.data.settings = { namaTPQ:'TPQ/TPA Al-Hidayah', alamatTPQ:'Jl. Pendidikan No. 123, Bandung', teleponTPQ:'022-1234567', tahunAjaran:'2024/2025', linkWebsite: WEBSITE_LINK_DEFAULT };
+      if (!state.data.settings.linkWebsite) state.data.settings.linkWebsite = WEBSITE_LINK_DEFAULT;
+      saveData();
     } else { initFreshData(); }
   } catch(e) { initFreshData(); }
 }
@@ -227,19 +225,13 @@ function initFreshData() {
     tugas: [], materi: [], pengumpulan: [], meetings: [],
     accounts: { admin: { username:'hajar', password:'hajar2024', nama:"Hajar As'wad", role:'owner' }, guru: { username:'guru', password:'guru123', nama:'Administrator TPQ', role:'admin' }, santri: [] },
     logs: [{ id:'l1', waktu:'01 Agu 2024 08:00', aktor:'Hajar As\'wad', aksi:'Sistem diinisialisasi', detail:'Sistem Taman Pendidikan Al-Qur\'an dimulai dari nol.' }],
-    settings: { namaTPQ:'TPQ/TPA Al-Hidayah', alamatTPQ:'Jl. Pendidikan No. 123, Bandung', teleponTPQ:'022-1234567', tahunAjaran:'2024/2025' }
+    settings: { namaTPQ:'TPQ/TPA Al-Hidayah', alamatTPQ:'Jl. Pendidikan No. 123, Bandung', teleponTPQ:'022-1234567', tahunAjaran:'2024/2025', linkWebsite: WEBSITE_LINK_DEFAULT }
   };
   saveData();
 }
 
 function saveData() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); } catch(e) { toast('Penyimpanan penuh! Hapus beberapa data.', 'error'); } }
-function addLog(aksi, detail) {
-  const now = new Date(); const bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-  const waktu = `${String(now.getDate()).padStart(2,'0')} ${bulan[now.getMonth()]} ${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  state.data.logs.unshift({ id: 'l' + (state.data.logs.length + 1), waktu, aktor: state.currentUser?.nama || 'Sistem', aksi, detail });
-  saveData();
-}
-
+function addLog(aksi, detail) { const now = new Date(); const bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']; const waktu = `${String(now.getDate()).padStart(2,'0')} ${bulan[now.getMonth()]} ${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`; state.data.logs.unshift({ id: 'l' + (state.data.logs.length + 1), waktu, aktor: state.currentUser?.nama || 'Sistem', aksi, detail }); saveData(); }
 function formatRupiah(n) { return 'Rp ' + (n||0).toLocaleString('id-ID'); }
 function getGuru(id) { return state.data.guru.find(g => g.id === id); }
 function getSantri(id) { return state.data.santri.find(s => s.id === id); }
@@ -270,10 +262,12 @@ function showModal(html, size='max-w-lg') {
 function closeModal() { const modal = document.getElementById('activeModal'); if (modal) { modal.remove(); document.body.style.overflow = ''; stopCamera(); } }
 function toggleSidebar(role) { const sidebar = document.getElementById(role + 'Sidebar'); if (sidebar) sidebar.classList.toggle('sidebar-mobile-hidden'); }
 function togglePassword(inputId, btn) { const input = document.getElementById(inputId); if (input.type === 'password') { input.type = 'text'; btn.innerHTML = `<i data-lucide="eye-off" style="width:18px;height:18px"></i>`; } else { input.type = 'password'; btn.innerHTML = `<i data-lucide="eye" style="width:18px;height:18px"></i>`; } lucide.createIcons(); }
+function togglePassDisplay(elementId, realValue) { const el = document.getElementById(elementId); if (el.textContent === '•••••••') el.textContent = realValue; else el.textContent = '•••••••'; }
+function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => toast(`Kode ${text} disalin`, 'success')); }
 
 function showSplash() {
   stopCamera();
-  loadData(); // Sync data
+  loadData();
   document.getElementById('splashScreen').classList.remove('hidden');
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('registerScreen').classList.add('hidden');
@@ -284,7 +278,7 @@ function showSplash() {
 }
 
 function reloadApp(role) {
-  loadData(); // Ambil data terbaru dari localStorage
+  loadData();
   if (role === 'guru') { updateMeetingStatus('guru'); navigateGuru(state.guruPage); }
   else if (role === 'santri') { updateMeetingStatus('santri'); navigateSantri(state.santriPage); }
   else if (role === 'admin') { updateMeetingStatus('admin'); navigateAdmin(state.adminPage); }
@@ -298,11 +292,7 @@ function updateClock() {
   const ids = ['currentTime','currentTimeSantri','currentTimeAdmin','currentDate','currentDateSantri','currentDateAdmin'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = id.includes('Time') ? timeStr : tglMasehi; });
 }
-
-function openCalendarModal() {
-  const now = new Date();
-  showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-3"><i data-lucide="calendar" class="text-emerald-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-1">Penanggalan</h3><p class="text-sm text-gray-500 mb-5">Waktu sekarang</p></div><div class="bg-teal-50 border border-teal-200 rounded-xl p-5 text-center"><p class="text-3xl font-mono font-black text-teal-800">${now.toLocaleTimeString('id-ID')}</p></div><div class="flex gap-3 pt-5"><button onclick="closeModal()" class="btn-primary w-full py-3 rounded-xl font-semibold">Tutup</button></div>`);
-}
+function openCalendarModal() { const now = new Date(); showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-3"><i data-lucide="calendar" class="text-emerald-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-1">Penanggalan</h3><p class="text-sm text-gray-500 mb-5">Waktu sekarang</p></div><div class="bg-teal-50 border border-teal-200 rounded-xl p-5 text-center"><p class="text-3xl font-mono font-black text-teal-800">${now.toLocaleTimeString('id-ID')}</p></div><div class="flex gap-3 pt-5"><button onclick="closeModal()" class="btn-primary w-full py-3 rounded-xl font-semibold">Tutup</button></div>`); }
 setInterval(updateClock, 1000);
 
 function goToLogin(role) {
@@ -325,12 +315,12 @@ function goToLogin(role) {
 
 function handleLogin(e) {
   e.preventDefault();
-  loadData(); // SINKRONISASI DATA PENTING: Ambil data terbaru dari localStorage sebelum login
+  loadData();
   const u = document.getElementById('loginUsername').value.trim();
   const p = document.getElementById('loginPassword').value.trim();
   const errEl = document.getElementById('loginError');
   let acc = null;
-  if (!state.data || !state.data.accounts) initFreshData(); 
+  if (!state.data || !state.data.accounts) initFreshData();
   if (state.currentRole === 'admin') { if (state.data.accounts.admin && state.data.accounts.admin.username === u && state.data.accounts.admin.password === p) acc = state.data.accounts.admin; }
   else if (state.currentRole === 'guru') {
     if (state.data.accounts.guru && state.data.accounts.guru.username === u && state.data.accounts.guru.password === p) { acc = state.data.accounts.guru; acc.role = 'admin'; acc.guruId = null; }
@@ -348,7 +338,227 @@ function handleLogin(e) {
 
 function logout() { if (state.currentUser) addLog('Logout', `${state.currentUser.nama} keluar`); stopCamera(); state.currentUser = null; state.currentRole = null; showSplash(); }
 
-// ===== LOGIC MEETING =====
+// ===== REGISTER FLOW =====
+function showRegisterChoiceModal() {
+  showModal(`
+    <div class="text-center mb-5">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 mb-3 pulse-qr"><i data-lucide="qr-code" class="text-amber-600" style="width:32px;height:32px"></i></div>
+      <h3 class="text-xl font-bold text-gray-800">Pendaftaran Santri Baru</h3>
+      <p class="text-sm text-gray-500 mt-1">Pilih metode pendaftaran</p>
+    </div>
+    <div class="space-y-3">
+      <button onclick="goToRegister('santri')" class="w-full p-4 border-2 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl text-left flex items-center gap-3 transition-colors">
+        <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center"><i data-lucide="scan-line" class="text-emerald-600" style="width:24px;height:24px"></i></div>
+        <div class="flex-1"><p class="font-bold text-gray-800">Scan QR Code / Manual</p><p class="text-xs text-gray-500">Lanjut ke pengisian formulir</p></div>
+        <i data-lucide="chevron-right" class="text-gray-400" style="width:20px;height:20px"></i>
+      </button>
+    </div>
+    <div class="flex gap-3 mt-5"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Tutup</button></div>
+  `);
+}
+
+function goToRegister(role) {
+  state.registerRole = role;
+  closeModal();
+  document.getElementById('splashScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('registerScreen').classList.remove('hidden');
+  setRegisterStep(1);
+  renderRegisterStep1();
+  lucide.createIcons();
+}
+
+function setRegisterStep(step) {
+  for (let i = 1; i <= 3; i++) { const el = document.getElementById(`registerStep${i}`); if (el) el.classList.toggle('hidden', i !== step); }
+  const dots = ['step1Dot', 'step2Dot', 'step3Dot'];
+  const lines = ['step1Line', 'step2Line'];
+  dots.forEach((id, i) => { const el = document.getElementById(id); if (!el) return; el.classList.remove('active', 'done', 'pending'); if (i + 1 < step) el.classList.add('done'); else if (i + 1 === step) el.classList.add('active'); else el.classList.add('pending'); });
+  lines.forEach((id, i) => { const el = document.getElementById(id); if (!el) return; el.classList.toggle('done', i + 1 < step); });
+}
+
+function renderRegisterStep1() {
+  document.getElementById('registerStep1').innerHTML = `
+    <div class="text-center mb-6">
+      <h3 class="text-xl font-bold text-gray-800 mb-1">Langkah 1: Pendaftaran</h3>
+      <p class="text-sm text-gray-500">Klik tombol di bawah untuk melanjutkan ke pengisian data</p>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="stopCamera(); showSplash();" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button>
+      <button onclick="skipScan()" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Lanjut</button>
+    </div>`;
+  lucide.createIcons();
+}
+function skipScan() { setRegisterStep(2); renderRegisterStep2(); }
+
+function renderRegisterStep2() {
+  const isGuru = state.registerRole === 'guru';
+  const guruOptions = state.data.guru.length > 0 ? state.data.guru.map(g => `<option value="${g.id}">${g.nama} - ${g.mapel}</option>`).join('') : '<option value="">Belum ada guru</option>';
+  document.getElementById('registerStep2').innerHTML = `
+    <h3 class="text-xl font-bold text-gray-800 mb-1">${isGuru ? 'Data Diri Guru' : 'Data Diri Santri'}</h3>
+    <p class="text-sm text-gray-500 mb-4">Lengkapi formulir di bawah ini</p>
+    <form onsubmit="submitRegisterForm(event)" class="space-y-4">
+      ${!isGuru ? `
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap *</label><input id="rg_nama" type="text" class="input-field" required></div>
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelamin *</label><select id="rg_gender" class="input-field"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tempat Lahir *</label><input id="rg_tempat" type="text" class="input-field" required></div>
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Lahir *</label><input id="rg_tgl" type="date" class="input-field" required></div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Kelas *</label><select id="rg_kelas" class="input-field"><option>Iqro 1</option><option>Iqro 2</option><option>Iqro 3</option><option>Iqro 4</option><option>Iqro 5</option><option>Iqro 6</option></select></div>
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Guru Wali *</label><select id="rg_guru_id" class="input-field">${guruOptions}</select></div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Wali *</label><input id="rg_wali" type="text" class="input-field" required></div>
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telepon Wali *</label><input id="rg_telepon" type="text" class="input-field" required></div>
+        </div>
+        <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat *</label><textarea id="rg_alamat" class="input-field" rows="2" required></textarea></div>
+      ` : `
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap *</label><input id="rg_nama" type="text" class="input-field" required></div>
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Mata Pelajaran *</label><input id="rg_mapel" type="text" class="input-field" required></div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telepon *</label><input id="rg_telepon" type="text" class="input-field" required></div>
+          <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelamin *</label><select id="rg_gender" class="input-field"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
+        </div>
+        <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat</label><textarea id="rg_alamat" class="input-field" rows="2"></textarea></div>
+      `}
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="setRegisterStep(1); renderRegisterStep1();" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Kembali</button>
+        <button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Lanjut</button>
+      </div>
+    </form>`;
+  lucide.createIcons();
+}
+
+function submitRegisterForm(e) {
+  e.preventDefault();
+  state.registerData = {
+    nama: document.getElementById('rg_nama').value.trim(),
+    gender: document.getElementById('rg_gender').value,
+    telepon: document.getElementById('rg_telepon')?.value.trim() || '',
+    alamat: document.getElementById('rg_alamat')?.value.trim() || ''
+  };
+  if (state.registerRole === 'santri') {
+    state.registerData.tempat = document.getElementById('rg_tempat').value.trim();
+    state.registerData.tgl = document.getElementById('rg_tgl').value;
+    state.registerData.kelas = document.getElementById('rg_kelas').value;
+    state.registerData.guru_id = document.getElementById('rg_guru_id').value;
+    state.registerData.wali = document.getElementById('rg_wali').value.trim();
+  } else {
+    state.registerData.mapel = document.getElementById('rg_mapel').value.trim();
+  }
+  setRegisterStep(3);
+  renderRegisterStep3();
+}
+
+function renderRegisterStep3() {
+  const d = state.registerData;
+  const isGuru = state.registerRole === 'guru';
+  document.getElementById('registerStep3').innerHTML = `
+    <h3 class="text-xl font-bold text-gray-800 mb-1">Konfirmasi Data</h3>
+    <p class="text-sm text-gray-500 mb-4">Pastikan data berikut sudah benar</p>
+    <div class="bg-stone-50 border border-stone-200 rounded-xl p-5 space-y-3 text-sm mb-5">
+      <div class="flex justify-between"><span class="text-gray-500">Nama</span><span class="font-semibold text-gray-800">${d.nama}</span></div>
+      <div class="flex justify-between"><span class="text-gray-500">Jenis Kelamin</span><span class="text-gray-800">${d.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</span></div>
+      ${!isGuru ? `
+        <div class="flex justify-between"><span class="text-gray-500">Tempat Lahir</span><span class="text-gray-800">${d.tempat}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Tanggal Lahir</span><span class="text-gray-800">${d.tgl}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Kelas</span><span class="text-gray-800">${d.kelas}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Wali</span><span class="text-gray-800">${d.wali}</span></div>
+      ` : `<div class="flex justify-between"><span class="text-gray-500">Mata Pelajaran</span><span class="text-gray-800">${d.mapel}</span></div>`}
+      <div class="flex justify-between"><span class="text-gray-500">Telepon</span><span class="text-gray-800">${d.telepon}</span></div>
+      <div class="flex justify-between"><span class="text-gray-500">Alamat</span><span class="text-gray-800 text-right">${d.alamat}</span></div>
+    </div>
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-5 text-xs text-amber-800"><p class="font-semibold">ℹ️ Catatan:</p><p>${isGuru ? 'Pendaftaran guru akan diproses oleh admin.' : 'Santri akan masuk daftar pending, menunggu persetujuan admin.'}</p></div>
+    <div class="flex gap-3">
+      <button onclick="setRegisterStep(2); renderRegisterStep2();" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Kembali</button>
+      <button onclick="submitRegisterFinal()" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Kirim Pendaftaran</button>
+    </div>`;
+  lucide.createIcons();
+}
+
+function submitRegisterFinal() {
+  const d = state.registerData;
+  if (state.registerRole === 'santri') {
+    const result = createSantriAccount(d.nama, d.gender, d.tempat, d.tgl, d.kelas, d.wali, d.telepon, d.alamat, d.guru_id, true);
+    if (result) {
+      addLog('Pendaftaran Santri Baru', `Santri ${d.nama} mendaftar (pending)`);
+      saveData();
+      toast('Pendaftaran berhasil! Menunggu persetujuan admin.', 'success');
+      setTimeout(() => showSplash(), 2000);
+    }
+  } else {
+    if (!state.data.pendingGuru) state.data.pendingGuru = [];
+    state.data.pendingGuru.push({ id: 'g_pending_' + Date.now(), nama: d.nama, mapel: d.mapel, telepon: d.telepon, gender: d.gender, alamat: d.alamat, status: 'pending' });
+    saveData();
+    addLog('Pendaftaran Guru Baru', `Guru ${d.nama} mendaftar (pending)`);
+    toast('Pendaftaran guru terkirim! Menunggu persetujuan admin.', 'success');
+    setTimeout(() => showSplash(), 2000);
+  }
+}
+
+function createSantriAccount(nama, gender, tempat, tgl, kelas, wali, telepon, alamat, guru_id, isPending) {
+  const newId = isPending ? 'pending_' + Date.now() : 's' + Date.now();
+  const nis = 'S' + String(Date.now()).slice(-6);
+  let ttlStr = '-';
+  if (tgl) { const dt = new Date(tgl); const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']; ttlStr = `${tempat}, ${dt.getDate()} ${bulan[dt.getMonth()]} ${dt.getFullYear()}`; }
+  const newSantri = { id: newId, nis, nama, gender, tempat, tgl_lahir: tgl, ttl: ttlStr, kelas, guru_id, wali, telepon, alamat, status: isPending ? 'pending' : 'active' };
+  if (isPending) {
+    state.data.pendingSantri.push(newSantri);
+  } else {
+    state.data.santri.push(newSantri);
+    const password = 'santri123';
+    state.data.accounts.santri.push({ username: nis, password: password, nama: nama, santri_id: newId, role: 'santri' });
+    const now = new Date(); const bulanNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    for (let i = 0; i < 6; i++) { const m = (now.getMonth() + i) % 12; const y = now.getFullYear() + Math.floor((now.getMonth() + i) / 12); state.data.tagihan.push({ id: 'tg' + Date.now() + '_' + i, santri_id: newId, jenis: 'SPP Bulanan', periode: `${bulanNames[m]} ${y}`, nominal: 50000, deadline: `${y}-${String(m+1).padStart(2,'0')}-15`, status: 'belum' }); }
+    state.data.tagihan.push({ id: 'tg_reg_' + Date.now(), santri_id: newId, jenis: 'Pendaftaran', periode: 'Sekali Bayar', nominal: 100000, deadline: `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-30`, status: 'belum' });
+  }
+  return { id: newId, nis, password: 'santri123' };
+}
+
+function approveSantri(pendingId) {
+  const idx = state.data.pendingSantri.findIndex(p => p.id === pendingId);
+  if (idx === -1) return;
+  const p = state.data.pendingSantri[idx];
+  const result = createSantriAccount(p.nama, p.gender, p.tempat, p.tgl_lahir, p.kelas, p.wali, p.telepon, p.alamat, p.guru_id, false);
+  state.data.pendingSantri.splice(idx, 1);
+  saveData();
+  addLog('Setujui Santri', `Admin menyetujui pendaftaran ${p.nama}`);
+  toast(`Santri ${p.nama} disetujui. NIS: ${result.nis}`, 'success');
+  navigateAdmin('akun-santri');
+}
+
+function rejectSantri(pendingId) {
+  const idx = state.data.pendingSantri.findIndex(p => p.id === pendingId);
+  if (idx === -1) return;
+  const p = state.data.pendingSantri[idx];
+  state.data.pendingSantri.splice(idx, 1);
+  saveData();
+  addLog('Tolak Santri', `Admin menolak pendaftaran ${p.nama}`);
+  toast('Pendaftaran ditolak', 'warn');
+  navigateAdmin('akun-santri');
+}
+
+function stopCamera() {
+  if (state.cameraStream) { state.cameraStream.getTracks().forEach(t => t.stop()); state.cameraStream = null; }
+  if (state.scanInterval) { clearInterval(state.scanInterval); state.scanInterval = null; }
+}
+
+function processPayment(tagihanId, metode, tanggal, petugas, ket) {
+  const t = state.data.tagihan.find(x => x.id === tagihanId);
+  if (!t) { toast('Tagihan tidak ditemukan', 'error'); return false; }
+  if (t.status === 'lunas') { toast('Tagihan sudah lunas', 'warn'); return false; }
+  const pembayaranId = 'pay' + Date.now();
+  state.data.pembayaran.push({ id: pembayaranId, tagihan_id: tagihanId, santri_id: t.santri_id, jumlah: t.nominal, tanggal: tanggal, metode: metode, petugas: petugas, keterangan: ket || '' });
+  t.status = 'lunas'; t.tanggal_bayar = tanggal;
+  saveData();
+  return true;
+}
+
 function getCurrentMeeting() {
   let active = state.data.meetings.find(m => m.status === 'active');
   if (active) return { type: 'active', data: active };
@@ -361,17 +571,9 @@ function updateMeetingStatus(role) {
   const current = getCurrentMeeting();
   const el = document.getElementById(`meetingStatus${role.charAt(0).toUpperCase() + role.slice(1)}`);
   if (!el) return;
-  
-  if (current.type === 'active') {
-    el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-green-100 text-green-800 font-bold transition-colors hover:bg-green-200";
-    el.innerHTML = `<span class="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span> Host Aktif`;
-  } else if (current.type === 'upcoming') {
-    el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-orange-100 text-orange-800 font-bold transition-colors hover:bg-orange-200";
-    el.innerHTML = `<i data-lucide="megaphone" style="width:14px;height:14px"></i> Pengumuman Meeting`;
-  } else {
-    el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-red-100 text-red-800 font-bold transition-colors hover:bg-red-200";
-    el.innerHTML = `<span class="w-2 h-2 bg-red-600 rounded-full"></span> Host Offline`;
-  }
+  if (current.type === 'active') { el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-green-100 text-green-800 font-bold transition-colors hover:bg-green-200"; el.innerHTML = `<span class="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span> Host Aktif (Bisa Masuk)`; }
+  else if (current.type === 'upcoming') { el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-orange-100 text-orange-800 font-bold transition-colors hover:bg-orange-200"; el.innerHTML = `<i data-lucide="megaphone" style="width:14px;height:14px"></i> Pengumuman Meeting`; }
+  else { el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-red-100 text-red-800 font-bold transition-colors hover:bg-red-200"; el.innerHTML = `<span class="w-2 h-2 bg-red-600 rounded-full"></span> Host Offline`; }
   lucide.createIcons();
 }
 
@@ -395,49 +597,15 @@ function openAddMeetingModal() {
 function submitAddMeeting(e) {
   e.preventDefault();
   const newId = 'meet' + Date.now();
-  state.data.meetings.push({
-    id: newId,
-    judul: document.getElementById('mt_judul').value.trim(),
-    deskripsi: document.getElementById('mt_desc').value.trim(),
-    tanggal: document.getElementById('mt_tanggal').value,
-    waktu: document.getElementById('mt_waktu').value,
-    link: document.getElementById('mt_link').value.trim(),
-    status: 'pending',
-    pengaju: state.currentUser.nama
-  });
+  state.data.meetings.push({ id: newId, judul: document.getElementById('mt_judul').value.trim(), deskripsi: document.getElementById('mt_desc').value.trim(), tanggal: document.getElementById('mt_tanggal').value, waktu: document.getElementById('mt_waktu').value, link: document.getElementById('mt_link').value.trim(), status: 'pending', pengaju: state.currentUser.nama });
   saveData(); addLog('Ajukan Meeting', `${state.currentUser.nama} mengajukan meeting ${document.getElementById('mt_judul').value}`);
   closeModal(); toast('Pengajuan meeting terkirim ke Admin!', 'success'); navigateGuru('meeting');
 }
 
-function approveMeeting(id) {
-  const m = state.data.meetings.find(x => x.id === id); if(!m) return;
-  m.status = 'approved';
-  saveData(); addLog('Setujui Meeting', `Admin menyetujui meeting ${m.judul}`);
-  toast('Pengumuman meeting dikirim ke Guru & Santri', 'success'); navigateAdmin('meeting');
-}
-
-function rejectMeeting(id) {
-  const m = state.data.meetings.find(x => x.id === id); if(!m) return;
-  m.status = 'rejected';
-  saveData(); addLog('Tolak Meeting', `Admin menolak meeting ${m.judul}`);
-  toast('Pengajuan meeting ditolak', 'warn'); navigateAdmin('meeting');
-}
-
-function startMeeting(id) {
-  const m = state.data.meetings.find(x => x.id === id); if(!m) return;
-  m.status = 'active';
-  saveData(); addLog('Mulai Meeting', `Meeting ${m.judul} dimulai`);
-  toast('Meeting dimulai! Status berubah menjadi Host Aktif (Hijau)', 'success');
-  navigateAdmin('meeting');
-}
-
-function endMeeting(id) {
-  const m = state.data.meetings.find(x => x.id === id); if(!m) return;
-  m.status = 'ended';
-  saveData(); addLog('Akhiri Meeting', `Meeting ${m.judul} diakhiri`);
-  toast('Meeting diakhiri. Status kembali Offline (Merah)', 'info');
-  navigateAdmin('meeting');
-}
+function approveMeeting(id) { const m = state.data.meetings.find(x => x.id === id); if(!m) return; m.status = 'approved'; saveData(); addLog('Setujui Meeting', `Admin menyetujui meeting ${m.judul}`); toast('Pengumuman meeting dikirim ke Guru & Santri', 'success'); navigateAdmin('meeting'); }
+function rejectMeeting(id) { const m = state.data.meetings.find(x => x.id === id); if(!m) return; m.status = 'rejected'; saveData(); addLog('Tolak Meeting', `Admin menolak meeting ${m.judul}`); toast('Pengajuan meeting ditolak', 'warn'); navigateAdmin('meeting'); }
+function startMeeting(id) { const m = state.data.meetings.find(x => x.id === id); if(!m) return; m.status = 'active'; saveData(); addLog('Mulai Meeting', `Meeting ${m.judul} dimulai`); toast('Meeting dibuka! Santri sudah bisa masuk room', 'success'); navigateAdmin('meeting'); }
+function endMeeting(id) { const m = state.data.meetings.find(x => x.id === id); if(!m) return; m.status = 'ended'; saveData(); addLog('Akhiri Meeting', `Meeting ${m.judul} diakhiri`); toast('Meeting diakhiri. Status kembali Offline', 'info'); navigateAdmin('meeting'); }
 
 function renderGuruMeeting() {
   const myMeetings = state.data.meetings.filter(m => m.pengaju === state.currentUser.nama || state.currentUser.role === 'admin');
@@ -449,14 +617,13 @@ function renderGuruMeeting() {
         <div>
           <p class="text-sm font-semibold text-gray-600">Status Host Saat Ini:</p>
           <p class="text-xl font-black ${current.type === 'active' ? 'text-green-700' : current.type === 'upcoming' ? 'text-orange-700' : 'text-red-700'}">
-            ${current.type === 'active' ? '🟢 Host Aktif (Tatap Muka Online)' : current.type === 'upcoming' ? '🟠 Pengumuman Meeting' : '🔴 Host Offline'}
+            ${current.type === 'active' ? '🟢 Host Aktif (Santri Bisa Masuk Room)' : current.type === 'upcoming' ? '🟠 Pengumuman Meeting (Diberitahukan ke Santri)' : '🔴 Host Offline (Belum Ada Meeting)'}
           </p>
           ${current.data ? `<p class="text-xs text-gray-500 mt-1">Judul: ${current.data.judul}</p>` : ''}
         </div>
         ${current.data && current.data.link ? `<a href="${current.data.link}" target="_blank" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold">Gabung</a>` : ''}
       </div>
     </div>
-
     <div class="card p-6">
       <div class="flex justify-between items-center mb-4">
         <h3 class="font-bold text-gray-800 text-lg">Pengajuan Meeting Saya</h3>
@@ -472,12 +639,7 @@ function renderGuruMeeting() {
               <span><i data-lucide="clock" style="width:12px;height:12px" class="inline mr-1"></i> ${m.waktu}</span>
             </div>
             <div class="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between">
-              <span class="text-xs font-bold px-3 py-1 rounded-full ${
-                m.status === 'pending' ? 'bg-amber-100 text-amber-700' : 
-                m.status === 'approved' ? 'bg-orange-100 text-orange-700' : 
-                m.status === 'active' ? 'bg-green-100 text-green-700' : 
-                m.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-700'
-              } uppercase tracking-wider">${m.status}</span>
+              <span class="text-xs font-bold px-3 py-1 rounded-full ${m.status === 'pending' ? 'bg-amber-100 text-amber-700' : m.status === 'approved' ? 'bg-orange-100 text-orange-700' : m.status === 'active' ? 'bg-green-100 text-green-700' : m.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-700'} uppercase tracking-wider">${m.status}</span>
               ${m.status === 'active' ? `<a href="${m.link}" target="_blank" class="text-xs btn-primary px-3 py-1.5 rounded-lg font-semibold">Gabung Meeting</a>` : ''}
             </div>
           </div>
@@ -492,11 +654,10 @@ function renderSantriMeeting() {
   return `
     <div class="card p-6">
       <h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2"><i data-lucide="video" style="width:20px;height:20px"></i> Room Meeting Tatap Muka Online</h3>
-      
       ${current.type === 'active' ? `
         <div class="bg-green-50 border-2 border-green-200 rounded-2xl p-6 text-center">
           <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-3"><i data-lucide="video" class="text-green-600" style="width:32px;height:32px"></i></div>
-          <h4 class="text-xl font-black text-green-800 mb-1">Meeting Sedang Aktif!</h4>
+          <h4 class="text-xl font-black text-green-800 mb-1">Meeting Sudah Dibuka! (Silakan Masuk)</h4>
           <p class="text-sm text-green-700 mb-4">${current.data.judul}</p>
           <a href="${current.data.link}" target="_blank" class="inline-flex items-center gap-2 btn-primary px-6 py-3 rounded-xl font-bold">Gabung Meeting Sekarang <i data-lucide="external-link" style="width:16px;height:16px"></i></a>
         </div>
@@ -507,6 +668,7 @@ function renderSantriMeeting() {
           <p class="text-sm text-orange-700 mb-2">${current.data.judul}</p>
           <p class="text-xs text-orange-600">Akan dilaksanakan pada:</p>
           <p class="text-lg font-bold text-orange-800">${current.data.tanggal} pukul ${current.data.waktu}</p>
+          <p class="text-xs text-orange-500 mt-2 italic">Menunggu disetujui & dibuka oleh Admin</p>
         </div>
       ` : `
         <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center">
@@ -525,23 +687,14 @@ function renderAdminMeeting() {
       <h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2"><i data-lucide="video" style="width:20px;height:20px"></i> Kontrol Room Meeting</h3>
       <p class="text-sm text-gray-500">Setujui pengajuan meeting dari Guru. Untuk memulai meeting, ubah status menjadi "Mulai/Aktif". Untuk menyelesaikan, ubah menjadi "Akhiri".</p>
     </div>
-
     <div class="card p-6">
       <h3 class="font-bold text-gray-800 text-lg mb-4">Daftar Pengajuan Meeting</h3>
       <div class="space-y-4">
         ${state.data.meetings.length > 0 ? state.data.meetings.map(m => `
           <div class="p-4 border border-stone-200 rounded-xl">
             <div class="flex justify-between items-start mb-2">
-              <div>
-                <h4 class="font-bold text-gray-800">${m.judul}</h4>
-                <p class="text-xs text-gray-500">Diajukan oleh: ${m.pengaju}</p>
-              </div>
-              <span class="text-xs font-bold px-3 py-1 rounded-full ${
-                m.status === 'pending' ? 'bg-amber-100 text-amber-700' : 
-                m.status === 'approved' ? 'bg-orange-100 text-orange-700' : 
-                m.status === 'active' ? 'bg-green-100 text-green-700' : 
-                m.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-700'
-              } uppercase tracking-wider">${m.status}</span>
+              <div><h4 class="font-bold text-gray-800">${m.judul}</h4><p class="text-xs text-gray-500">Diajukan oleh: ${m.pengaju}</p></div>
+              <span class="text-xs font-bold px-3 py-1 rounded-full ${m.status === 'pending' ? 'bg-amber-100 text-amber-700' : m.status === 'approved' ? 'bg-orange-100 text-orange-700' : m.status === 'active' ? 'bg-green-100 text-green-700' : m.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-700'} uppercase tracking-wider">${m.status}</span>
             </div>
             <p class="text-sm text-gray-600 mb-2">${m.deskripsi || ''}</p>
             <div class="flex flex-wrap gap-4 text-xs text-gray-500 mb-3">
@@ -550,16 +703,9 @@ function renderAdminMeeting() {
               <a href="${m.link}" target="_blank" class="text-blue-600 hover:underline"><i data-lucide="link" style="width:12px;height:12px" class="inline mr-1"></i> Link Meeting</a>
             </div>
             <div class="pt-3 border-t border-stone-100 flex flex-wrap gap-2">
-              ${m.status === 'pending' ? `
-                <button onclick="approveMeeting('${m.id}')" class="text-xs btn-primary px-3 py-1.5 rounded-lg font-semibold">Setujui (Pengumuman)</button>
-                <button onclick="rejectMeeting('${m.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold">Tolak</button>
-              ` : ''}
-              ${m.status === 'approved' ? `
-                <button onclick="startMeeting('${m.id}')" class="text-xs btn-primary px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"><i data-lucide="play" style="width:12px;height:12px"></i> Mulai Meeting (Host Hijau)</button>
-              ` : ''}
-              ${m.status === 'active' ? `
-                <button onclick="endMeeting('${m.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"><i data-lucide="square" style="width:12px;height:12px"></i> Akhiri Meeting (Host Merah)</button>
-              ` : ''}
+              ${m.status === 'pending' ? `<button onclick="approveMeeting('${m.id}')" class="text-xs btn-primary px-3 py-1.5 rounded-lg font-semibold">Setujui (Pengumuman)</button><button onclick="rejectMeeting('${m.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold">Tolak</button>` : ''}
+              ${m.status === 'approved' ? `<button onclick="startMeeting('${m.id}')" class="text-xs btn-primary px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"><i data-lucide="play" style="width:12px;height:12px"></i> Mulai Meeting (Host Hijau)</button>` : ''}
+              ${m.status === 'active' ? `<button onclick="endMeeting('${m.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"><i data-lucide="square" style="width:12px;height:12px"></i> Akhiri Meeting (Host Merah)</button>` : ''}
             </div>
           </div>
         `).join('') : '<div class="text-center py-8 text-gray-400"><p>Belum ada pengajuan meeting.</p></div>'}
@@ -568,13 +714,12 @@ function renderAdminMeeting() {
   `;
 }
 
-// ===== DASHBOARD & LAINNYA =====
 function showGuruApp() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('guruApp').classList.remove('hidden'); document.getElementById('guruName').textContent = state.currentUser.nama; document.getElementById('guruAvatar').textContent = state.currentUser.nama.charAt(0); navigateGuru('dashboard'); updateMeetingStatus('guru'); updateClock(); lucide.createIcons(); }
 function navigateGuru(page) {
   state.guruPage = page;
   document.querySelectorAll('#guruSidebar .nav-item').forEach(el => el.classList.remove('active'));
   document.querySelector(`#guruSidebar .nav-item[data-page="${page}"]`).classList.add('active');
-  const titles = { dashboard: ['Dashboard','Ringkasan administrasi & pembayaran'], pendaftaran: ['Pendaftaran Santri','Generate QR Code untuk santri baru'], santri: ['Daftar Santri','Kelola data semua santri'], kontrol: ['Kartu Kontrol','Pantau & kelola tagihan santri'], tagihan: ['Tagihan & SPP','Daftar tagihan semua santri'], pembayaran: ['Pembayaran','Kelola pembayaran masuk'], 'tugas-materi': ['Tugas & Materi', 'Bagikan tugas dan materi ke santri'], meeting: ['Room Meeting', 'Adakan tatap muka online dengan santri'] };
+  const titles = { dashboard: ['Dashboard','Ringkasan administrasi & pembayaran'], pendaftaran: ['Pendaftaran Santri','Generate QR Code untuk santri baru'], santri: ['Daftar Santri','Kelola data semua santri'], kontrol: ['Kartu Kontrol','Pantau & kelola tagihan santri'], tagihan: ['Tagihan & SPP','Daftar tagihan semua santri'], pembayaran: ['Pembayaran','Kelola pembayaran masuk'], 'tugas-materi': ['Tugas & Materi', 'Bagikan tugas dan materi ke santri'], sertifikat: ['Buat Sertifikat', 'Buat sertifikat kelulusan mengaji/hafalan'], meeting: ['Room Meeting', 'Adakan tatap muka online dengan santri'] };
   document.getElementById('guruPageTitle').textContent = titles[page][0];
   document.getElementById('guruPageSubtitle').textContent = titles[page][1];
   const main = document.getElementById('guruMain');
@@ -586,12 +731,13 @@ function navigateGuru(page) {
   else if (page === 'tagihan') main.innerHTML = renderGuruTagihan();
   else if (page === 'pembayaran') main.innerHTML = renderGuruPembayaran();
   else if (page === 'tugas-materi') main.innerHTML = renderGuruTugasMateri();
+  else if (page === 'sertifikat') main.innerHTML = renderGuruSertifikat();
   else if (page === 'meeting') main.innerHTML = renderGuruMeeting();
   if (page === 'pendaftaran') initGuruQRCode();
   updateMeetingStatus('guru');
   lucide.createIcons();
 }
-function showSantriApp() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('santriApp').classList.remove('hidden'); const santri = getSantri(state.currentUser.santri_id); document.getElementById('santriName').textContent = santri.nama; document.getElementById('santriKelasBadge').textContent = santri.kelas; document.getElementById('santriAvatar').textContent = santri.nama.charAt(0); navigateSantri('beranda'); updateMeetingStatus('santri'); updateClock(); lucide.createIcons(); }
+function showSantriApp() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('santriApp').classList.remove('hidden'); const santri = getSantri(state.currentUser.santri_id); if (!santri) { logout(); return; } document.getElementById('santriName').textContent = santri.nama; document.getElementById('santriKelasBadge').textContent = santri.kelas; document.getElementById('santriAvatar').textContent = santri.nama.charAt(0); navigateSantri('beranda'); updateMeetingStatus('santri'); updateClock(); lucide.createIcons(); }
 function navigateSantri(page) {
   state.santriPage = page;
   document.querySelectorAll('#santriSidebar .nav-item').forEach(el => el.classList.remove('active'));
@@ -630,15 +776,51 @@ function navigateAdmin(page) {
   lucide.createIcons();
 }
 
-// ===== TUGAS & MATERI GURU =====
+function renderKartuKontrolGuru() {
+  const santriList = state.data.santri;
+  return `
+    <div class="card p-5 mb-5"><div class="flex items-center justify-between flex-wrap gap-3"><div><h3 class="font-bold text-gray-800 text-lg">Kartu Kontrol Tagihan Santri</h3><p class="text-sm text-gray-500">Pantau status pembayaran semua santri</p></div></div></div>
+    <div class="card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-stone-50 border-b border-stone-200"><tr class="text-left text-xs text-gray-600 uppercase tracking-wider"><th class="px-5 py-3 font-semibold">Santri</th><th class="px-5 py-3 font-semibold">Kelas</th><th class="px-5 py-3 font-semibold text-center">Lunas</th><th class="px-5 py-3 font-semibold text-center">Belum</th><th class="px-5 py-3 font-semibold text-right">Tunggakan</th><th class="px-5 py-3 font-semibold text-center">Status</th></tr></thead><tbody>
+    ${santriList.length > 0 ? santriList.map(s => {
+      const tagihan = getTagihanSantri(s.id); const lunas = tagihan.filter(t => t.status === 'lunas').length; const belum = tagihan.length - lunas; const tunggakan = tagihan.filter(t => t.status !== 'lunas').reduce((a, b) => a + b.nominal, 0);
+      const status = tunggakan === 0 ? 'lunas' : (tunggakan > 100000 ? 'critical' : 'warning'); const badge = status === 'lunas' ? 'badge-lunas' : 'badge-belum'; const label = status === 'lunas' ? 'Lunas' : status === 'critical' ? 'Kritis' : 'Tunggakan';
+      return `<tr class="table-row border-b border-stone-100 cursor-pointer" onclick="openSantriDetail('${s.id}')"><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="avatar-circle w-7 h-7 text-[10px]" style="background:${s.gender === 'L' ? '#0f5c4a' : '#c89844'}">${s.nama.charAt(0)}</div><div><p class="font-semibold text-gray-800">${s.nama}</p><p class="text-[10px] text-gray-500">${s.nis}</p></div></div></td><td class="px-5 py-3 text-gray-700">${s.kelas}</td><td class="px-5 py-3 text-center font-bold text-emerald-700">${lunas}</td><td class="px-5 py-3 text-center font-bold text-red-600">${belum}</td><td class="px-5 py-3 text-right font-semibold ${tunggakan > 0 ? 'text-red-600' : 'text-emerald-700'}">${formatRupiah(tunggakan)}</td><td class="px-5 py-3 text-center"><span class="text-xs px-2.5 py-1 rounded-full font-semibold ${badge}">${label}</span></td></tr>`;
+    }).join('') : '<tr><td colspan="6" class="py-12 text-center text-gray-400">Belum ada santri</td></tr>'}
+    </tbody></table></div></div>
+  `;
+}
+
+function renderKartuKontrolSantri() {
+  const sid = state.currentUser.santri_id; const s = getSantri(sid); if (!s) return '<div class="text-center py-12 text-gray-400">Data tidak ditemukan</div>';
+  const tagihan = getTagihanSantri(sid); const lunas = tagihan.filter(t => t.status === 'lunas'); const belumLunas = tagihan.filter(t => t.status !== 'lunas');
+  const totalNominal = tagihan.reduce((a, b) => a + b.nominal, 0); const lunasNominal = lunas.reduce((a, b) => a + b.nominal, 0); const belumNominal = belumLunas.reduce((a, b) => a + b.nominal, 0);
+  const persen = totalNominal ? Math.round((lunasNominal / totalNominal) * 100) : 0;
+  return `
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+      <div class="card p-5"><p class="text-xs text-gray-500 mb-1">Total Tagihan</p><p class="text-xl font-black text-gray-800">${tagihan.length}</p></div>
+      <div class="card p-5"><p class="text-xs text-gray-500 mb-1">Sudah Lunas</p><p class="text-xl font-black text-emerald-700">${lunas.length}</p></div>
+      <div class="card p-5"><p class="text-xs text-gray-500 mb-1">Belum Lunas</p><p class="text-xl font-black text-red-600">${belumLunas.length}</p></div>
+      <div class="card p-5"><p class="text-xs text-gray-500 mb-1">Tunggakan</p><p class="text-lg font-black text-amber-700">${formatRupiah(belumNominal)}</p></div>
+    </div>
+    <div class="card p-6 mb-5">
+      <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-gray-800">Status Pembayaran</h3><div class="text-right"><p class="text-2xl font-black text-emerald-700">${persen}%</p><p class="text-xs text-gray-500">Lunas</p></div></div>
+      <div class="progress-track mb-2" style="height:14px"><div class="progress-fill" style="width:${persen}%"></div></div>
+      <div class="flex justify-between text-xs text-gray-500"><span>${formatRupiah(lunasNominal)} terbayar</span><span>${formatRupiah(totalNominal)} total</span></div>
+    </div>
+    <div class="card p-6">
+      <h3 class="font-bold text-gray-800 mb-4">Detail Tagihan</h3>
+      <div class="space-y-3">
+        ${tagihan.length > 0 ? tagihan.map(t => `<div class="flex items-center justify-between p-3 ${t.status === 'lunas' ? 'bg-emerald-50' : 'bg-amber-50'} rounded-xl"><div><p class="font-semibold text-gray-800">${t.jenis}</p><p class="text-xs text-gray-500">Periode ${t.periode} • Deadline ${t.deadline}</p></div><div class="text-right"><p class="font-bold ${t.status === 'lunas' ? 'text-emerald-700' : 'text-amber-700'}">${formatRupiah(t.nominal)}</p><span class="text-xs px-2 py-0.5 rounded-full font-semibold ${t.status === 'lunas' ? 'badge-lunas' : 'badge-belum'}">${t.status === 'lunas' ? 'Lunas' : 'Belum'}</span></div></div>`).join('') : '<div class="text-center py-8 text-gray-400">Tidak ada tagihan</div>'}
+      </div>
+    </div>
+  `;
+}
+
 function renderGuruTugasMateri() {
   return `
     <div class="grid md:grid-cols-2 gap-6 mb-6">
       <div class="card p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-bold text-gray-800 text-lg">Materi Pembelajaran</h3>
-          <button onclick="openAddMateriModal()" class="btn-primary px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" style="width:14px;height:14px"></i> Tambah Materi</button>
-        </div>
+        <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-gray-800 text-lg">Materi Pembelajaran</h3><button onclick="openAddMateriModal()" class="btn-primary px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" style="width:14px;height:14px"></i> Tambah Materi</button></div>
         <div class="space-y-3 max-h-[60vh] overflow-y-auto">
           ${state.data.materi.length > 0 ? state.data.materi.map(m => `
             <div class="p-4 border border-stone-200 rounded-xl">
@@ -656,12 +838,8 @@ function renderGuruTugasMateri() {
           `).join('') : '<div class="text-center py-8 text-gray-400"><p>Belum ada materi.</p></div>'}
         </div>
       </div>
-      
       <div class="card p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-bold text-gray-800 text-lg">Tugas Santri</h3>
-          <button onclick="openAddTugasModal()" class="btn-primary px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" style="width:14px;height:14px"></i> Berikan Tugas</button>
-        </div>
+        <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-gray-800 text-lg">Tugas Santri</h3><button onclick="openAddTugasModal()" class="btn-primary px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" style="width:14px;height:14px"></i> Berikan Tugas</button></div>
         <div class="space-y-3 max-h-[60vh] overflow-y-auto">
           ${state.data.tugas.length > 0 ? state.data.tugas.map(t => `
             <div class="p-4 border border-stone-200 rounded-xl">
@@ -688,200 +866,59 @@ function renderGuruTugasMateri() {
 
 function readFileAsBase64(file, callback) {
   if (!file) return callback(null);
-  if (file.size > 2000000) { // 2MB limit
-    toast('Ukuran file maksimal 2MB.', 'error');
-    return;
-  }
+  if (file.size > 2000000) { toast('Ukuran file maksimal 2MB.', 'error'); return; }
   const reader = new FileReader();
-  reader.onload = function(e) {
-    callback({ name: file.name, data: e.target.result });
-  };
+  reader.onload = function(e) { callback({ name: file.name, data: e.target.result }); };
   reader.readAsDataURL(file);
 }
-
-function openAddMateriModal() {
-  showModal(`
-    <h3 class="text-xl font-bold text-gray-800 mb-1">Tambah Materi Baru</h3>
-    <form onsubmit="submitAddMateri(event)" class="space-y-4 mt-4">
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Materi *</label><input id="am_judul" type="text" class="input-field" required></div>
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi Materi (Opsional)</label><textarea id="am_deskripsi" class="input-field" rows="4"></textarea></div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Unggah File (PDF, Word, Excel, dll. Maks 2MB)</label>
-        <input id="am_file" type="file" class="input-field p-2">
-      </div>
-      <div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div>
-    </form>
-  `);
-}
+function openAddMateriModal() { showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Tambah Materi Baru</h3><form onsubmit="submitAddMateri(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Materi *</label><input id="am_judul" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi Materi (Opsional)</label><textarea id="am_deskripsi" class="input-field" rows="4"></textarea></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Unggah File (PDF, Word, Excel, dll. Maks 2MB)</label><input id="am_file" type="file" class="input-field p-2"></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); }
 function submitAddMateri(e) {
-  e.preventDefault();
-  const fileInput = document.getElementById('am_file');
-  const file = fileInput.files[0];
-  
+  e.preventDefault(); const fileInput = document.getElementById('am_file'); const file = fileInput.files[0];
   const saveMateri = (fileData) => {
-    const newId = 'materi' + Date.now();
-    const now = new Date();
-    const tgl = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
-    state.data.materi.push({
-      id: newId, 
-      judul: document.getElementById('am_judul').value.trim(),
-      deskripsi: document.getElementById('am_deskripsi').value.trim(), 
-      tanggal: tgl,
-      file_name: fileData ? fileData.name : null,
-      file_data: fileData ? fileData.data : null
-    });
+    const newId = 'materi' + Date.now(); const now = new Date(); const tgl = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+    state.data.materi.push({ id: newId, judul: document.getElementById('am_judul').value.trim(), deskripsi: document.getElementById('am_deskripsi').value.trim(), tanggal: tgl, file_name: fileData ? fileData.name : null, file_data: fileData ? fileData.data : null });
     saveData(); addLog('Tambah Materi', `Guru menambahkan materi`);
     closeModal(); toast('Materi berhasil dibagikan ke santri', 'success'); navigateGuru('tugas-materi');
   };
-
-  if (file) {
-    readFileAsBase64(file, saveMateri);
-  } else {
-    saveMateri(null);
-  }
+  if (file) { readFileAsBase64(file, saveMateri); } else { saveMateri(null); }
 }
-
-function deleteMateri(id) {
-  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Materi</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus materi ini?</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteMateri('${id}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`);
-}
-function confirmDeleteMateri(id) {
-  state.data.materi = state.data.materi.filter(m => m.id !== id);
-  saveData(); closeModal(); toast('Materi dihapus', 'success'); navigateGuru('tugas-materi');
-}
-function openEditMateriModal(id) {
-  const m = state.data.materi.find(x => x.id === id); if (!m) return;
-  showModal(`
-    <h3 class="text-xl font-bold text-gray-800 mb-1">Edit Materi</h3>
-    <form onsubmit="submitEditMateri(event, '${id}')" class="space-y-4 mt-4">
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Materi *</label><input id="em_judul" type="text" class="input-field" value="${m.judul}" required></div>
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi Materi</label><textarea id="em_deskripsi" class="input-field" rows="4">${m.deskripsi||''}</textarea></div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Ganti File (Kosongkan jika tidak)</label>
-        <input id="em_file" type="file" class="input-field p-2">
-        ${m.file_name ? `<p class="text-xs text-gray-500 mt-1">File saat ini: ${m.file_name}</p>` : ''}
-      </div>
-      <div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div>
-    </form>
-  `);
-}
+function deleteMateri(id) { showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Materi</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus materi ini?</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteMateri('${id}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`); }
+function confirmDeleteMateri(id) { state.data.materi = state.data.materi.filter(m => m.id !== id); saveData(); closeModal(); toast('Materi dihapus', 'success'); navigateGuru('tugas-materi'); }
+function openEditMateriModal(id) { const m = state.data.materi.find(x => x.id === id); if (!m) return; showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Edit Materi</h3><form onsubmit="submitEditMateri(event, '${id}')" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Materi *</label><input id="em_judul" type="text" class="input-field" value="${m.judul}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi Materi</label><textarea id="em_deskripsi" class="input-field" rows="4">${m.deskripsi||''}</textarea></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Ganti File (Kosongkan jika tidak)</label><input id="em_file" type="file" class="input-field p-2">${m.file_name ? `<p class="text-xs text-gray-500 mt-1">File saat ini: ${m.file_name}</p>` : ''}</div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); }
 function submitEditMateri(e, id) {
-  e.preventDefault();
-  const m = state.data.materi.find(x => x.id === id); if(!m) return;
-  const fileInput = document.getElementById('em_file');
-  const file = fileInput.files[0];
-  
+  e.preventDefault(); const m = state.data.materi.find(x => x.id === id); if(!m) return; const fileInput = document.getElementById('em_file'); const file = fileInput.files[0];
   const updateData = (fileData) => {
-    m.judul = document.getElementById('em_judul').value.trim();
-    m.deskripsi = document.getElementById('em_deskripsi').value.trim();
-    if (fileData) {
-      m.file_name = fileData.name;
-      m.file_data = fileData.data;
-    }
+    m.judul = document.getElementById('em_judul').value.trim(); m.deskripsi = document.getElementById('em_deskripsi').value.trim();
+    if (fileData) { m.file_name = fileData.name; m.file_data = fileData.data; }
     saveData(); addLog('Edit Materi', `Guru mengubah materi`);
     closeModal(); toast('Materi berhasil diperbarui', 'success'); navigateGuru('tugas-materi');
   };
-
-  if (file) {
-    readFileAsBase64(file, updateData);
-  } else {
-    updateData(null);
-  }
+  if (file) { readFileAsBase64(file, updateData); } else { updateData(null); }
 }
-
-function openAddTugasModal() {
-  showModal(`
-    <h3 class="text-xl font-bold text-gray-800 mb-1">Berikan Tugas Baru</h3>
-    <form onsubmit="submitAddTugas(event)" class="space-y-4 mt-4">
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Tugas *</label><input id="at_judul" type="text" class="input-field" required></div>
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi / Soal *</label><textarea id="at_deskripsi" class="input-field" rows="4" required></textarea></div>
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deadline *</label><input id="at_deadline" type="date" class="input-field" required></div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Lampirkan File Tugas (PDF, Word, Excel - Maks 2MB)</label>
-        <input id="at_file" type="file" class="input-field p-2">
-      </div>
-      <div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div>
-    </form>
-  `);
-}
+function openAddTugasModal() { showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Berikan Tugas Baru</h3><form onsubmit="submitAddTugas(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Tugas *</label><input id="at_judul" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi / Soal *</label><textarea id="at_deskripsi" class="input-field" rows="4" required></textarea></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deadline *</label><input id="at_deadline" type="date" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Lampirkan File Tugas (PDF, Word, Excel - Maks 2MB)</label><input id="at_file" type="file" class="input-field p-2"></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); }
 function submitAddTugas(e) {
-  e.preventDefault();
-  const fileInput = document.getElementById('at_file');
-  const file = fileInput.files[0];
-
+  e.preventDefault(); const fileInput = document.getElementById('at_file'); const file = fileInput.files[0];
   const saveTugas = (fileData) => {
-    const newId = 'tugas' + Date.now();
-    const now = new Date();
-    const tgl = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
-    state.data.tugas.push({
-      id: newId, 
-      judul: document.getElementById('at_judul').value.trim(),
-      deskripsi: document.getElementById('at_deskripsi').value.trim(),
-      deadline: document.getElementById('at_deadline').value, 
-      tanggal: tgl,
-      file_name: fileData ? fileData.name : null,
-      file_data: fileData ? fileData.data : null
-    });
+    const newId = 'tugas' + Date.now(); const now = new Date(); const tgl = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+    state.data.tugas.push({ id: newId, judul: document.getElementById('at_judul').value.trim(), deskripsi: document.getElementById('at_deskripsi').value.trim(), deadline: document.getElementById('at_deadline').value, tanggal: tgl, file_name: fileData ? fileData.name : null, file_data: fileData ? fileData.data : null });
     saveData(); addLog('Tambah Tugas', `Guru menambahkan tugas`);
     closeModal(); toast('Tugas berhasil dibagikan ke santri', 'success'); navigateGuru('tugas-materi');
   };
-
-  if (file) {
-    readFileAsBase64(file, saveTugas);
-  } else {
-    saveTugas(null);
-  }
+  if (file) { readFileAsBase64(file, saveTugas); } else { saveTugas(null); }
 }
-
-function deleteTugas(id) {
-  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Tugas</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus tugas ini?</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteTugas('${id}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`);
-}
-function confirmDeleteTugas(id) {
-  state.data.tugas = state.data.tugas.filter(t => t.id !== id);
-  state.data.pengumpulan = state.data.pengumpulan.filter(p => p.tugas_id !== id);
-  saveData(); closeModal(); toast('Tugas dihapus', 'success'); navigateGuru('tugas-materi');
-}
-function openEditTugasModal(id) {
-  const t = state.data.tugas.find(x => x.id === id); if (!t) return;
-  showModal(`
-    <h3 class="text-xl font-bold text-gray-800 mb-1">Edit Tugas</h3>
-    <form onsubmit="submitEditTugas(event, '${id}')" class="space-y-4 mt-4">
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Tugas *</label><input id="et_judul" type="text" class="input-field" value="${t.judul}" required></div>
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi / Soal *</label><textarea id="et_deskripsi" class="input-field" rows="4" required>${t.deskripsi}</textarea></div>
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deadline *</label><input id="et_deadline" type="date" class="input-field" value="${t.deadline}" required></div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Ganti File (Kosongkan jika tidak)</label>
-        <input id="et_file" type="file" class="input-field p-2">
-        ${t.file_name ? `<p class="text-xs text-gray-500 mt-1">File saat ini: ${t.file_name}</p>` : ''}
-      </div>
-      <div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div>
-    </form>
-  `);
-}
+function deleteTugas(id) { showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Tugas</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus tugas ini?</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteTugas('${id}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`); }
+function confirmDeleteTugas(id) { state.data.tugas = state.data.tugas.filter(t => t.id !== id); state.data.pengumpulan = state.data.pengumpulan.filter(p => p.tugas_id !== id); saveData(); closeModal(); toast('Tugas dihapus', 'success'); navigateGuru('tugas-materi'); }
+function openEditTugasModal(id) { const t = state.data.tugas.find(x => x.id === id); if (!t) return; showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Edit Tugas</h3><form onsubmit="submitEditTugas(event, '${id}')" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Tugas *</label><input id="et_judul" type="text" class="input-field" value="${t.judul}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi / Soal *</label><textarea id="et_deskripsi" class="input-field" rows="4" required>${t.deskripsi}</textarea></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deadline *</label><input id="et_deadline" type="date" class="input-field" value="${t.deadline}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Ganti File (Kosongkan jika tidak)</label><input id="et_file" type="file" class="input-field p-2">${t.file_name ? `<p class="text-xs text-gray-500 mt-1">File saat ini: ${t.file_name}</p>` : ''}</div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); }
 function submitEditTugas(e, id) {
-  e.preventDefault();
-  const t = state.data.tugas.find(x => x.id === id); if(!t) return;
-  const fileInput = document.getElementById('et_file');
-  const file = fileInput.files[0];
-
+  e.preventDefault(); const t = state.data.tugas.find(x => x.id === id); if(!t) return; const fileInput = document.getElementById('et_file'); const file = fileInput.files[0];
   const updateData = (fileData) => {
-    t.judul = document.getElementById('et_judul').value.trim();
-    t.deskripsi = document.getElementById('et_deskripsi').value.trim();
-    t.deadline = document.getElementById('et_deadline').value;
-    if (fileData) {
-      t.file_name = fileData.name;
-      t.file_data = fileData.data;
-    }
+    t.judul = document.getElementById('et_judul').value.trim(); t.deskripsi = document.getElementById('et_deskripsi').value.trim(); t.deadline = document.getElementById('et_deadline').value;
+    if (fileData) { t.file_name = fileData.name; t.file_data = fileData.data; }
     saveData(); addLog('Edit Tugas', `Guru mengubah tugas`);
     closeModal(); toast('Tugas berhasil diperbarui', 'success'); navigateGuru('tugas-materi');
   };
-
-  if (file) {
-    readFileAsBase64(file, updateData);
-  } else {
-    updateData(null);
-  }
+  if (file) { readFileAsBase64(file, updateData); } else { updateData(null); }
 }
-
 function viewSubmissions(tugasId) {
   const t = state.data.tugas.find(x => x.id === tugasId); if (!t) return;
   const submissions = state.data.pengumpulan.filter(p => p.tugas_id === tugasId);
@@ -890,24 +927,14 @@ function viewSubmissions(tugasId) {
     <p class="text-sm text-gray-500 mb-4">Daftar santri yang sudah mengumpulkan (${submissions.length})</p>
     <div class="space-y-3 max-h-[60vh] overflow-y-auto">
       ${submissions.length > 0 ? submissions.map(p => {
-        const s = getSantri(p.santri_id);
-        return `
-          <div class="p-3 border border-stone-200 rounded-xl flex items-center gap-3">
-            <div class="avatar-circle w-10 h-10 text-sm" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div>
-            <div class="flex-1 min-w-0">
-              <p class="font-semibold text-gray-800">${s.nama}</p>
-              <p class="text-xs text-gray-500">${p.tanggal} • ${p.file_name}</p>
-            </div>
-            <a href="${p.file_data}" download="${p.file_name}" target="_blank" class="text-xs btn-primary px-3 py-1.5 rounded-lg font-semibold">Lihat File</a>
-          </div>
-        `;
+        const s = getSantri(p.santri_id); if (!s) return '';
+        return `<div class="p-3 border border-stone-200 rounded-xl flex items-center gap-3"><div class="avatar-circle w-10 h-10 text-sm" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><div class="flex-1 min-w-0"><p class="font-semibold text-gray-800">${s.nama}</p><p class="text-xs text-gray-500">${p.tanggal} • ${p.file_name}</p></div><a href="${p.file_data}" download="${p.file_name}" target="_blank" class="text-xs btn-primary px-3 py-1.5 rounded-lg font-semibold">Lihat File</a></div>`;
       }).join('') : '<p class="text-center py-8 text-gray-400">Belum ada yang mengumpulkan.</p>'}
     </div>
     <div class="flex gap-3 pt-4"><button onclick="closeModal()" class="btn-ghost w-full py-3 rounded-xl font-semibold">Tutup</button></div>
   `, 'max-w-xl');
 }
 
-// ===== TUGAS & MATERI SANTRI =====
 function renderSantriMateri() {
   return `
     <div class="card p-6">
@@ -942,11 +969,7 @@ function renderSantriTugas() {
                 ${t.file_name ? `<a href="${t.file_data}" download="${t.file_name}" target="_blank" class="mt-3 inline-flex items-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg font-semibold"><i data-lucide="download" style="width:16px;height:16px"></i> ${t.file_name}</a>` : ''}
               </div>
               ${pengumpulan ? 
-                `<div class="text-center">
-                  <span class="badge-lunas text-xs px-3 py-1 rounded-full font-semibold">Dikumpulkan</span>
-                  <p class="text-xs text-gray-500 mt-1">${pengumpulan.tanggal}</p>
-                  <a href="${pengumpulan.file_data}" download="${pengumpulan.file_name}" target="_blank" class="mt-2 text-xs text-blue-600 hover:underline block">Lihat File Anda</a>
-                </div>` 
+                `<div class="text-center"><span class="badge-lunas text-xs px-3 py-1 rounded-full font-semibold">Dikumpulkan</span><p class="text-xs text-gray-500 mt-1">${pengumpulan.tanggal}</p><a href="${pengumpulan.file_data}" download="${pengumpulan.file_name}" target="_blank" class="mt-2 text-xs text-blue-600 hover:underline block">Lihat File Anda</a></div>` 
                 : 
                 `<button onclick="openUploadTugasModal('${t.id}')" class="btn-accent px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="upload" style="width:16px;height:16px"></i> Upload Tugas</button>`
               }
@@ -970,72 +993,43 @@ function openUploadTugasModal(tugasId) {
       </div>
       <div class="flex gap-3 pt-2">
         <button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button>
-        <button type="submit" id="uploadBtn" class="btn-primary flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
-          <i data-lucide="upload" style="width:16px;height:16px"></i> Upload
-        </button>
+        <button type="submit" id="uploadBtn" class="btn-primary flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="upload" style="width:16px;height:16px"></i> Upload</button>
       </div>
     </form>
   `);
 }
-
 function checkImageBlurry(base64Str) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = function() {
-      const canvas = document.createElement('canvas');
-      const maxW = 150;
-      const scale = Math.min(1, maxW / img.width);
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      
+      const canvas = document.createElement('canvas'); const maxW = 150; const scale = Math.min(1, maxW / img.width);
+      canvas.width = img.width * scale; canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       try {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        let sum = 0;
-        let count = 0;
-        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height); const data = imageData.data;
+        let sum = 0; let count = 0;
         for (let y = 1; y < canvas.height - 1; y++) {
           for (let x = 1; x < canvas.width - 1; x++) {
-            const i = (y * canvas.width + x) * 4;
-            const gray = (data[i] + data[i+1] + data[i+2]) / 3;
-            
-            const i_up = ((y - 1) * canvas.width + x) * 4;
-            const gray_up = (data[i_up] + data[i_up+1] + data[i_up+2]) / 3;
-            
-            const i_down = ((y + 1) * canvas.width + x) * 4;
-            const gray_down = (data[i_down] + data[i_down+1] + data[i_down+2]) / 3;
-            
-            const i_left = (y * canvas.width + (x - 1)) * 4;
-            const gray_left = (data[i_left] + data[i_left+1] + data[i_left+2]) / 3;
-            
-            const i_right = (y * canvas.width + (x + 1)) * 4;
-            const gray_right = (data[i_right] + data[i_right+1] + data[i_right+2]) / 3;
-            
+            const i = (y * canvas.width + x) * 4; const gray = (data[i] + data[i+1] + data[i+2]) / 3;
+            const i_up = ((y - 1) * canvas.width + x) * 4; const gray_up = (data[i_up] + data[i_up+1] + data[i_up+2]) / 3;
+            const i_down = ((y + 1) * canvas.width + x) * 4; const gray_down = (data[i_down] + data[i_down+1] + data[i_down+2]) / 3;
+            const i_left = (y * canvas.width + (x - 1)) * 4; const gray_left = (data[i_left] + data[i_left+1] + data[i_left+2]) / 3;
+            const i_right = (y * canvas.width + (x + 1)) * 4; const gray_right = (data[i_right] + data[i_right+1] + data[i_right+2]) / 3;
             const laplacian = Math.abs(4 * gray - gray_up - gray_down - gray_left - gray_right);
-            sum += laplacian;
-            count++;
+            sum += laplacian; count++;
           }
         }
-        const variance = sum / count;
-        resolve(variance < 15);
-      } catch (e) {
-        resolve(false);
-      }
+        const variance = sum / count; resolve(variance < 15);
+      } catch (e) { resolve(false); }
     };
     img.onerror = () => resolve(false);
     img.src = base64Str;
   });
 }
-
 async function submitUploadTugas(e, tugasId) {
   e.preventDefault();
-  const fileInput = document.getElementById('tugas_file');
-  const file = fileInput.files[0];
-  const aiResponse = document.getElementById('ai_response');
-  const uploadBtn = document.getElementById('uploadBtn');
-  
+  const fileInput = document.getElementById('tugas_file'); const file = fileInput.files[0];
+  const aiResponse = document.getElementById('ai_response'); const uploadBtn = document.getElementById('uploadBtn');
   if (!file) return;
   if (file.size > 1000000) { toast('Ukuran file melebihi 1MB.', 'error'); return; }
 
@@ -1067,16 +1061,9 @@ async function submitUploadTugas(e, tugasId) {
     }
 
     const newId = 'kumpul' + Date.now();
-    const now = new Date();
-    const tgl = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
-    
-    state.data.pengumpulan.push({
-      id: newId, tugas_id: tugasId, santri_id: state.currentUser.santri_id,
-      file_name: file.name, file_type: file.type, file_data: fileData,
-      tanggal: tgl, status: 'terkumpul'
-    });
+    const now = new Date(); const tgl = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+    state.data.pengumpulan.push({ id: newId, tugas_id: tugasId, santri_id: state.currentUser.santri_id, file_name: file.name, file_type: file.type, file_data: fileData, tanggal: tgl, status: 'terkumpul' });
     saveData(); addLog('Upload Tugas', `Santri mengumpulkan tugas`);
-    
     toast('Tugas berhasil diupload!', 'success');
     closeModal();
     navigateSantri('tugas');
@@ -1085,7 +1072,23 @@ async function submitUploadTugas(e, tugasId) {
 }
 
 function renderPendaftaranPage() {
+  const webLink = state.data.settings.linkWebsite || WEBSITE_LINK_DEFAULT;
   return `
+    <div class="card p-6 mb-6">
+      <div class="flex items-center justify-between mb-5">
+        <div><h3 class="font-bold text-gray-800 text-lg">Kartu Pengenal Santri (Kartu Kontrol)</h3><p class="text-sm text-gray-500">Buat QR Code kartu identitas untuk santri</p></div>
+      </div>
+      <div class="flex gap-3 flex-wrap items-end">
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pilih Santri</label>
+          <select id="idCardSantri" class="input-field" ${state.data.santri.length === 0 ? 'disabled' : ''}>
+            ${state.data.santri.length > 0 ? state.data.santri.map(st => `<option value="${st.id}">${st.nama} - ${st.nis}</option>`).join('') : '<option value="">Belum ada santri</option>'}
+          </select>
+        </div>
+        <button onclick="generateIdCard()" class="btn-primary px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2" ${state.data.santri.length === 0 ? 'disabled' : ''}><i data-lucide="id-card" style="width:16px;height:16px"></i> Buat Kartu</button>
+      </div>
+    </div>
+
     <div class="grid lg:grid-cols-2 gap-6 mb-6">
       <div class="card p-6">
         <div class="flex items-center justify-between mb-5">
@@ -1104,7 +1107,7 @@ function renderPendaftaranPage() {
         </div>
         <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6">
           <div id="linkQrCode" class="flex justify-center mb-4"></div>
-          <div class="text-center"><p class="text-xs text-gray-500 mb-1">Scan untuk langsung mendaftar di website:</p><p class="font-mono font-bold text-sm text-blue-700 tracking-wider break-all">${WEBSITE_LINK}#daftar</p></div>
+          <div class="text-center"><p class="text-xs text-gray-500 mb-1">Scan untuk langsung mendaftar di website:</p><p class="font-mono font-bold text-sm text-blue-700 tracking-wider break-all">${webLink}#daftar</p></div>
         </div>
       </div>
     </div>
@@ -1114,11 +1117,150 @@ function renderPendaftaranPage() {
       <div class="space-y-3">
         ${state.data.guru.length > 0 ? state.data.guru.map(g => {
           const count = santriOfGuru(g.id).length;
-          return `<div class="border border-stone-200 rounded-xl p-4 hover:border-emerald-300"><div class="flex items-center gap-3 mb-3"><div class="avatar-circle w-10 h-10 text-sm" style="background:${g.gender==='L'?'#0f5c4a':'#c89844'}">${g.foto}</div><div class="flex-1"><p class="font-semibold text-gray-800 text-sm">${g.nama}</p><p class="text-xs text-gray-500">${g.mapel} • ${count} santri</p></div><button onclick="copyToClipboard('${g.code}')" class="text-xs btn-ghost px-2 py-1 rounded font-semibold">Salin</button></div><div class="bg-stone-100 rounded-lg px-3 py-2 flex items-center justify-between"><code class="font-mono text-sm font-bold text-emerald-700">${g.code}</code><i data-lucide="copy" class="text-gray-400" style="width:14px;height:14px"></i></div></div>`;
+          return `<div class="border border-stone-200 rounded-xl p-4 hover:border-emerald-300"><div class="flex items-center gap-3 mb-3"><div class="avatar-circle w-10 h-10 text-sm" style="background:${g.gender==='L'?'#0f5c4a':'#c89844'}">${g.foto||g.nama.charAt(0)}</div><div class="flex-1"><p class="font-semibold text-gray-800 text-sm">${g.nama}</p><p class="text-xs text-gray-500">${g.mapel} • ${count} santri</p></div><button onclick="copyToClipboard('${g.code}')" class="text-xs btn-ghost px-2 py-1 rounded font-semibold">Salin</button></div><div class="bg-stone-100 rounded-lg px-3 py-2 flex items-center justify-between"><code class="font-mono text-sm font-bold text-emerald-700">${g.code}</code><i data-lucide="copy" class="text-gray-400" style="width:14px;height:14px"></i></div></div>`;
         }).join('') : '<div class="text-center py-8 text-gray-400"><p>Belum ada guru terdaftar.</p></div>'}
       </div>
     </div>`;
 }
+
+function generateIdCard() {
+  const sid = document.getElementById('idCardSantri').value;
+  const s = getSantri(sid);
+  if (!s) return;
+  const g = getGuru(s.guru_id);
+  const settings = state.data.settings;
+  showModal(`
+    <div class="text-center mb-4">
+      <h3 class="text-xl font-bold text-gray-800">Kartu Pengenal Santri</h3>
+      <p class="text-sm text-gray-500">Cetak kartu ini untuk santri</p>
+    </div>
+    <div class="border-2 border-stone-300 rounded-2xl p-6 max-w-sm mx-auto bg-white">
+      <div class="text-center border-b-2 border-emerald-600 pb-4 mb-4">
+        <h2 class="text-xl font-black text-emerald-700">${settings.namaTPQ}</h2>
+        <p class="text-xs text-gray-500">${settings.alamatTPQ}</p>
+      </div>
+      <div class="flex flex-col items-center gap-4">
+        <div class="avatar-circle w-24 h-24 text-3xl border-4 border-emerald-100" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div>
+        <div id="idCardQr" class="bg-white p-2 rounded-lg border border-stone-200"></div>
+        <div class="text-center w-full">
+          <p class="text-lg font-bold text-gray-800">${s.nama}</p>
+          <p class="text-sm text-gray-600 font-mono">${s.nis}</p>
+          <p class="text-sm text-gray-600">Kelas: ${s.kelas}</p>
+          <p class="text-xs text-gray-500 mt-1">Wali: ${s.wali}</p>
+        </div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-stone-200 text-center text-xs text-gray-400">
+        Tahun Ajaran ${settings.tahunAjaran}
+      </div>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Tutup</button>
+      <button onclick="window.print()" class="btn-primary flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="printer" style="width:16px;height:16px"></i> Cetak Kartu</button>
+    </div>
+  `, 'max-w-md');
+  generateQRCode('idCardQr', s.nis, 120);
+  lucide.createIcons();
+}
+
+function renderGuruSertifikat() {
+  const santriOptions = state.data.santri.length > 0 ? state.data.santri.map(s => `<option value="${s.id}">${s.nama} - ${s.kelas}</option>`).join('') : '';
+  return `
+    <div class="card p-6">
+      <h3 class="font-bold text-gray-800 text-lg mb-1">Buat Sertifikat Santri</h3>
+      <p class="text-sm text-gray-500 mb-5">Khusus untuk santri yang sudah lulus mengaji atau hafalan</p>
+      <form onsubmit="generateSertifikat(event)" class="space-y-4 max-w-lg">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pilih Santri</label>
+          <select id="cert_santri" class="input-field" required ${state.data.santri.length === 0 ? 'disabled' : ''}>
+            ${state.data.santri.length > 0 ? santriOptions : '<option value="">Belum ada santri</option>'}
+          </select>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelulusan</label>
+            <select id="cert_jenis" class="input-field">
+              <option>Lulus Mengaji</option>
+              <option>Lulus Hafalan</option>
+              <option>Lulus Iqro 1</option>
+              <option>Lulus Iqro 2</option>
+              <option>Lulus Iqro 3</option>
+              <option>Lulus Iqro 4</option>
+              <option>Lulus Iqro 5</option>
+              <option>Lulus Iqro 6</option>
+              <option>Hafalan Juz 30</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Terbit</label>
+            <input id="cert_tanggal" type="date" class="input-field" value="${new Date().toISOString().split('T')[0]}" required>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanda Tangan Guru</label>
+          <input id="cert_guru" type="text" class="input-field" value="${state.currentUser.nama}" required>
+        </div>
+        <button type="submit" class="btn-primary px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2" ${state.data.santri.length === 0 ? 'disabled' : ''}><i data-lucide="award" style="width:16px;height:16px"></i> Generate Sertifikat</button>
+      </form>
+    </div>
+  `;
+}
+
+function generateSertifikat(e) {
+  e.preventDefault();
+  const sid = document.getElementById('cert_santri').value;
+  const s = getSantri(sid);
+  if (!s) return;
+  const jenis = document.getElementById('cert_jenis').value;
+  const tanggal = document.getElementById('cert_tanggal').value;
+  const guru = document.getElementById('cert_guru').value;
+  const settings = state.data.settings;
+  
+  const dateObj = new Date(tanggal);
+  const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const tglStr = `${dateObj.getDate()} ${bulan[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+  
+  showModal(`
+    <div class="text-center mb-4">
+      <h3 class="text-xl font-bold text-gray-800">Pratinjau Sertifikat</h3>
+    </div>
+    <div id="printableCertificate" class="border-8 border-double border-amber-500 p-8 bg-gradient-to-br from-amber-50 to-emerald-50 relative overflow-hidden" style="min-height: 400px;">
+      <div class="absolute top-4 right-4 w-16 h-16 rounded-full bg-amber-100 opacity-50 flex items-center justify-center">
+        <i data-lucide="award" class="text-amber-600" style="width:32px;height:32px"></i>
+      </div>
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-black text-emerald-800">${settings.namaTPQ}</h2>
+        <p class="text-sm text-gray-600 font-arabic text-lg mt-1">بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
+      </div>
+      <div class="text-center my-8">
+        <p class="text-sm uppercase tracking-widest text-gray-500 mb-2">Sertifikat Penghargaan</p>
+        <p class="text-sm text-gray-600">Diberikan kepada:</p>
+        <h3 class="text-3xl font-black text-gray-800 my-3 border-b-2 border-amber-400 inline-block px-12 pb-2">${s.nama}</h3>
+        <p class="text-sm text-gray-600 mt-4">Atas prestasi dan kesungguhan dalam menuntut ilmu</p>
+        <p class="text-lg font-bold text-emerald-700 mt-2">${jenis}</p>
+      </div>
+      <div class="flex justify-between items-end mt-16 text-sm">
+        <div class="text-center">
+          <p class="text-gray-500">Bandung, ${tglStr}</p>
+          <p class="text-gray-600 font-semibold mt-1">Pembina TPQ</p>
+          <div class="h-12"></div>
+          <p class="font-bold text-gray-800 underline">${guru}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-gray-500">Mengetahui,</p>
+          <p class="text-gray-600 font-semibold mt-1">Kepala Madrasah</p>
+          <div class="h-12"></div>
+          <p class="font-bold text-gray-800 underline">Hajar As'wad</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Tutup</button>
+      <button onclick="window.print()" class="btn-primary flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="printer" style="width:16px;height:16px"></i> Cetak Sertifikat</button>
+    </div>
+  `, 'max-w-2xl');
+  lucide.createIcons();
+}
+
 function renderGuruDashboard() { 
   const totalSantri = state.data.santri.length; const totalGuru = state.data.guru.length; 
   const totalTagihan = state.data.tagihan.reduce((s,t)=>s+t.nominal,0); 
@@ -1158,11 +1300,12 @@ function renderGuruDashboard() {
       <div class="overflow-x-auto -mx-6 px-6">
         <table class="w-full text-sm">
           <thead><tr class="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-stone-200"><th class="pb-3 pr-4 font-semibold">ID</th><th class="pb-3 pr-4 font-semibold">Santri</th><th class="pb-3 pr-4 font-semibold">Tanggal</th><th class="pb-3 pr-4 font-semibold">Metode</th><th class="pb-3 pr-4 font-semibold text-right">Jumlah</th></tr></thead>
-          <tbody>${recent.length > 0 ? recent.map(p => { const s = getSantri(p.santri_id); return `<tr class="table-row border-b border-stone-100"><td class="py-3 pr-4 font-mono text-xs text-gray-600">${p.id}</td><td class="py-3 pr-4"><div class="flex items-center gap-2"><div class="avatar-circle w-7 h-7 text-[10px]" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><span class="font-semibold text-gray-800">${s.nama}</span></div></td><td class="py-3 pr-4 text-gray-600">${p.tanggal}</td><td class="py-3 pr-4"><span class="text-xs px-2 py-1 bg-stone-100 rounded-md text-gray-700">${p.metode}</span></td><td class="py-3 pr-4 text-right font-bold text-emerald-700">${formatRupiah(p.jumlah)}</td></tr>`; }).join('') : '<tr><td colspan="5" class="py-6 text-center text-gray-400">Belum ada transaksi</td></tr>'}</tbody>
+          <tbody>${recent.length > 0 ? recent.map(p => { const s = getSantri(p.santri_id); if (!s) return ''; return `<tr class="table-row border-b border-stone-100"><td class="py-3 pr-4 font-mono text-xs text-gray-600">${p.id}</td><td class="py-3 pr-4"><div class="flex items-center gap-2"><div class="avatar-circle w-7 h-7 text-[10px]" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><span class="font-semibold text-gray-800">${s.nama}</span></div></td><td class="py-3 pr-4 text-gray-600">${p.tanggal}</td><td class="py-3 pr-4"><span class="text-xs px-2 py-1 bg-stone-100 rounded-md text-gray-700">${p.metode}</span></td><td class="py-3 pr-4 text-right font-bold text-emerald-700">${formatRupiah(p.jumlah)}</td></tr>`; }).join('') : '<tr><td colspan="5" class="py-6 text-center text-gray-400">Belum ada transaksi</td></tr>'}</tbody>
         </table>
       </div>
     </div>`;
 }
+
 function renderGuruSantri() { 
   const search = (state._santriSearch || '').toLowerCase(); 
   let list = state.data.santri; 
@@ -1316,7 +1459,7 @@ function renderGuruTagihan() {
           </thead>
           <tbody>
             ${list.length > 0 ? list.slice(0,100).map(t => { 
-              const s = getSantri(t.santri_id); 
+              const s = getSantri(t.santri_id); if (!s) return ''; 
               const badge = t.status==='lunas'?'badge-lunas':'badge-belum'; 
               const label = t.status==='lunas'?'Lunas':'Belum'; 
               return `<tr class="table-row border-b border-stone-100"><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="avatar-circle w-7 h-7 text-[10px]" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><div><p class="font-semibold text-gray-800">${s.nama}</p><p class="text-[10px] text-gray-500">${s.nis}</p></div></div></td><td class="px-5 py-3 text-gray-700">${t.jenis}</td><td class="px-5 py-3 text-gray-700">${t.periode}</td><td class="px-5 py-3 text-gray-600">${t.deadline}</td><td class="px-5 py-3 text-right font-semibold text-gray-800">${formatRupiah(t.nominal)}</td><td class="px-5 py-3 text-center"><span class="text-xs px-2.5 py-1 rounded-full font-semibold ${badge}">${label}</span></td><td class="px-5 py-3 text-center">${t.status!=='lunas' ? `<button onclick="quickPay('${t.id}')" class="text-xs btn-primary px-3 py-1.5 rounded-lg font-semibold">Catat Bayar</button>` : `<button onclick="viewReceipt('${t.id}')" class="text-xs btn-ghost px-3 py-1.5 rounded-lg font-semibold">Kwitansi</button>`}</td></tr>`; 
@@ -1326,6 +1469,7 @@ function renderGuruTagihan() {
       </div>
     </div>`;
 }
+
 function renderGuruPembayaran() { 
   return `
     <div class="card p-6 mb-5 flex items-center justify-between">
@@ -1336,16 +1480,17 @@ function renderGuruPembayaran() {
       <h4 class="font-bold text-gray-800 mb-4">Pembayaran Terbaru (10 transaksi)</h4>
       <div class="space-y-3">
         ${state.data.pembayaran.length > 0 ? state.data.pembayaran.slice(-10).reverse().map(p => { 
-          const s = getSantri(p.santri_id); 
+          const s = getSantri(p.santri_id); if (!s) return ''; 
           const t = state.data.tagihan.find(x=>x.id===p.tagihan_id); 
           return `<div class="flex items-center gap-4 p-3 rounded-xl hover:bg-stone-50 border border-stone-100"><div class="avatar-circle w-10 h-10 text-sm" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><p class="font-semibold text-gray-800">${s.nama}</p><span class="text-xs px-2 py-0.5 bg-stone-100 rounded text-gray-600">${p.metode}</span></div><p class="text-xs text-gray-500">${t?t.jenis+' • '+t.periode:''} • ${p.tanggal} • ${p.petugas}</p></div><div class="text-right"><p class="font-bold text-emerald-700">${formatRupiah(p.jumlah)}</p><button onclick="viewReceipt('${t?t.id:''}')" class="text-xs text-blue-600 hover:underline">Lihat Kwitansi</button></div></div>`; 
         }).join('') : '<div class="text-center py-8 text-gray-400"><p>Belum ada pembayaran masuk</p></div>'}
       </div>
     </div>`;
 }
+
 function renderSantriBeranda() { 
   const sid = state.currentUser.santri_id; 
-  const s = getSantri(sid); 
+  const s = getSantri(sid); if (!s) return '<div class="text-center py-12">Data tidak ditemukan</div>';
   const g = getGuru(s.guru_id); 
   const tagihan = getTagihanSantri(sid); 
   const lunas = tagihan.filter(t=>t.status==='lunas'); 
@@ -1381,6 +1526,7 @@ function renderSantriBeranda() {
       ${pembayaran.length>0?`<div class="space-y-3">${pembayaran.slice(0,3).map(p => { const t = state.data.tagihan.find(x=>x.id===p.tagihan_id); return `<div class="flex items-center gap-3 p-3 border border-stone-100 rounded-xl"><div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><i data-lucide="check-circle" class="text-emerald-600" style="width:20px;height:20px"></i></div><div class="flex-1 min-w-0"><p class="font-semibold text-gray-800">${t?t.jenis:''} ${t?t.periode:''}</p><p class="text-xs text-gray-500">${p.tanggal} • ${p.metode}</p></div><p class="font-bold text-emerald-700">${formatRupiah(p.jumlah)}</p></div>`; }).join('')}</div>`:`<div class="text-center py-8 text-gray-400"><p>Belum ada pembayaran.</p></div>`}
     </div>`;
 }
+
 function renderSantriTagihan() { 
   const sid = state.currentUser.santri_id; 
   const tagihan = getTagihanSantri(sid); 
@@ -1394,9 +1540,10 @@ function renderSantriTagihan() {
       }).join('') : '<div class="text-center py-16 text-gray-400"><p class="font-semibold">Tidak ada tagihan</p></div>'}
     </div>`;
 }
+
 function renderSantriProfil() { 
   const sid = state.currentUser.santri_id; 
-  const s = getSantri(sid); 
+  const s = getSantri(sid); if (!s) return '<div class="text-center py-12">Data tidak ditemukan</div>';
   const g = getGuru(s.guru_id); 
   const umur = hitungUmur(s.tgl_lahir);
   return `
@@ -1438,6 +1585,7 @@ function renderSantriProfil() {
       </div>
     </div>`;
 }
+
 function renderAdminDashboard() { 
   const totalGuru = state.data.guru.length; 
   const totalSantri = state.data.santri.length; 
@@ -1472,6 +1620,7 @@ function renderAdminDashboard() {
       </div>
     </div>`;
 }
+
 function renderAdminAkunGuru() { 
   const guruAcc = state.data.accounts.guru; 
   return `
@@ -1501,11 +1650,12 @@ function renderAdminAkunGuru() {
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-stone-50 border-b border-stone-200"><tr class="text-left text-xs text-gray-600 uppercase tracking-wider"><th class="px-4 py-3 font-semibold">Guru</th><th class="px-4 py-3 font-semibold">Username</th><th class="px-4 py-3 font-semibold">Password</th><th class="px-4 py-3 font-semibold">Kode QR</th><th class="px-4 py-3 font-semibold text-center">Aksi</th></tr></thead>
-          <tbody>${state.data.guru.length > 0 ? state.data.guru.map(g => `<tr class="table-row border-b border-stone-100"><td class="px-4 py-3"><div class="flex items-center gap-2"><div class="avatar-circle w-9 h-9 text-xs" style="background:${g.gender==='L'?'#0f5c4a':'#c89844'}">${g.foto}</div><div><p class="font-semibold text-gray-800">${g.nama}</p><p class="text-[10px] text-gray-500">${g.mapel}</p></div></div></td><td class="px-4 py-3"><code class="font-mono text-xs font-bold text-gray-800">${g.username || '-'}</code></td><td class="px-4 py-3"><div class="flex items-center gap-2"><code class="font-mono text-xs text-gray-600" id="guruPass_${g.id}">•••••••</code><button onclick="togglePassDisplay('guruPass_${g.id}', '${g.password || '-'}')" class="text-xs text-blue-600 hover:underline">Lihat</button></div></td><td class="px-4 py-3"><code class="font-mono text-xs font-bold text-emerald-700">${g.code}</code></td><td class="px-4 py-3 text-center"><div class="flex gap-2 justify-center"><button onclick="openEditGuruModal('${g.id}')" class="text-xs btn-royal px-3 py-1.5 rounded-lg font-semibold">Edit</button><button onclick="deleteGuru('${g.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold">Hapus</button></div></td></tr>`).join('') : '<tr><td colspan="5" class="py-12 text-center text-gray-400"><p>Belum ada data guru.</p></td></tr>'}</tbody>
+          <tbody>${state.data.guru.length > 0 ? state.data.guru.map(g => `<tr class="table-row border-b border-stone-100"><td class="px-4 py-3"><div class="flex items-center gap-2"><div class="avatar-circle w-9 h-9 text-xs" style="background:${g.gender==='L'?'#0f5c4a':'#c89844'}">${g.foto||g.nama.charAt(0)}</div><div><p class="font-semibold text-gray-800">${g.nama}</p><p class="text-[10px] text-gray-500">${g.mapel}</p></div></div></td><td class="px-4 py-3"><code class="font-mono text-xs font-bold text-gray-800">${g.username || '-'}</code></td><td class="px-4 py-3"><div class="flex items-center gap-2"><code class="font-mono text-xs text-gray-600" id="guruPass_${g.id}">•••••••</code><button onclick="togglePassDisplay('guruPass_${g.id}', '${g.password || '-'}')" class="text-xs text-blue-600 hover:underline">Lihat</button></div></td><td class="px-4 py-3"><code class="font-mono text-xs font-bold text-emerald-700">${g.code}</code></td><td class="px-4 py-3 text-center"><div class="flex gap-2 justify-center"><button onclick="openEditGuruModal('${g.id}')" class="text-xs btn-royal px-3 py-1.5 rounded-lg font-semibold">Edit</button><button onclick="deleteGuru('${g.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold">Hapus</button></div></td></tr>`).join('') : '<tr><td colspan="5" class="py-12 text-center text-gray-400"><p>Belum ada data guru.</p></td></tr>'}</tbody>
         </table>
       </div>
     </div>`;
 }
+
 function renderAdminAkunSantri() { 
   const search = (state._adminSantriSearch || '').toLowerCase(); 
   let list = state.data.santri; 
@@ -1513,210 +1663,39 @@ function renderAdminAkunSantri() {
   const pendingHtml = state.data.pendingSantri.length > 0 ? `<div class="card p-6 mb-5 border-l-4 border-amber-500"><h3 class="font-bold text-gray-800 text-lg mb-1">Persetujuan Pendaftaran Manual (${state.data.pendingSantri.length})</h3><div class="space-y-3 mt-4">${state.data.pendingSantri.map(p => { const g = getGuru(p.guru_id); return `<div class="flex items-center gap-4 p-3 border border-amber-200 bg-amber-50 rounded-xl"><div class="avatar-circle w-10 h-10 text-sm" style="background:${p.gender==='L'?'#0f5c4a':'#c89844'}">${p.nama.charAt(0)}</div><div class="flex-1 min-w-0"><p class="font-semibold text-gray-800">${p.nama}</p><p class="text-xs text-gray-500">Kelas: ${p.kelas} • Guru: ${g?.nama || '-'}</p></div><div class="flex gap-2"><button onclick="approveSantri('${p.id}')" class="text-xs btn-primary px-3 py-1.5 rounded-lg font-semibold">Setujui</button><button onclick="rejectSantri('${p.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold">Tolak</button></div></div>`; }).join('')}</div></div>` : '';
   return `${pendingHtml}<div class="card p-5 mb-5"><div class="flex items-center justify-between flex-wrap gap-3"><div><h3 class="font-bold text-gray-800 text-lg">Daftar Akun Santri (${state.data.santri.length})</h3><p class="text-sm text-gray-500">Lihat dan edit akun santri</p></div><button onclick="openAddSantriModal()" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="user-plus" style="width:16px;height:16px"></i> Tambah Manual</button></div><div class="mt-4"><div class="relative"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" style="width:18px;height:18px"></i><input type="text" placeholder="Cari nama atau NIS..." value="${state._adminSantriSearch||''}" oninput="state._adminSantriSearch=this.value; document.getElementById('adminMain').innerHTML=renderAdminAkunSantri(); lucide.createIcons();" class="input-field pl-10"></div></div></div><div class="card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-stone-50 border-b border-stone-200"><tr class="text-left text-xs text-gray-600 uppercase tracking-wider"><th class="px-4 py-3 font-semibold">Santri</th><th class="px-4 py-3 font-semibold">Username (NIS)</th><th class="px-4 py-3 font-semibold">Guru Wali</th><th class="px-4 py-3 font-semibold text-center">Aksi</th></tr></thead><tbody>${list.length > 0 ? list.map(s => { const acc = state.data.accounts.santri.find(a => a.santri_id === s.id); const g = getGuru(s.guru_id); return `<tr class="table-row border-b border-stone-100"><td class="px-4 py-3"><div class="flex items-center gap-2"><div class="avatar-circle w-8 h-8 text-[10px]" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><div><p class="font-semibold text-gray-800">${s.nama}</p><p class="text-[10px] text-gray-500">${s.kelas}</p></div></div></td><td class="px-4 py-3"><code class="font-mono text-xs font-bold text-gray-800">${acc?.username || s.nis}</code></td><td class="px-4 py-3 text-xs text-gray-600">${g?.nama || '-'}</td><td class="px-4 py-3 text-center"><div class="flex gap-2 justify-center"><button onclick="openEditSantriModal('${s.id}')" class="text-xs btn-royal px-3 py-1.5 rounded-lg font-semibold">Edit Data</button><button onclick="deleteSantriAdmin('${s.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold">Hapus</button></div></td></tr>`; }).join('') : '<tr><td colspan="4" class="py-12 text-center text-gray-400"><p>Belum ada santri.</p></td></tr>'}</tbody></table></div></div>`;
 }
+
 function renderAdminPengaturan() { 
   const s = state.data.settings; 
-  return `<div class="card p-6 mb-5"><h3 class="font-bold text-gray-800 text-lg mb-1">Pengaturan Sistem</h3><form onsubmit="saveSettings(event)" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama TPQ/TPA</label><input id="set_namaTPQ" type="text" class="input-field" value="${s.namaTPQ}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tahun Ajaran</label><input id="set_tahunAjaran" type="text" class="input-field" value="${s.tahunAjaran}" required></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat TPQ</label><input id="set_alamatTPQ" type="text" class="input-field" value="${s.alamatTPQ}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Telepon TPQ</label><input id="set_teleponTPQ" type="text" class="input-field" value="${s.teleponTPQ}" required></div><button type="submit" class="btn-royal px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2"><i data-lucide="save" style="width:16px;height:16px"></i> Simpan</button></form></div><div class="card p-6 mb-5"><h3 class="font-bold text-gray-800 text-lg mb-1">Ubah Password Owner</h3><form onsubmit="changeOwnerPassword(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password Lama</label><div class="relative"><input id="old_pass" type="password" class="input-field pr-10" required><button type="button" onclick="togglePassword('old_pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i data-lucide="eye" style="width:18px;height:18px"></i></button></div></div><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password Baru</label><div class="relative"><input id="new_pass" type="password" class="input-field pr-10" required><button type="button" onclick="togglePassword('new_pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i data-lucide="eye" style="width:18px;height:18px"></i></button></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Konfirmasi Password</label><div class="relative"><input id="confirm_pass" type="password" class="input-field pr-10" required><button type="button" onclick="togglePassword('confirm_pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i data-lucide="eye" style="width:18px;height:18px"></i></button></div></div></div><button type="submit" class="btn-danger px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2"><i data-lucide="key" style="width:16px;height:16px"></i> Ubah Password</button></form></div>`;
+  return `<div class="card p-6 mb-5"><h3 class="font-bold text-gray-800 text-lg mb-1">Pengaturan Sistem</h3><form onsubmit="saveSettings(event)" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama TPQ/TPA</label><input id="set_namaTPQ" type="text" class="input-field" value="${s.namaTPQ}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tahun Ajaran</label><input id="set_tahunAjaran" type="text" class="input-field" value="${s.tahunAjaran}" required></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat TPQ</label><input id="set_alamatTPQ" type="text" class="input-field" value="${s.alamatTPQ}" required></div><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Telepon TPQ</label><input id="set_teleponTPQ" type="text" class="input-field" value="${s.teleponTPQ}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Link Website Pendaftaran</label><input id="set_linkWebsite" type="url" class="input-field" value="${s.linkWebsite}" required></div></div><button type="submit" class="btn-royal px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2"><i data-lucide="save" style="width:16px;height:16px"></i> Simpan</button></form></div><div class="card p-6 mb-5"><h3 class="font-bold text-gray-800 text-lg mb-1">Ubah Password Owner</h3><form onsubmit="changeOwnerPassword(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password Lama</label><div class="relative"><input id="old_pass" type="password" class="input-field pr-10" required><button type="button" onclick="togglePassword('old_pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i data-lucide="eye" style="width:18px;height:18px"></i></button></div></div><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password Baru</label><div class="relative"><input id="new_pass" type="password" class="input-field pr-10" required><button type="button" onclick="togglePassword('new_pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i data-lucide="eye" style="width:18px;height:18px"></i></button></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Konfirmasi Password</label><div class="relative"><input id="confirm_pass" type="password" class="input-field pr-10" required><button type="button" onclick="togglePassword('confirm_pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i data-lucide="eye" style="width:18px;height:18px"></i></button></div></div></div><button type="submit" class="btn-danger px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2"><i data-lucide="key" style="width:16px;height:16px"></i> Ubah Password</button></form></div>`;
 }
 
-function togglePassDisplay(elementId, realValue) { const el = document.getElementById(elementId); if (el.textContent === '•••••••') el.textContent = realValue; else el.textContent = '•••••••'; }
-function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => toast(`Kode ${text} disalin`, 'success')); }
-
 function openAddGuruModal() { 
-  const su = 'guru' + (state.data.guru.length + 1);
-  const sp = 'guru' + Math.random().toString(36).substring(2, 6);
+  const su = 'guru' + (state.data.guru.length + 1); const sp = 'guru' + Math.random().toString(36).substring(2, 6);
   showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Tambah Data Guru</h3><form onsubmit="submitAddGuru(event)" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap</label><input id="ag_nama" type="text" class="input-field" placeholder="Nama guru" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Mata Pelajaran</label><input id="ag_mapel" type="text" class="input-field" placeholder="Contoh: Iqro & Tajwid" required></div></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telepon</label><input id="ag_telepon" type="text" class="input-field" placeholder="08xx-xxxx-xxxx" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelamin</label><select id="ag_gender" class="input-field"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div></div><div class="border-t border-stone-200 pt-4 mt-2"><h4 class="font-bold text-gray-800 text-sm mb-3">Kredensial Login</h4><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Username</label><input id="ag_username" type="text" class="input-field font-mono" value="${su}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password</label><input id="ag_password" type="text" class="input-field font-mono" value="${sp}" required></div></div></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); 
 }
 function submitAddGuru(e) {
   e.preventDefault();
-  const newId = 'g' + (state.data.guru.length + 1);
-  const nama = document.getElementById('ag_nama').value.trim();
-  const mapel = document.getElementById('ag_mapel').value.trim();
-  const namaParts = nama.split(' ');
-  const foto = namaParts.map(p => p.charAt(0)).join('').substring(0, 2).toUpperCase();
-  const code = `TPQ-G${state.data.guru.length + 1}-${namaParts[0].toUpperCase()}`;
-  const username = document.getElementById('ag_username').value.trim();
-  const password = document.getElementById('ag_password').value.trim();
+  const newId = 'g' + Date.now(); const nama = document.getElementById('ag_nama').value.trim(); const mapel = document.getElementById('ag_mapel').value.trim();
+  const namaParts = nama.split(' '); const foto = namaParts.map(p => p.charAt(0)).join('').substring(0, 2).toUpperCase();
+  const code = `TPQ-G${state.data.guru.length + 1}-${namaParts[0].toUpperCase()}`; const username = document.getElementById('ag_username').value.trim(); const password = document.getElementById('ag_password').value.trim();
   const newGuru = { id: newId, nama, nip: '-', telepon: document.getElementById('ag_telepon').value.trim(), gender: document.getElementById('ag_gender').value, mapel, foto, code, username, password };
-  state.data.guru.push(newGuru);
-  saveData(); addLog('Tambah Data Guru', `Guru ${nama} ditambahkan.`);
+  state.data.guru.push(newGuru); saveData(); addLog('Tambah Data Guru', `Guru ${nama} ditambahkan.`);
   closeModal(); toast(`Guru ${nama} berhasil ditambahkan!`, 'success'); navigateAdmin('akun-guru');
 }
-function deleteGuru(guruId) {
-  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Data Guru</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus guru ini?</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteGuru('${guruId}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`);
-}
-function confirmDeleteGuru(guruId) {
-  const guru = getGuru(guruId);
-  state.data.guru = state.data.guru.filter(g => g.id !== guruId);
-  state.data.santri.forEach(s => { if (s.guru_id === guruId) s.guru_id = null; });
-  saveData(); addLog('Hapus Data Guru', `Guru ${guru?.nama || guruId} dihapus.`);
-  closeModal(); toast('Data guru berhasil dihapus', 'success'); navigateAdmin('akun-guru');
-}
-function deleteSantriAdmin(sid) {
-  const s = getSantri(sid); if(!s) return;
-  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Data Santri</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus santri: <strong>${s.nama}</strong>? Semua data tagihan & pembayarannya akan ikut terhapus.</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteSantriAdmin('${sid}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`);
-}
-function confirmDeleteSantriAdmin(sid) {
-  const s = getSantri(sid); if(!s) return;
-  state.data.santri = state.data.santri.filter(x => x.id !== sid);
-  state.data.accounts.santri = state.data.accounts.santri.filter(x => x.santri_id !== sid);
-  state.data.tagihan = state.data.tagihan.filter(x => x.santri_id !== sid);
-  state.data.pembayaran = state.data.pembayaran.filter(x => x.santri_id !== sid);
-  state.data.pengumpulan = state.data.pengumpulan.filter(x => x.santri_id !== sid);
-  saveData(); addLog('Hapus Data Santri', `Admin menghapus santri ${s.nama}`);
-  closeModal(); toast('Data santri berhasil dihapus', 'success'); navigateAdmin('akun-santri');
-}
-function openEditGuruAccountModal() { 
-  const acc = state.data.accounts.guru; 
-  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Edit Akun Login Guru Utama</h3><form onsubmit="submitEditGuruAccount(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama</label><input id="edit_guru_nama" type="text" class="input-field" value="${acc.nama}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Username</label><input id="edit_guru_username" type="text" class="input-field font-mono" value="${acc.username}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password</label><div class="relative"><input id="edit_guru_password" type="password" class="input-field pr-10" value="${acc.password}" required><button type="button" onclick="togglePassword('edit_guru_password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i data-lucide="eye" style="width:18px;height:18px"></i></button></div></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-royal flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); 
-}
-function submitEditGuruAccount(e) { 
-  e.preventDefault(); 
-  const nama = document.getElementById('edit_guru_nama').value.trim(); 
-  const username = document.getElementById('edit_guru_username').value.trim(); 
-  const password = document.getElementById('edit_guru_password').value.trim(); 
-  if (!nama || !username || !password) { toast('Lengkapi semua field', 'error'); return; } 
-  state.data.accounts.guru.nama = nama; state.data.accounts.guru.username = username; state.data.accounts.guru.password = password; 
-  saveData(); addLog('Edit Akun Guru', `Akun guru diubah.`);
-  closeModal(); toast('Akun guru berhasil diperbarui', 'success'); navigateAdmin('akun-guru'); 
-}
-function openEditGuruModal(guruId) { 
-  const g = getGuru(guruId); if (!g) return; 
-  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Edit Data Guru</h3><form onsubmit="submitEditGuru(event, '${guruId}')" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap</label><input id="eg_nama" type="text" class="input-field" value="${g.nama}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Mata Pelajaran</label><input id="eg_mapel" type="text" class="input-field" value="${g.mapel}" required></div></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telepon</label><input id="eg_telepon" type="text" class="input-field" value="${g.telepon}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelamin</label><select id="eg_gender" class="input-field"><option value="L" ${g.gender==='L'?'selected':''}>Laki-laki</option><option value="P" ${g.gender==='P'?'selected':''}>Perempuan</option></select></div></div><div class="border-t border-stone-200 pt-4 mt-2"><h4 class="font-bold text-gray-800 text-sm mb-3">Kredensial Login</h4><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Username</label><input id="eg_username" type="text" class="input-field font-mono" value="${g.username || ''}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password</label><input id="eg_password" type="text" class="input-field font-mono" value="${g.password || ''}" required></div></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Kode QR Pendaftaran</label><input id="eg_code" type="text" class="input-field font-mono" value="${g.code}" required></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-royal flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); 
-}
-function submitEditGuru(e, guruId) { 
-  e.preventDefault(); const g = getGuru(guruId); if (!g) return; 
-  g.nama = document.getElementById('eg_nama').value.trim(); g.mapel = document.getElementById('eg_mapel').value.trim(); g.telepon = document.getElementById('eg_telepon').value.trim(); g.gender = document.getElementById('eg_gender').value; g.username = document.getElementById('eg_username').value.trim(); g.password = document.getElementById('eg_password').value.trim(); g.code = document.getElementById('eg_code').value.trim().toUpperCase(); 
-  saveData(); addLog('Edit Data Guru', `Data guru ${g.nama} diperbarui`); 
-  closeModal(); toast('Data guru berhasil diperbarui', 'success'); navigateAdmin('akun-guru'); 
-}
-function openEditSantriModal(sid) {
-  const s = getSantri(sid); const acc = state.data.accounts.santri.find(a => a.santri_id === sid); if (!s || !acc) return;
-  const guruOptions = state.data.guru.map(g => `<option value="${g.id}" ${s.guru_id===g.id?'selected':''}>${g.nama} - ${g.mapel}</option>`).join('');
-  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Edit Data Santri</h3><form onsubmit="submitEditSantri(event, '${sid}')" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap</label><input id="es_nama" type="text" class="input-field" value="${s.nama}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelamin</label><select id="es_gender" class="input-field"><option value="L" ${s.gender==='L'?'selected':''}>Laki-laki</option><option value="P" ${s.gender==='P'?'selected':''}>Perempuan</option></select></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Kelas</label><select id="es_kelas" class="input-field"><option ${s.kelas==='Iqro 1'?'selected':''}>Iqro 1</option><option ${s.kelas==='Iqro 2'?'selected':''}>Iqro 2</option><option ${s.kelas==='Iqro 3'?'selected':''}>Iqro 3</option><option ${s.kelas==='Iqro 4'?'selected':''}>Iqro 4</option><option ${s.kelas==='Iqro 5'?'selected':''}>Iqro 5</option><option ${s.kelas==='Iqro 6'?'selected':''}>Iqro 6</option></select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Guru Wali</label><select id="es_guru_id" class="input-field">${guruOptions}</select></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Wali</label><input id="es_wali" type="text" class="input-field" value="${s.wali}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telepon Wali</label><input id="es_telepon" type="text" class="input-field" value="${s.telepon}" required></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat</label><textarea id="es_alamat" class="input-field" rows="2" required>${s.alamat}</textarea></div><div class="border-t border-stone-200 pt-4 mt-2"><h4 class="font-bold text-gray-800 text-sm mb-3">Kredensial Login</h4><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Username (NIS)</label><input id="es_username" type="text" class="input-field font-mono" value="${acc.username}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password</label><input id="es_password" type="text" class="input-field font-mono" value="${acc.password}" required></div></div></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`);
-}
-function submitEditSantri(e, sid) {
-  e.preventDefault(); const s = getSantri(sid); const acc = state.data.accounts.santri.find(a => a.santri_id === sid); if (!s || !acc) return;
-  s.nama = document.getElementById('es_nama').value.trim(); s.gender = document.getElementById('es_gender').value; s.kelas = document.getElementById('es_kelas').value; s.guru_id = document.getElementById('es_guru_id').value; s.wali = document.getElementById('es_wali').value.trim(); s.telepon = document.getElementById('es_telepon').value.trim(); s.alamat = document.getElementById('es_alamat').value.trim();
-  acc.username = document.getElementById('es_username').value.trim(); acc.password = document.getElementById('es_password').value.trim(); s.nis = acc.username;
-  saveData(); addLog('Edit Data Santri', `Admin mengubah data santri ${s.nama}`);
-  closeModal(); toast('Data santri berhasil diperbarui', 'success'); navigateAdmin('akun-santri');
-}
-function openAddSantriModal() {
-  const guruOptions = state.data.guru.map(g => `<option value="${g.id}">${g.nama} - ${g.mapel}</option>`).join('');
-  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Tambah Santri Manual</h3><form onsubmit="submitAddSantri(event)" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap</label><input id="as_nama" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelamin</label><select id="as_gender" class="input-field"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tempat Lahir</label><input id="as_tempat" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Lahir</label><input id="as_tgl" type="date" class="input-field" required></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Kelas</label><select id="as_kelas" class="input-field"><option>Iqro 1</option><option>Iqro 2</option><option>Iqro 3</option><option>Iqro 4</option><option>Iqro 5</option><option>Iqro 6</option></select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Guru Wali</label><select id="as_guru_id" class="input-field">${guruOptions}</select></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Wali</label><input id="as_wali" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telepon Wali</label><input id="as_telepon" type="text" class="input-field" required></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat</label><textarea id="as_alamat" class="input-field" rows="2" required></textarea></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`);
-}
-function submitAddSantri(e) {
-  e.preventDefault();
-  const result = createSantriAccount(
-    document.getElementById('as_nama').value.trim(),
-    document.getElementById('as_gender').value,
-    document.getElementById('as_tempat').value.trim(),
-    document.getElementById('as_tgl').value,
-    document.getElementById('as_kelas').value,
-    document.getElementById('as_wali').value.trim(),
-    document.getElementById('as_telepon').value.trim(),
-    document.getElementById('as_alamat').value.trim(),
-    document.getElementById('as_guru_id').value, false
-  );
-  addLog('Tambah Santri', `Admin menambahkan santri ${result.nis}`);
-  saveData(); closeModal(); 
-  showModal(`
-    <div class="text-center py-4">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-4"><i data-lucide="check-circle" class="text-emerald-600" style="width:32px;height:32px"></i></div>
-      <h3 class="text-xl font-bold text-gray-800 mb-2">Santri Berhasil Ditambahkan!</h3>
-      <div class="bg-stone-50 border border-stone-200 rounded-xl p-4 mt-4 text-left text-sm">
-        <p class="text-gray-600">Username: <span class="font-bold text-gray-800 font-mono">${result.nis}</span></p>
-        <p class="text-gray-600">Password: <span class="font-bold text-gray-800 font-mono">santri123</span></p>
-      </div>
-      <p class="text-xs text-gray-500 mt-3">Gunakan NIS dan password di atas untuk login di Panel Santri.</p>
-      <button onclick="closeModal(); navigateAdmin('akun-santri');" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Selesai</button>
-    </div>
-  `);
-  lucide.createIcons();
-}
-function saveSettings(e) { 
-  e.preventDefault(); 
-  state.data.settings.namaTPQ = document.getElementById('set_namaTPQ').value.trim(); 
-  state.data.settings.tahunAjaran = document.getElementById('set_tahunAjaran').value.trim(); 
-  state.data.settings.alamatTPQ = document.getElementById('set_alamatTPQ').value.trim(); 
-  state.data.settings.teleponTPQ = document.getElementById('set_teleponTPQ').value.trim(); 
-  saveData(); addLog('Ubah Pengaturan', 'Pengaturan sistem diperbarui'); toast('Pengaturan berhasil disimpan', 'success'); 
-}
-function changeOwnerPassword(e) { 
-  e.preventDefault(); 
-  const oldPass = document.getElementById('old_pass').value.trim(); 
-  const newPass = document.getElementById('new_pass').value.trim(); 
-  const confirmPass = document.getElementById('confirm_pass').value.trim(); 
-  if (oldPass !== state.data.accounts.admin.password) { toast('Password lama salah', 'error'); return; } 
-  if (newPass.length < 4) { toast('Password baru minimal 4 karakter', 'error'); return; } 
-  if (newPass !== confirmPass) { toast('Konfirmasi password tidak cocok', 'error'); return; } 
-  state.data.accounts.admin.password = newPass; saveData(); addLog('Ubah Password Owner', 'Password pemegang website diubah'); 
-  toast('Password owner berhasil diubah', 'success'); 
-  document.getElementById('old_pass').value = ''; document.getElementById('new_pass').value = ''; document.getElementById('confirm_pass').value = ''; 
-}
+function deleteGuru(guruId) { showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Data Guru</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus guru ini?</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteGuru('${guruId}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`); }
+function confirmDeleteGuru(guruId) { const guru = getGuru(guruId); state.data.guru = state.data.guru.filter(g => g.id !== guruId); state.data.santri.forEach(s => { if (s.guru_id === guruId) s.guru_id = null; }); saveData(); addLog('Hapus Data Guru', `Guru ${guru?.nama || guruId} dihapus.`); closeModal(); toast('Data guru berhasil dihapus', 'success'); navigateAdmin('akun-guru'); }
+function deleteSantriAdmin(sid) { const s = getSantri(sid); if(!s) return; showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Data Santri</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus santri: <strong>${s.nama}</strong>? Semua data tagihan & pembayarannya akan ikut terhapus.</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteSantriAdmin('${sid}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`); }
+function confirmDeleteSantriAdmin(sid) { const s = getSantri(sid); if(!s) return; state.data.santri = state.data.santri.filter(x => x.id !== sid); state.data.accounts.santri = state.data.accounts.santri.filter(x => x.santri_id !== sid); state.data.tagihan = state.data.tagihan.filter(x => x.santri_id !== sid); state.data.pembayaran = state.data.pembayaran.filter(x => x.santri_id !== sid); state.data.pengumpulan = state.data.pengumpulan.filter(x => x.santri_id !== sid); saveData(); addLog('Hapus Data Santri', `Admin menghapus santri ${s.nama}`); closeModal(); toast('Data santri berhasil dihapus', 'success'); navigateAdmin('akun-santri'); }
+function openEditGuruAccountModal() { const acc = state.data.accounts.guru; showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Edit Akun Login Guru Utama</h3><form onsubmit="submitEditGuruAccount(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama</label><input id="edit_guru_nama" type="text" class="input-field" value="${acc.nama}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Username</label><input id="edit_guru_username" type="text" class="input-field font-mono" value="${acc.username}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password</label><div class="relative"><input id="edit_guru_password" type="password" class="input-field pr-10" value="${acc.password}" required><button type="button" onclick="togglePassword('edit_guru_password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i data-lucide="eye" style="width:18px;height:18px"></i></button></div></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-royal flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); }
+function submitEditGuruAccount(e) { e.preventDefault(); const nama = document.getElementById('edit_guru_nama').value.trim(); const username = document.getElementById('edit_guru_username').value.trim(); const password = document.getElementById('edit_guru_password').value.trim(); if (!nama || !username || !password) { toast('Lengkapi semua field', 'error'); return; } state.data.accounts.guru.nama = nama; state.data.accounts.guru.username = username; state.data.accounts.guru.password = password; saveData(); addLog('Edit Akun Guru', `Akun guru diubah.`); closeModal(); toast('Akun guru berhasil diperbarui', 'success'); navigateAdmin('akun-guru'); }
+function openEditGuruModal(guruId) { const g = getGuru(guruId); if (!g) return; showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Edit Data Guru</h3><form onsubmit="submitEditGuru(event, '${guruId}')" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap</label><input id="eg_nama" type="text" class="input-field" value="${g.nama}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Mata Pelajaran</label><input id="eg_mapel" type="text" class="input-field" value="${g.mapel}" required></div></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telepon</label><input id="eg_telepon" type="text" class="input-field" value="${g.telepon}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelamin</label><select id="eg_gender" class="input-field"><option value="L" ${g.gender==='L'?'selected':''}>Laki-laki</option><option value="P" ${g.gender==='P'?'selected':''}>Perempuan</option></select></div></div><div class="border-t border-stone-200 pt-4 mt-2"><h4 class="font-bold text-gray-800 text-sm mb-3">Kredensial Login</h4><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Username</label><input id="eg_username" type="text" class="input-field font-mono" value="${g.username || ''}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password</label><input id="eg_password" type="text" class="input-field font-mono" value="${g.password || ''}" required></div></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Kode QR Pendaftaran</label><input id="eg_code" type="text" class="input-field font-mono" value="${g.code}" required></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-royal flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); }
+function submitEditGuru(e, guruId) { e.preventDefault(); const g = getGuru(guruId); if (!g) return; g.nama = document.getElementById('eg_nama').value.trim(); g.mapel = document.getElementById('eg_mapel').value.trim(); g.telepon = document.getElementById('eg_telepon').value.trim(); g.gender = document.getElementById('eg_gender').value; g.username = document.getElementById('eg_username').value.trim(); g.password = document.getElementById('eg_password').value.trim(); g.code = document.getElementById('eg_code').value.trim().toUpperCase(); saveData(); addLog('Edit Data Guru', `Data guru ${g.nama} diperbarui`); closeModal(); toast('Data guru berhasil diperbarui', 'success'); navigateAdmin('akun-guru'); }
+function openEditSantriModal(sid) { const s = getSantri(sid); const acc = state.data.accounts.santri.find(a => a.santri_id === sid); if (!s || !acc) return; const guruOptions = state.data.guru.map(g => `<option value="${g.id}" ${s.guru_id===g.id?'selected':''}>${g.nama} - ${g.mapel}</option>`).join(''); showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Edit Data Santri</h3><form onsubmit="submitEditSantri(event, '${sid}')" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap</label><input id="es_nama" type="text" class="input-field" value="${s.nama}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelamin</label><select id="es_gender" class="input-field"><option value="L" ${s.gender==='L'?'selected':''}>Laki-laki</option><option value="P" ${s.gender==='P'?'selected':''}>Perempuan</option></select></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Kelas</label><select id="es_kelas" class="input-field"><option ${s.kelas==='Iqro 1'?'selected':''}>Iqro 1</option><option ${s.kelas==='Iqro 2'?'selected':''}>Iqro 2</option><option ${s.kelas==='Iqro 3'?'selected':''}>Iqro 3</option><option ${s.kelas==='Iqro 4'?'selected':''}>Iqro 4</option><option ${s.kelas==='Iqro 5'?'selected':''}>Iqro 5</option><option ${s.kelas==='Iqro 6'?'selected':''}>Iqro 6</option></select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Guru Wali</label><select id="es_guru_id" class="input-field">${guruOptions}</select></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Wali</label><input id="es_wali" type="text" class="input-field" value="${s.wali}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telepon Wali</label><input id="es_telepon" type="text" class="input-field" value="${s.telepon}" required></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat</label><textarea id="es_alamat" class="input-field" rows="2" required>${s.alamat}</textarea></div><div class="border-t border-stone-200 pt-4 mt-2"><h4 class="font-bold text-gray-800 text-sm mb-3">Kredensial Login</h4><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Username (NIS)</label><input id="es_username" type="text" class="input-field font-mono" value="${acc.username}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password</label><input id="es_password" type="text" class="input-field font-mono" value="${acc.password}" required></div></div></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); }
+function submitEditSantri(e, sid) { e.preventDefault(); const s = getSantri(sid); const acc = state.data.accounts.santri.find(a => a.santri_id === sid); if (!s || !acc) return; s.nama = document.getElementById('es_nama').value.trim(); s.gender = document.getElementById('es_gender').value; s.kelas = document.getElementById('es_kelas').value; s.guru_id = document.getElementById('es_guru_id').value; s.wali = document.getElementById('es_wali').value.trim(); s.telepon = document.getElementById('es_telepon').value.trim(); s.alamat = document.getElementById('es_alamat').value.trim(); acc.username = document.getElementById('es_username').value.trim(); acc.password = document.getElementById('es_password').value.trim(); s.nis = acc.username; saveData(); addLog('Edit Data Santri', `Admin mengubah data santri ${s.nama}`); closeModal(); toast('Data santri berhasil diperbarui', 'success'); navigateAdmin('akun-santri'); }
+function openAddSantriModal() { const guruOptions = state.data.guru.map(g => `<option value="${g.id}">${g.nama} - ${g.mapel}</option>`).join(''); showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Tambah Santri Manual</h3><form onsubmit="submitAddSantri(event)" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap</label><input id="as_nama" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelamin</label><select id="as_gender" class="input-field"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tempat Lahir</label><input id="as_tempat" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Lahir</label><input id="as_tgl" type="date" class="input-field" required></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Kelas</label><select id="as_kelas" class="input-field"><option>Iqro 1</option><option>Iqro 2</option><option>Iqro 3</option><option>Iqro 4</option><option>Iqro 5</option><option>Iqro 6</option></select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Guru Wali</label><select id="as_guru_id" class="input-field">${guruOptions}</select></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Wali</label><input id="as_wali" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telepon Wali</label><input id="as_telepon" type="text" class="input-field" required></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat</label><textarea id="as_alamat" class="input-field" rows="2" required></textarea></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); }
+function submitAddSantri(e) { e.preventDefault(); const result = createSantriAccount(document.getElementById('as_nama').value.trim(), document.getElementById('as_gender').value, document.getElementById('as_tempat').value.trim(), document.getElementById('as_tgl').value, document.getElementById('as_kelas').value, document.getElementById('as_wali').value.trim(), document.getElementById('as_telepon').value.trim(), document.getElementById('as_alamat').value.trim(), document.getElementById('as_guru_id').value, false); addLog('Tambah Santri', `Admin menambahkan santri ${result.nis}`); saveData(); closeModal(); showModal(`<div class="text-center py-4"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-4"><i data-lucide="check-circle" class="text-emerald-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Santri Berhasil Ditambahkan!</h3><div class="bg-stone-50 border border-stone-200 rounded-xl p-4 mt-4 text-left text-sm"><p class="text-gray-600">Username: <span class="font-bold text-gray-800 font-mono">${result.nis}</span></p><p class="text-gray-600">Password: <span class="font-bold text-gray-800 font-mono">santri123</span></p></div><p class="text-xs text-gray-500 mt-3">Gunakan NIS dan password di atas untuk login di Panel Santri.</p><button onclick="closeModal(); navigateAdmin('akun-santri');" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Selesai</button></div>`); lucide.createIcons(); }
+function saveSettings(e) { e.preventDefault(); state.data.settings.namaTPQ = document.getElementById('set_namaTPQ').value.trim(); state.data.settings.tahunAjaran = document.getElementById('set_tahunAjaran').value.trim(); state.data.settings.alamatTPQ = document.getElementById('set_alamatTPQ').value.trim(); state.data.settings.teleponTPQ = document.getElementById('set_teleponTPQ').value.trim(); state.data.settings.linkWebsite = document.getElementById('set_linkWebsite').value.trim(); saveData(); addLog('Ubah Pengaturan', 'Pengaturan sistem diperbarui'); toast('Pengaturan berhasil disimpan', 'success'); }
+function changeOwnerPassword(e) { e.preventDefault(); const oldPass = document.getElementById('old_pass').value.trim(); const newPass = document.getElementById('new_pass').value.trim(); const confirmPass = document.getElementById('confirm_pass').value.trim(); if (oldPass !== state.data.accounts.admin.password) { toast('Password lama salah', 'error'); return; } if (newPass.length < 4) { toast('Password baru minimal 4 karakter', 'error'); return; } if (newPass !== confirmPass) { toast('Konfirmasi password tidak cocok', 'error'); return; } state.data.accounts.admin.password = newPass; saveData(); addLog('Ubah Password Owner', 'Password pemegang website diubah'); toast('Password owner berhasil diubah', 'success'); document.getElementById('old_pass').value = ''; document.getElementById('new_pass').value = ''; document.getElementById('confirm_pass').value = ''; }
 
-function openAddPaymentModal() { 
-  const santriOptions = state.data.santri.length > 0 ? state.data.santri.map(s => { const g = getGuru(s.guru_id); return `<option value="${s.id}">${s.nama} — ${g?.nama||''} (${s.kelas})</option>`; }).join('') : ''; 
-  const metodeOpts = METODE_PEMBAYARAN.map(m=>`<option value="${m}">${m}</option>`).join(''); 
-  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Tambah Pembayaran</h3><form onsubmit="submitAddPayment(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Santri</label><select id="pay_santri" required class="input-field" onchange="updateTagihanOptions()"><option value="">— Pilih Santri —</option>${santriOptions}</select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tagihan Belum Lunas</label><select id="pay_tagihan" required class="input-field" disabled><option value="">Pilih santri dulu</option></select></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Pembayaran</label><input id="pay_tanggal" type="date" required class="input-field"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Metode</label><select id="pay_metode" required class="input-field">${metodeOpts}</select></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Keterangan (opsional)</label><input id="pay_ket" type="text" class="input-field" placeholder="Catatan tambahan"></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); 
-  document.getElementById('pay_tanggal').value = new Date().toISOString().split('T')[0]; 
-}
-function updateTagihanOptions() { 
-  const sid = document.getElementById('pay_santri').value; const sel = document.getElementById('pay_tagihan'); 
-  if (!sid) { sel.disabled = true; sel.innerHTML = '<option value="">Pilih santri dulu</option>'; return; } 
-  const belum = state.data.tagihan.filter(t => t.santri_id===sid && t.status!=='lunas'); 
-  if (belum.length===0) { sel.disabled = true; sel.innerHTML = '<option value="">Tidak ada tagihan belum lunas</option>'; } 
-  else { sel.disabled = false; sel.innerHTML = belum.map(t => `<option value="${t.id}">${t.jenis} — ${t.periode} — ${formatRupiah(t.nominal)}</option>`).join(''); } 
-}
-function submitAddPayment(e) { 
-  e.preventDefault(); const sid = document.getElementById('pay_santri').value; const tid = document.getElementById('pay_tagihan').value; const tanggal = document.getElementById('pay_tanggal').value; const metode = document.getElementById('pay_metode').value; const ket = document.getElementById('pay_ket').value; 
-  if (!sid || !tid) { toast('Lengkapi data pembayaran','error'); return; } 
-  const success = processPayment(tid, metode, tanggal, state.currentUser?.nama || 'Admin', ket); 
-  if (success) { 
-    const t = state.data.tagihan.find(x=>x.id===tid); 
-    addLog('Tambah Pembayaran', `Pembayaran ${formatRupiah(t.nominal)} untuk santri ${getSantri(sid).nama} via ${metode}`); 
-    closeModal(); toast(`Pembayaran ${formatRupiah(t.nominal)} berhasil dicatat`,'success'); navigateGuru(state.guruPage); 
-  } 
-}
-function quickPay(tagihanId) { 
-  const t = state.data.tagihan.find(x=>x.id===tagihanId); if (!t) return; const s = getSantri(t.santri_id); 
-  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Konfirmasi Pembayaran</h3><div class="bg-stone-50 rounded-xl p-4 mb-5 mt-4 space-y-2 text-sm"><div class="flex justify-between"><span class="text-gray-500">Santri</span><span class="font-semibold">${s.nama}</span></div><div class="flex justify-between"><span class="text-gray-500">Tagihan</span><span class="font-semibold">${t.jenis} ${t.periode}</span></div><div class="flex justify-between"><span class="text-gray-500">Nominal</span><span class="font-semibold">${formatRupiah(t.nominal)}</span></div></div><div class="space-y-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Metode Pembayaran</label><select id="quick_metode" class="input-field">${METODE_PEMBAYARAN.map(m=>`<option value="${m}">${m}</option>`).join('')}</select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Pembayaran</label><input id="quick_tanggal" type="date" class="input-field" value="${new Date().toISOString().split('T')[0]}"></div></div><div class="flex gap-3 pt-5"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmQuickPay('${tagihanId}')" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Konfirmasi Bayar</button></div>`); 
-}
-function confirmQuickPay(tagihanId) { 
-  const metode = document.getElementById('quick_metode').value; const tglInput = document.getElementById('quick_tanggal').value; const t = state.data.tagihan.find(x=>x.id===tagihanId); 
-  const success = processPayment(tagihanId, metode, tglInput, state.currentUser?.nama || 'Admin', 'Pembayaran cepat'); 
-  if (success) { 
-    addLog('Pembayaran Cepat', `Pembayaran ${formatRupiah(t.nominal)} - ${getSantri(t.santri_id).nama} via ${metode}`); 
-    closeModal(); toast('Pembayaran berhasil dikonfirmasi','success'); navigateGuru(state.guruPage); 
-  } 
-}
-function viewReceipt(tagihanId) { 
-  const t = state.data.tagihan.find(x=>x.id===tagihanId); if (!t) return; const p = state.data.pembayaran.find(x=>x.tagihan_id===tagihanId); if (!p) return; const s = getSantri(t.santri_id); const g = getGuru(s.guru_id); 
-  showModal(`<div class="text-center mb-5"><div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-50 mb-3"><i data-lucide="file-check" class="text-emerald-600" style="width:28px;height:28px"></i></div><h3 class="text-xl font-bold text-gray-800">Kwitansi Pembayaran</h3></div><div class="border-2 border-dashed border-stone-300 rounded-xl p-5 mb-4"><div class="flex justify-between text-xs text-gray-500 mb-4 pb-3 border-b border-stone-200"><span>No: <strong class="font-mono text-gray-700">${p.id}</strong></span><span>Tanggal: <strong class="text-gray-700">${p.tanggal}</strong></span></div><div class="space-y-2.5 text-sm"><div class="flex justify-between"><span class="text-gray-500">Nama Santri</span><span class="font-semibold text-gray-800">${s.nama}</span></div><div class="flex justify-between"><span class="text-gray-500">NIS</span><span class="font-mono text-gray-700">${s.nis}</span></div><div class="flex justify-between"><span class="text-gray-500">Kelas</span><span class="text-gray-700">${s.kelas}</span></div><div class="flex justify-between"><span class="text-gray-500">Guru Wali</span><span class="text-gray-700">${g?.nama||'-'}</span></div><div class="flex justify-between"><span class="text-gray-500">Pembayaran Untuk</span><span class="font-semibold text-gray-800 text-right">${t.jenis}<br><span class="text-xs font-normal text-gray-500">Periode ${t.periode}</span></span></div><div class="flex justify-between"><span class="text-gray-500">Metode</span><span class="text-gray-700">${p.metode}</span></div><div class="flex justify-between"><span class="text-gray-500">Petugas</span><span class="text-gray-700">${p.petugas}</span></div><div class="flex justify-between pt-3 mt-3 border-t border-stone-200"><span class="font-bold text-gray-800">Total Dibayar</span><span class="font-black text-emerald-700 text-lg">${formatRupiah(p.jumlah)}</span></div></div></div><div class="flex gap-3"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Tutup</button><button onclick="window.print()" class="btn-primary flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="printer" style="width:16px;height:16px"></i> Cetak</button></div>`); 
-}
-
-function showQRPendaftaranModal() { 
-  showModal(`<div class="text-center mb-5"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 mb-3 pulse-qr"><i data-lucide="qr-code" class="text-amber-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800">Pendaftaran Santri Baru</h3></div><div class="bg-gradient-to-br from-emerald-50 to-amber-50 border-2 border-emerald-200 rounded-2xl p-6 mb-4"><div id="modalQrCode" class="flex justify-center mb-4"></div><div class="text-center"><p class="font-mono font-bold text-lg text-emerald-700 tracking-wider">TPQ-ALQURAN-DAFTAR</p></div></div><div class="flex gap-3"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Tutup</button></div>`); 
-  generateQRCode('modalQrCode', 'TPQ_ALQURAN|REGISTER', 200); lucide.createIcons(); 
-}
-function initGuruQRCode() { 
-  generateQRCode('mainQrCode', 'TPQ_ALQURAN|REGISTER', 192); 
-  generateQRCode('linkQrCode', WEBSITE_LINK + '#daftar', 192); 
-}
-function generateQRCode(elementId, text, size) { const el = document.getElementById(elementId); if (!el) return; el.innerHTML = ''; try { new QRCode(el, { text: text, width: size, height: size, colorDark: '#0a3d31', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H }); } catch(e) { el.innerHTML = `<div class="bg-stone-100 rounded-xl flex items-center justify-center text-xs text-gray-400" style="width:${size}px;height:${size}px">QR Error</div>`; } }
-function downloadQR(elementId, fileName) { const canvas = document.querySelector(`#${elementId} canvas`); if (!canvas) { toast('QR Code belum siap', 'error'); return; } const link = document.createElement('a'); link.download = `${fileName}.png`; link.href = canvas.toDataURL(); link.click(); toast('QR Code berhasil diunduh', 'success'); }
-
-loadData(); 
-showSplash(); 
-updateClock(); 
-lucide.createIcons();
-
-if (window.location.hash.includes('daftar')) {
-  setTimeout(() => {
-    showRegisterChoiceModal();
-    history.replaceState(null, null, window.location.pathname);
-  }, 800);
-}
-</script>
-</body>
-</html>
+function openAddPaymentModal() { const santriOptions = state.data.santri.length > 0 ? state.data.santri.map(s => { const g = getGuru(s.guru_id); return `<option value="${s.id}">${s.nama} — ${g?.nama||''} (${s.kelas})</option>`; }).join('') : ''; const metodeOpts = METODE_PEMBAYARAN.map(m=>`<option value="${m}">${m}</option>`).join(''); showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Tambah Pembayaran</h3><form onsubmit="submitAddPayment(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Santri</label><select id="pay_santri" required class="input-field" onchange="updateTagihanOptions()"><option value="">— Pilih Santri —</option>${santriOptions}</select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tagihan Belum Lunas</label><select id="pay_tagihan" required class="input-field" disabled><option value="">Pilih santri dulu</option></select></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Pembayaran</label><input id="pay_tanggal" type="date" required class="input-field"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Metode</label><select id="pay_metode" required class="input-field">${metodeOpts}</select></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Keterangan (opsional)</label><input id="pay_ket" type="text" class="input-field" placeholder="Catatan tambahan"></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div></form>`); document.getElementById('pay_tanggal').value = new Date().toISOString().split('T')[0]; }
+function updateTagihanOptions() { const sid = document.getElementById('pay_santri').value; const sel = document.getElementById('pay_tagihan'); if (!sid) { sel.disabled = true; sel.innerHTML = '<option value="">Pilih santri dulu</option>'; return;
