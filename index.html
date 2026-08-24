@@ -182,7 +182,7 @@
 <div id="toastContainer" class="fixed top-4 right-4 z-[100] space-y-2"></div>
 
 <script>
-const STORAGE_KEY = 'tpq_alquran_kontrol_v3';
+const STORAGE_KEY = 'tpq_alquran_kontrol_v4';
 const WEBSITE_LINK = 'https://nutrisari3152-lab.github.io/Taman-Pendidikan-Quran/';
 const METODE_PEMBAYARAN = ['Tunai', 'Transfer Bank (BSI)', 'Transfer Bank (BNI)', 'Transfer Bank (Mandiri)', 'Alfamart', 'Indomaret'];
 let state = { currentUser:null, currentRole:null, guruPage:'dashboard', santriPage:'beranda', adminPage:'dashboard', data:null, registerGuruId:null, registerRole:null, cameraStream:null, scanInterval:null };
@@ -757,8 +757,15 @@ function renderGuruTugasMateri() {
           ${state.data.materi.length > 0 ? state.data.materi.map(m => `
             <div class="p-4 border border-stone-200 rounded-xl">
               <h4 class="font-bold text-gray-800">${m.judul}</h4>
-              <p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">${m.deskripsi}</p>
-              <p class="text-xs text-gray-400 mt-2">${m.tanggal}</p>
+              <p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">${m.deskripsi || ''}</p>
+              ${m.file_name ? `<a href="${m.file_data}" download="${m.file_name}" target="_blank" class="mt-2 inline-flex items-center gap-2 text-xs text-blue-600 hover:underline"><i data-lucide="paperclip" style="width:14px;height:14px"></i> ${m.file_name}</a>` : ''}
+              <div class="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between">
+                <p class="text-xs text-gray-400">${m.tanggal}</p>
+                <div class="flex gap-2">
+                  <button onclick="openEditMateriModal('${m.id}')" class="text-xs btn-ghost px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"><i data-lucide="edit-3" style="width:12px;height:12px"></i> Edit</button>
+                  <button onclick="deleteMateri('${m.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"><i data-lucide="trash-2" style="width:12px;height:12px"></i> Hapus</button>
+                </div>
+              </div>
             </div>
           `).join('') : '<div class="text-center py-8 text-gray-400"><p>Belum ada materi.</p></div>'}
         </div>
@@ -774,8 +781,16 @@ function renderGuruTugasMateri() {
             <div class="p-4 border border-stone-200 rounded-xl">
               <h4 class="font-bold text-gray-800">${t.judul}</h4>
               <p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">${t.deskripsi}</p>
-              <p class="text-xs text-red-500 mt-2">Deadline: ${t.deadline}</p>
-              <button onclick="viewSubmissions('${t.id}')" class="mt-3 text-xs btn-ghost px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"><i data-lucide="inbox" style="width:12px;height:12px"></i> Lihat Pengumpulan</button>
+              <div class="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between">
+                <div>
+                  <p class="text-xs text-red-500 font-semibold">Deadline: ${t.deadline}</p>
+                  <button onclick="viewSubmissions('${t.id}')" class="mt-1 text-xs btn-ghost px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"><i data-lucide="inbox" style="width:12px;height:12px"></i> Lihat Pengumpulan</button>
+                </div>
+                <div class="flex gap-2">
+                  <button onclick="openEditTugasModal('${t.id}')" class="text-xs btn-ghost px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"><i data-lucide="edit-3" style="width:12px;height:12px"></i> Edit</button>
+                  <button onclick="deleteTugas('${t.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"><i data-lucide="trash-2" style="width:12px;height:12px"></i> Hapus</button>
+                </div>
+              </div>
             </div>
           `).join('') : '<div class="text-center py-8 text-gray-400"><p>Belum ada tugas.</p></div>'}
         </div>
@@ -784,27 +799,106 @@ function renderGuruTugasMateri() {
   `;
 }
 
+function readFileAsBase64(file, callback) {
+  if (!file) return callback(null);
+  if (file.size > 2000000) { // 2MB limit
+    toast('Ukuran file maksimal 2MB.', 'error');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    callback({ name: file.name, data: e.target.result });
+  };
+  reader.readAsDataURL(file);
+}
+
 function openAddMateriModal() {
   showModal(`
     <h3 class="text-xl font-bold text-gray-800 mb-1">Tambah Materi Baru</h3>
     <form onsubmit="submitAddMateri(event)" class="space-y-4 mt-4">
       <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Materi *</label><input id="am_judul" type="text" class="input-field" required></div>
-      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Isi Materi *</label><textarea id="am_deskripsi" class="input-field" rows="5" required></textarea></div>
+      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi Materi (Opsional)</label><textarea id="am_deskripsi" class="input-field" rows="4"></textarea></div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Unggah File (PDF, Word, Excel, dll. Maks 2MB)</label>
+        <input id="am_file" type="file" class="input-field p-2">
+      </div>
       <div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div>
     </form>
   `);
 }
 function submitAddMateri(e) {
   e.preventDefault();
-  const newId = 'materi' + Date.now();
-  const now = new Date();
-  const tgl = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
-  state.data.materi.push({
-    id: newId, judul: document.getElementById('am_judul').value.trim(),
-    deskripsi: document.getElementById('am_deskripsi').value.trim(), tanggal: tgl
-  });
-  saveData(); addLog('Tambah Materi', `Guru menambahkan materi`);
-  closeModal(); toast('Materi berhasil dibagikan ke santri', 'success'); navigateGuru('tugas-materi');
+  const fileInput = document.getElementById('am_file');
+  const file = fileInput.files[0];
+  
+  const saveMateri = (fileData) => {
+    const newId = 'materi' + Date.now();
+    const now = new Date();
+    const tgl = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+    state.data.materi.push({
+      id: newId, 
+      judul: document.getElementById('am_judul').value.trim(),
+      deskripsi: document.getElementById('am_deskripsi').value.trim(), 
+      tanggal: tgl,
+      file_name: fileData ? fileData.name : null,
+      file_data: fileData ? fileData.data : null
+    });
+    saveData(); addLog('Tambah Materi', `Guru menambahkan materi`);
+    closeModal(); toast('Materi berhasil dibagikan ke santri', 'success'); navigateGuru('tugas-materi');
+  };
+
+  if (file) {
+    readFileAsBase64(file, saveMateri);
+  } else {
+    saveMateri(null);
+  }
+}
+
+function deleteMateri(id) {
+  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Materi</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus materi ini?</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteMateri('${id}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`);
+}
+function confirmDeleteMateri(id) {
+  state.data.materi = state.data.materi.filter(m => m.id !== id);
+  saveData(); closeModal(); toast('Materi dihapus', 'success'); navigateGuru('tugas-materi');
+}
+function openEditMateriModal(id) {
+  const m = state.data.materi.find(x => x.id === id); if (!m) return;
+  showModal(`
+    <h3 class="text-xl font-bold text-gray-800 mb-1">Edit Materi</h3>
+    <form onsubmit="submitEditMateri(event, '${id}')" class="space-y-4 mt-4">
+      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Materi *</label><input id="em_judul" type="text" class="input-field" value="${m.judul}" required></div>
+      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi Materi</label><textarea id="em_deskripsi" class="input-field" rows="4">${m.deskripsi||''}</textarea></div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Ganti File (Kosongkan jika tidak)</label>
+        <input id="em_file" type="file" class="input-field p-2">
+        ${m.file_name ? `<p class="text-xs text-gray-500 mt-1">File saat ini: ${m.file_name}</p>` : ''}
+      </div>
+      <div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div>
+    </form>
+  `);
+}
+function submitEditMateri(e, id) {
+  e.preventDefault();
+  const m = state.data.materi.find(x => x.id === id); if(!m) return;
+  const fileInput = document.getElementById('em_file');
+  const file = fileInput.files[0];
+  
+  const updateData = (fileData) => {
+    m.judul = document.getElementById('em_judul').value.trim();
+    m.deskripsi = document.getElementById('em_deskripsi').value.trim();
+    if (fileData) {
+      m.file_name = fileData.name;
+      m.file_data = fileData.data;
+    }
+    saveData(); addLog('Edit Materi', `Guru mengubah materi`);
+    closeModal(); toast('Materi berhasil diperbarui', 'success'); navigateGuru('tugas-materi');
+  };
+
+  if (file) {
+    readFileAsBase64(file, updateData);
+  } else {
+    updateData(null);
+  }
 }
 
 function openAddTugasModal() {
@@ -830,6 +924,36 @@ function submitAddTugas(e) {
   });
   saveData(); addLog('Tambah Tugas', `Guru menambahkan tugas`);
   closeModal(); toast('Tugas berhasil dibagikan ke santri', 'success'); navigateGuru('tugas-materi');
+}
+
+function deleteTugas(id) {
+  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Tugas</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus tugas ini?</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteTugas('${id}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`);
+}
+function confirmDeleteTugas(id) {
+  state.data.tugas = state.data.tugas.filter(t => t.id !== id);
+  state.data.pengumpulan = state.data.pengumpulan.filter(p => p.tugas_id !== id);
+  saveData(); closeModal(); toast('Tugas dihapus', 'success'); navigateGuru('tugas-materi');
+}
+function openEditTugasModal(id) {
+  const t = state.data.tugas.find(x => x.id === id); if (!t) return;
+  showModal(`
+    <h3 class="text-xl font-bold text-gray-800 mb-1">Edit Tugas</h3>
+    <form onsubmit="submitEditTugas(event, '${id}')" class="space-y-4 mt-4">
+      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Judul Tugas *</label><input id="et_judul" type="text" class="input-field" value="${t.judul}" required></div>
+      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deskripsi / Soal *</label><textarea id="et_deskripsi" class="input-field" rows="4" required>${t.deskripsi}</textarea></div>
+      <div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Deadline *</label><input id="et_deadline" type="date" class="input-field" value="${t.deadline}" required></div>
+      <div class="flex gap-3 pt-2"><button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan</button></div>
+    </form>
+  `);
+}
+function submitEditTugas(e, id) {
+  e.preventDefault();
+  const t = state.data.tugas.find(x => x.id === id); if(!t) return;
+  t.judul = document.getElementById('et_judul').value.trim();
+  t.deskripsi = document.getElementById('et_deskripsi').value.trim();
+  t.deadline = document.getElementById('et_deadline').value;
+  saveData(); addLog('Edit Tugas', `Guru mengubah tugas`);
+  closeModal(); toast('Tugas berhasil diperbarui', 'success'); navigateGuru('tugas-materi');
 }
 
 function viewSubmissions(tugasId) {
@@ -866,7 +990,8 @@ function renderSantriMateri() {
         ${state.data.materi.length > 0 ? state.data.materi.map(m => `
           <div class="p-5 border border-stone-200 rounded-xl bg-emerald-50/50">
             <h4 class="font-bold text-gray-800 text-lg">${m.judul}</h4>
-            <p class="text-sm text-gray-600 mt-2 whitespace-pre-wrap">${m.deskripsi}</p>
+            ${m.deskripsi ? `<p class="text-sm text-gray-600 mt-2 whitespace-pre-wrap">${m.deskripsi}</p>` : ''}
+            ${m.file_name ? `<a href="${m.file_data}" download="${m.file_name}" target="_blank" class="mt-3 inline-flex items-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg font-semibold"><i data-lucide="download" style="width:16px;height:16px"></i> ${m.file_name}</a>` : ''}
             <div class="mt-3 pt-3 border-t border-stone-200 text-xs text-gray-500">Diberikan pada: ${m.tanggal}</div>
           </div>
         `).join('') : '<div class="col-span-full text-center py-16 text-gray-400"><i data-lucide="library" style="width:48px;height:48px" class="mx-auto mb-3"></i><p>Belum ada materi.</p></div>'}
@@ -926,7 +1051,6 @@ function openUploadTugasModal(tugasId) {
   `);
 }
 
-// Fungsi cek foto buram pakai AI sederhana (Laplacian Variance)
 function checkImageBlurry(base64Str) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -968,7 +1092,7 @@ function checkImageBlurry(base64Str) {
           }
         }
         const variance = sum / count;
-        resolve(variance < 15); // Threshold blur
+        resolve(variance < 15);
       } catch (e) {
         resolve(false);
       }
@@ -1033,7 +1157,6 @@ async function submitUploadTugas(e, tugasId) {
   reader.readAsDataURL(file);
 }
 
-// ===== DASBOARD & LAINNYA =====
 function renderPendaftaranPage() {
   return `
     <div class="grid lg:grid-cols-2 gap-6 mb-6">
@@ -1461,7 +1584,7 @@ function renderAdminAkunSantri() {
   let list = state.data.santri; 
   if (search) list = list.filter(s => s.nama.toLowerCase().includes(search) || s.nis.toLowerCase().includes(search)); 
   const pendingHtml = state.data.pendingSantri.length > 0 ? `<div class="card p-6 mb-5 border-l-4 border-amber-500"><h3 class="font-bold text-gray-800 text-lg mb-1">Persetujuan Pendaftaran Manual (${state.data.pendingSantri.length})</h3><div class="space-y-3 mt-4">${state.data.pendingSantri.map(p => { const g = getGuru(p.guru_id); return `<div class="flex items-center gap-4 p-3 border border-amber-200 bg-amber-50 rounded-xl"><div class="avatar-circle w-10 h-10 text-sm" style="background:${p.gender==='L'?'#0f5c4a':'#c89844'}">${p.nama.charAt(0)}</div><div class="flex-1 min-w-0"><p class="font-semibold text-gray-800">${p.nama}</p><p class="text-xs text-gray-500">Kelas: ${p.kelas} • Guru: ${g?.nama || '-'}</p></div><div class="flex gap-2"><button onclick="approveSantri('${p.id}')" class="text-xs btn-primary px-3 py-1.5 rounded-lg font-semibold">Setujui</button><button onclick="rejectSantri('${p.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold">Tolak</button></div></div>`; }).join('')}</div></div>` : '';
-  return `${pendingHtml}<div class="card p-5 mb-5"><div class="flex items-center justify-between flex-wrap gap-3"><div><h3 class="font-bold text-gray-800 text-lg">Daftar Akun Santri (${state.data.santri.length})</h3><p class="text-sm text-gray-500">Lihat dan edit akun santri</p></div><button onclick="openAddSantriModal()" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="user-plus" style="width:16px;height:16px"></i> Tambah Manual</button></div><div class="mt-4"><div class="relative"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" style="width:18px;height:18px"></i><input type="text" placeholder="Cari nama atau NIS..." value="${state._adminSantriSearch||''}" oninput="state._adminSantriSearch=this.value; document.getElementById('adminMain').innerHTML=renderAdminAkunSantri(); lucide.createIcons();" class="input-field pl-10"></div></div></div><div class="card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-stone-50 border-b border-stone-200"><tr class="text-left text-xs text-gray-600 uppercase tracking-wider"><th class="px-4 py-3 font-semibold">Santri</th><th class="px-4 py-3 font-semibold">Username (NIS)</th><th class="px-4 py-3 font-semibold">Guru Wali</th><th class="px-4 py-3 font-semibold text-center">Aksi</th></tr></thead><tbody>${list.length > 0 ? list.map(s => { const acc = state.data.accounts.santri.find(a => a.santri_id === s.id); const g = getGuru(s.guru_id); return `<tr class="table-row border-b border-stone-100"><td class="px-4 py-3"><div class="flex items-center gap-2"><div class="avatar-circle w-8 h-8 text-[10px]" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><div><p class="font-semibold text-gray-800">${s.nama}</p><p class="text-[10px] text-gray-500">${s.kelas}</p></div></div></td><td class="px-4 py-3"><code class="font-mono text-xs font-bold text-gray-800">${acc?.username || s.nis}</code></td><td class="px-4 py-3 text-xs text-gray-600">${g?.nama || '-'}</td><td class="px-4 py-3 text-center"><button onclick="openEditSantriModal('${s.id}')" class="text-xs btn-royal px-3 py-1.5 rounded-lg font-semibold">Edit Data</button></td></tr>`; }).join('') : '<tr><td colspan="4" class="py-12 text-center text-gray-400"><p>Belum ada santri.</p></td></tr>'}</tbody></table></div></div>`;
+  return `${pendingHtml}<div class="card p-5 mb-5"><div class="flex items-center justify-between flex-wrap gap-3"><div><h3 class="font-bold text-gray-800 text-lg">Daftar Akun Santri (${state.data.santri.length})</h3><p class="text-sm text-gray-500">Lihat dan edit akun santri</p></div><button onclick="openAddSantriModal()" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="user-plus" style="width:16px;height:16px"></i> Tambah Manual</button></div><div class="mt-4"><div class="relative"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" style="width:18px;height:18px"></i><input type="text" placeholder="Cari nama atau NIS..." value="${state._adminSantriSearch||''}" oninput="state._adminSantriSearch=this.value; document.getElementById('adminMain').innerHTML=renderAdminAkunSantri(); lucide.createIcons();" class="input-field pl-10"></div></div></div><div class="card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-stone-50 border-b border-stone-200"><tr class="text-left text-xs text-gray-600 uppercase tracking-wider"><th class="px-4 py-3 font-semibold">Santri</th><th class="px-4 py-3 font-semibold">Username (NIS)</th><th class="px-4 py-3 font-semibold">Guru Wali</th><th class="px-4 py-3 font-semibold text-center">Aksi</th></tr></thead><tbody>${list.length > 0 ? list.map(s => { const acc = state.data.accounts.santri.find(a => a.santri_id === s.id); const g = getGuru(s.guru_id); return `<tr class="table-row border-b border-stone-100"><td class="px-4 py-3"><div class="flex items-center gap-2"><div class="avatar-circle w-8 h-8 text-[10px]" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><div><p class="font-semibold text-gray-800">${s.nama}</p><p class="text-[10px] text-gray-500">${s.kelas}</p></div></div></td><td class="px-4 py-3"><code class="font-mono text-xs font-bold text-gray-800">${acc?.username || s.nis}</code></td><td class="px-4 py-3 text-xs text-gray-600">${g?.nama || '-'}</td><td class="px-4 py-3 text-center"><div class="flex gap-2 justify-center"><button onclick="openEditSantriModal('${s.id}')" class="text-xs btn-royal px-3 py-1.5 rounded-lg font-semibold">Edit Data</button><button onclick="deleteSantriAdmin('${s.id}')" class="text-xs btn-danger px-3 py-1.5 rounded-lg font-semibold">Hapus</button></div></td></tr>`; }).join('') : '<tr><td colspan="4" class="py-12 text-center text-gray-400"><p>Belum ada santri.</p></td></tr>'}</tbody></table></div></div>`;
 }
 function renderAdminPengaturan() { 
   const s = state.data.settings; 
@@ -1500,6 +1623,20 @@ function confirmDeleteGuru(guruId) {
   state.data.santri.forEach(s => { if (s.guru_id === guruId) s.guru_id = null; });
   saveData(); addLog('Hapus Data Guru', `Guru ${guru?.nama || guruId} dihapus.`);
   closeModal(); toast('Data guru berhasil dihapus', 'success'); navigateAdmin('akun-guru');
+}
+function deleteSantriAdmin(sid) {
+  const s = getSantri(sid); if(!s) return;
+  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Hapus Data Santri</h3><p class="text-sm text-gray-500 mb-5">Yakin ingin menghapus santri: <strong>${s.nama}</strong>? Semua data tagihan & pembayarannya akan ikut terhapus.</p><div class="flex gap-3 pt-2"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmDeleteSantriAdmin('${sid}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Ya, Hapus</button></div>`);
+}
+function confirmDeleteSantriAdmin(sid) {
+  const s = getSantri(sid); if(!s) return;
+  state.data.santri = state.data.santri.filter(x => x.id !== sid);
+  state.data.accounts.santri = state.data.accounts.santri.filter(x => x.santri_id !== sid);
+  state.data.tagihan = state.data.tagihan.filter(x => x.santri_id !== sid);
+  state.data.pembayaran = state.data.pembayaran.filter(x => x.santri_id !== sid);
+  state.data.pengumpulan = state.data.pengumpulan.filter(x => x.santri_id !== sid);
+  saveData(); addLog('Hapus Data Santri', `Admin menghapus santri ${s.nama}`);
+  closeModal(); toast('Data santri berhasil dihapus', 'success'); navigateAdmin('akun-santri');
 }
 function openEditGuruAccountModal() { 
   const acc = state.data.accounts.guru; 
@@ -1555,7 +1692,20 @@ function submitAddSantri(e) {
     document.getElementById('as_guru_id').value, false
   );
   addLog('Tambah Santri', `Admin menambahkan santri ${result.nis}`);
-  saveData(); closeModal(); toast('Santri berhasil ditambahkan', 'success'); navigateAdmin('akun-santri');
+  saveData(); closeModal(); 
+  showModal(`
+    <div class="text-center py-4">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-4"><i data-lucide="check-circle" class="text-emerald-600" style="width:32px;height:32px"></i></div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">Santri Berhasil Ditambahkan!</h3>
+      <div class="bg-stone-50 border border-stone-200 rounded-xl p-4 mt-4 text-left text-sm">
+        <p class="text-gray-600">Username: <span class="font-bold text-gray-800 font-mono">${result.nis}</span></p>
+        <p class="text-gray-600">Password: <span class="font-bold text-gray-800 font-mono">santri123</span></p>
+      </div>
+      <p class="text-xs text-gray-500 mt-3">Gunakan NIS dan password di atas untuk login di Panel Santri.</p>
+      <button onclick="closeModal(); navigateAdmin('akun-santri');" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Selesai</button>
+    </div>
+  `);
+  lucide.createIcons();
 }
 function saveSettings(e) { 
   e.preventDefault(); 
@@ -1643,7 +1793,6 @@ function initGuruQRCode() {
 function generateQRCode(elementId, text, size) { const el = document.getElementById(elementId); if (!el) return; el.innerHTML = ''; try { new QRCode(el, { text: text, width: size, height: size, colorDark: '#0a3d31', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H }); } catch(e) { el.innerHTML = `<div class="bg-stone-100 rounded-xl flex items-center justify-center text-xs text-gray-400" style="width:${size}px;height:${size}px">QR Error</div>`; } }
 function downloadQR(elementId, fileName) { const canvas = document.querySelector(`#${elementId} canvas`); if (!canvas) { toast('QR Code belum siap', 'error'); return; } const link = document.createElement('a'); link.download = `${fileName}.png`; link.href = canvas.toDataURL(); link.click(); toast('QR Code berhasil diunduh', 'success'); }
 
-// ===== INISIALISASI SISTEM =====
 loadData(); 
 showSplash(); 
 updateClock(); 
