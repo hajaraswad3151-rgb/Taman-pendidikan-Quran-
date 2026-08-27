@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TPQ — Sistem Administrasi & Pembayaran</title>
+<title>Toggle.Ai — Proses Belajar & Mengajar</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -56,19 +56,19 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <div class="relative z-10 max-w-5xl w-full">
 <div class="text-center mb-10 animate-fade-up">
 <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-white/10 backdrop-blur border border-white/20 mb-6"><span class="text-4xl font-black text-amber-300 tracking-widest">TPQ</span></div>
-<h1 class="text-3xl md:text-5xl font-black text-white mb-3">Taman Pendidikan<br>Al-Qur'an</h1>
-<p class="text-amber-200/90 text-lg md:text-xl font-medium">Sistem Administrasi & Pembayaran</p>
+<h1 class="text-3xl md:text-5xl font-black text-white mb-3">Taman Pendidikan<br>Proses Belajar</h1>
+<p class="text-amber-200/90 text-lg md:text-xl font-medium">Proses Belajar & Mengajar</p>
 <p class="text-emerald-100/60 text-sm mt-2 font-arabic text-xl">بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
 </div>
 <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
 <button onclick="goToLogin('guru')" class="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-300 rounded-2xl p-5 text-left animate-fade-up"><i data-lucide="graduation-cap" class="text-amber-300 mb-3" style="width:24px;height:24px"></i><h3 class="text-white font-bold text-base mb-1">Login Guru</h3><p class="text-emerald-100/70 text-xs">Masuk untuk Pengajar</p></button>
-<button onclick="goToLogin('santri')" class="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-300 rounded-2xl p-5 text-left animate-fade-up" style="animation-delay:.2s"><i data-lucide="book-open" class="text-emerald-300 mb-3" style="width:24px;height:24px"></i><h3 class="text-white font-bold text-base mb-1">Login Santri</h3><p class="text-emerald-100/70 text-xs">Masuk untuk Wali/Santri</p></button>
+<button onclick="goToLogin('Murid')" class="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-300 rounded-2xl p-5 text-left animate-fade-up" style="animation-delay:.2s"><i data-lucide="book-open" class="text-emerald-300 mb-3" style="width:24px;height:24px"></i><h3 class="text-white font-bold text-base mb-1">Login Santri</h3><p class="text-emerald-100/70 text-xs">Masuk untuk Wali/Santri</p></button>
 <button onclick="showRegisterChoiceModal()" class="bg-gradient-to-br from-amber-500/20 to-amber-600/10 backdrop-blur-md border border-amber-400/30 hover:bg-amber-500/25 transition-all duration-300 rounded-2xl p-5 text-left animate-fade-up pulse-qr" style="animation-delay:.3s"><i data-lucide="qr-code" class="text-amber-200 mb-3" style="width:24px;height:24px"></i><h3 class="text-white font-bold text-base mb-1">Daftar Santri Baru</h3><p class="text-emerald-100/70 text-xs">Via Kamera QR / Manual</p></button>
 <button onclick="goToRegister('guru')" class="bg-gradient-to-br from-emerald-500/20 to-emerald-700/10 backdrop-blur-md border border-emerald-400/30 hover:bg-emerald-500/25 transition-all duration-300 rounded-2xl p-5 text-left animate-fade-up" style="animation-delay:.4s"><i data-lucide="user-plus" class="text-emerald-200 mb-3" style="width:24px;height:24px"></i><h3 class="text-white font-bold text-base mb-1">Daftar Guru Baru</h3><p class="text-emerald-100/70 text-xs">Daftarkan diri Anda</p></button>
 </div>
 <div class="mt-10 text-emerald-100/40 text-xs animate-fade-up text-center" style="animation-delay:.5s">
-<button onclick="goToLogin('admin')" class="text-amber-300 hover:underline font-bold mb-2">Login Administrasi (Owner) →</button>
-<p>Dimiliki & Dikelola oleh: <strong class="text-amber-300">Penggunaan Aplikasi</strong></p>
+<button onclick="goToLogin('admin')" class="text-amber-300 hover:underline font-bold mb-2">(Owner) →</button>
+<p>Dimiliki & Dikelola oleh: <strong class="text-amber-300">Pusat Kurikulum</strong></p>
 </div>
 </div>
 </div>
@@ -79,10 +79,10 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <div class="text-center mb-8">
 <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" id="loginIcon" style="background:linear-gradient(135deg,#0f5c4a,#1a8a6e)"><i data-lucide="graduation-cap" class="text-white" style="width:32px;height:32px"></i></div>
 <h2 id="loginTitle" class="text-2xl font-black text-gray-800">Login Guru</h2>
-<p id="loginSubtitle" class="text-sm text-gray-500 mt-1">Masuk sebagai pengelola TPQ</p>
+<p id="loginSubtitle" class="text-sm text-gray-500 mt-1">Masuk sebagai pengelola Admin</p>
 </div>
 <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-<div><label class="block text-sm font-semibold text-gray-700 mb-1.5" id="lblUsername">Username / Email / WhatsApp</label><input id="loginUsername" type="text" class="input-field" placeholder="Masukkan Username / Email / WA" required></div>
+<div><label class="block text-sm font-semibold text-gray-700 mb-1.5" id="lblUsername">Username</label><input id="loginUsername" type="text" class="input-field" placeholder="Masukkan Username / Email / WA" required></div>
 <div><label class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label><div class="relative"><input id="loginPassword" type="password" class="input-field pr-10" placeholder="Masukkan password" required><button type="button" onclick="togglePassword('loginPassword',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i data-lucide="eye" style="width:18px;height:18px"></i></button></div></div>
 <div id="loginError" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3"></div>
 <button type="submit" class="btn-primary w-full py-3 rounded-xl font-semibold text-base">Masuk</button>
@@ -109,9 +109,9 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <div class="px-3 mb-2 text-xs font-bold text-emerald-100/40 uppercase tracking-wider">Menu Utama</div>
 <a class="nav-item active flex items-center gap-3 px-5 py-3 text-sm" data-page="dashboard" onclick="navigateGuru('dashboard')"><i data-lucide="layout-dashboard" style="width:18px;height:18px"></i> Dashboard</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="absensi" onclick="navigateGuru('absensi')"><i data-lucide="scan-face" style="width:18px;height:18px"></i> Absensi Masuk Guru</a>
-<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="absensi-santri" onclick="navigateGuru('absensi-santri')"><i data-lucide="user-check" style="width:18px;height:18px"></i> Absensi Kehadiran Santri</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="absensi-santri" onclick="navigateGuru('absensi-Murid')"><i data-lucide="user-check" style="width:18px;height:18px"></i> Absensi Kehadiran Santri</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="pendaftaran" onclick="navigateGuru('pendaftaran')"><i data-lucide="qr-code" style="width:18px;height:18px"></i> Pendaftaran Santri</a>
-<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="santri" onclick="navigateGuru('santri')"><i data-lucide="users" style="width:18px;height:18px"></i> Daftar Santri</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="murid" onclick="navigateGuru('santri')"><i data-lucide="users" style="width:18px;height:18px"></i> Daftar Santri</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="setoran" onclick="navigateGuru('setoran')"><i data-lucide="notebook-pen" style="width:18px;height:18px"></i> Buku Setoran</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="kontrol" onclick="navigateGuru('kontrol')"><i data-lucide="clipboard-list" style="width:18px;height:18px"></i> Kartu Kontrol</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="pembayaran" onclick="navigateGuru('pembayaran')"><i data-lucide="wallet" style="width:18px;height:18px"></i> Pembayaran</a>
@@ -133,19 +133,19 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <div class="p-5 border-b border-white/10"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center"><span class="text-amber-300 text-xs font-black">TPQ</span></div><div><h1 class="text-white font-bold text-[13px] leading-tight">Taman Pendidikan<br>Al-Qur'an</h1><p class="text-emerald-100/50 text-xs">Panel Santri</p></div></div></div>
 <nav class="flex-1 overflow-y-auto py-4">
 <div class="px-3 mb-2 text-xs font-bold text-emerald-100/40 uppercase tracking-wider">Menu Saya</div>
-<a class="nav-item active flex items-center gap-3 px-5 py-3 text-sm" data-page="beranda" onclick="navigateSantri('beranda')"><i data-lucide="home" style="width:18px;height:18px"></i> Beranda</a>
-<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="materi" onclick="navigateSantri('materi')"><i data-lucide="library" style="width:18px;height:18px"></i> Materi</a>
-<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="tugas" onclick="navigateSantri('tugas')"><i data-lucide="pencil-ruler" style="width:18px;height:18px"></i> Tugas</a>
-<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="ujian" onclick="navigateSantri('ujian')"><i data-lucide="file-pen-line" style="width:18px;height:18px"></i> Ujian Santri</a>
-<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="kontrol" onclick="navigateSantri('kontrol')"><i data-lucide="clipboard-list" style="width:18px;height:18px"></i> Kartu Kontrol</a>
-<a class="nav-item flex items-center justify-between px-5 py-3 text-sm" data-page="meeting" onclick="navigateSantri('meeting')"><div class="flex items-center gap-3"><i data-lucide="video" style="width:18px;height:18px"></i> Room Meeting</div><span class="meeting-badge text-xs px-2 py-0.5 rounded-full font-bold hidden"></span></a>
-<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="profil" onclick="navigateSantri('profil')"><i data-lucide="user" style="width:18px;height:18px"></i> Profil Saya</a>
+<a class="nav-item active flex items-center gap-3 px-5 py-3 text-sm" data-page="beranda" onclick="navigateMurid('beranda')"><i data-lucide="home" style="width:18px;height:18px"></i> Beranda</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="materi" onclick="navigateMurid('materi')"><i data-lucide="library" style="width:18px;height:18px"></i> Materi</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="tugas" onclick="navigateMurid('tugas')"><i data-lucide="pencil-ruler" style="width:18px;height:18px"></i> Tugas</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="ujian" onclick="navigateMurid('ujian')"><i data-lucide="file-pen-line" style="width:18px;height:18px"></i> Ujian Murid</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="kontrol" onclick="navigateMurid('kontrol')"><i data-lucide="clipboard-list" style="width:18px;height:18px"></i> Kartu Kontrol</a>
+<a class="nav-item flex items-center justify-between px-5 py-3 text-sm" data-page="meeting" onclick="navigateMurid('meeting')"><div class="flex items-center gap-3"><i data-lucide="video" style="width:18px;height:18px"></i> Room Meeting</div><span class="meeting-badge text-xs px-2 py-0.5 rounded-full font-bold hidden"></span></a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="profil" onclick="navigateMurid('profil')"><i data-lucide="user" style="width:18px;height:18px"></i> Profil Saya</a>
 </nav>
-<div class="p-4 border-t border-white/10"><div class="flex items-center gap-3 mb-3"><div id="santriAvatar" class="w-10 h-10 rounded-full bg-emerald-400/30 border border-emerald-400/40 flex items-center justify-center text-emerald-200 font-bold text-sm">S</div><div class="flex-1 min-w-0"><p id="santriName" class="text-white text-sm font-semibold truncate">Santri</p><p id="santriKelasBadge" class="text-emerald-100/50 text-xs">Kelas</p></div></div><button onclick="logout()" class="w-full text-xs text-red-300 hover:text-red-200 border border-red-400/20 hover:border-red-400/40 rounded-lg py-2 flex items-center justify-center gap-1.5"><i data-lucide="log-out" style="width:14px;height:14px"></i> Keluar</button></div>
+<div class="p-4 border-t border-white/10"><div class="flex items-center gap-3 mb-3"><div id="santriAvatar" class="w-10 h-10 rounded-full bg-emerald-400/30 border border-emerald-400/40 flex items-center justify-center text-emerald-200 font-bold text-sm">S</div><div class="flex-1 min-w-0"><p id="santriName" class="text-white text-sm font-semibold truncate">Santri</p><p id="santriKelasBadge" class="text-emerald-100/50 text-xs">Kelas</p></div></div><button onclick="logout()" class="w-full text-xs text-red-300 hover:text-red-200 border border-red-400/20 hover:border-red-400/40 rounded-lg py-2 flex items-center justify-center gap-1.5"><i data-lucide="log-out" style="width:14px;height:14px"></i> Closed</button></div>
 </aside>
 <div class="md:ml-64 min-h-screen">
 <header class="bg-white/80 backdrop-blur-md border-b border-stone-200 sticky top-0 z-30"><div class="flex items-center justify-between px-6 py-3"><div class="flex items-center gap-3"><button onclick="toggleSidebar('santri')" class="md:hidden text-gray-600"><i data-lucide="menu" style="width:24px;height:24px"></i></button><div><h2 id="santriPageTitle" class="font-bold text-gray-800 text-lg">Beranda</h2><p id="santriPageSubtitle" class="text-xs text-gray-500">Informasi pembayaran</p></div></div><div class="flex items-center gap-3"><div onclick="openCalendarModal()" class="hidden md:flex items-center gap-2 text-sm text-gray-600 cursor-pointer time-pill-light px-3 py-1.5 rounded-lg"><i data-lucide="clock" style="width:16px;height:16px" class="text-emerald-600"></i><span id="currentTimeSantri" class="font-mono font-bold text-gray-800">00:00:00</span><span class="text-stone-300">|</span><i data-lucide="calendar-days" style="width:16px;height:16px" class="text-amber-600"></i><span id="currentDateSantri" class="text-xs font-semibold text-gray-700">Tanggal</span></div><div id="meetingStatusSantri" onclick="navigateSantri('meeting')" class="hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg font-bold transition-colors"></div><button onclick="reloadApp('santri')" class="flex items-center gap-2 text-sm text-emerald-700 cursor-pointer time-pill-light px-3 py-1.5 rounded-lg font-semibold"><i data-lucide="refresh-cw" style="width:16px;height:16px"></i> Reload</button></div></div></header>
-<main class="p-6" id="santriMain"></main>
+<main class="p-6" id="muridMain"></main>
 </div>
 </div>
 
@@ -158,7 +158,7 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="monitor-ai" onclick="navigateAdmin('monitor-ai')"><i data-lucide="bot" style="width:18px;height:18px"></i> Monitor.Ai</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="absensi-guru" onclick="navigateAdmin('absensi-guru')"><i data-lucide="scan-face" style="width:18px;height:18px"></i> Absensi Guru</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="akun-guru" onclick="navigateAdmin('akun-guru')"><i data-lucide="graduation-cap" style="width:18px;height:18px"></i> Akun Guru</a>
-<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="akun-santri" onclick="navigateAdmin('akun-santri')"><i data-lucide="users" style="width:18px;height:18px"></i> Akun Santri</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="akun-murid" onclick="navigateAdmin('akun-murid')"><i data-lucide="users" style="width:18px;height:18px"></i> Akun Murid</a>
 <a class="nav-item flex items-center justify-between px-5 py-3 text-sm" data-page="meeting" onclick="navigateAdmin('meeting')"><div class="flex items-center gap-3"><i data-lucide="video" style="width:18px;height:18px"></i> Room Meeting</div><span class="meeting-badge text-xs px-2 py-0.5 rounded-full font-bold hidden"></span></a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="storage" onclick="navigateAdmin('storage')"><i data-lucide="database" style="width:18px;height:18px"></i> Upgrade Penyimpanan</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="pengaturan" onclick="navigateAdmin('pengaturan')"><i data-lucide="settings" style="width:18px;height:18px"></i> Pengaturan</a>
@@ -188,12 +188,12 @@ function loadData(){
         if(s){
             state.data=JSON.parse(s);
             if(!state.data.accounts)state.data.accounts={};
-            if(!state.data.accounts.admin)state.data.accounts.admin={username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'};
+            if(!state.data.accounts.admin)state.data.accounts.admin={username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'08197336842585'};
             if(!state.data.accounts.guru)state.data.accounts.guru={username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'};
-            if(!state.data.accounts.santri)state.data.accounts.santri=[];
+            if(!state.data.accounts.murid)state.data.accounts.murid=[];
             if(!state.data.guru)state.data.guru=[];
-            if(!state.data.santri)state.data.santri=[];
-            if(!state.data.pendingSantri)state.data.pendingSantri=[];
+            if(!state.data.santri)state.data.murid=[];
+            if(!state.data.pendingSantri)state.data.pendingMurid=[];
             if(!state.data.tagihan)state.data.tagihan=[];
             if(!state.data.pembayaran)state.data.pembayaran=[];
             if(!state.data.tugas)state.data.tugas=[];
@@ -205,15 +205,15 @@ function loadData(){
             if(!state.data.examSubmissions)state.data.examSubmissions=[];
             if(!state.data.meetings)state.data.meetings=[];
             if(!state.data.absensiGuru)state.data.absensiGuru=[];
-            if(!state.data.absensiSantri)state.data.absensiSantri=[];
+            if(!state.data.absensiSantri)state.data.absensiMurid=[];
             if(!state.data.setoran)state.data.setoran={};
             if(!state.data.irapor)state.data.irapor={};
             if(!state.data.certificates)state.data.certificates=[];
             if(!state.data.logs)state.data.logs=[];
-            if(!state.data.settings)state.data.settings={namaTPQ:'TPQ/TPA Al-Hidayah',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2024/2025',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5};
+            if(!state.data.settings)state.data.settings={namaTPQ:'Toggle.ai',alamatTPQ:'Jl.Hartaco Indah',teleponTPQ:'+62 819-2794-5422',tahunAjaran:'2026/2030',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5};
             if(!state.data.liveMeeting)state.data.liveMeeting={active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]};
-            if(state.data.santri){
-                state.data.santri.forEach(s=>{
+            if(state.data.murid){
+                state.data.Murid.forEach(s=>{
                     if(!s.approval_status)s.approval_status='pending';
                     if(!s.approval_date)s.approval_date=null;
                     if(!s.approval_note)s.approval_note='';
@@ -227,7 +227,7 @@ function loadData(){
 }
 
 function initFresh(){
-    state.data={guru:[],santri:[],pendingSantri:[],tagihan:[],pembayaran:[],tugas:[],materi:[],pengumpulan:[],materiSubs:[],notes:[],exams:[],examSubmissions:[],meetings:[],absensiGuru:[],absensiSantri:[],setoran:{},irapor:{},certificates:[],accounts:{admin:{username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'},guru:{username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'},santri:[]},logs:[{id:'l1',waktu:'01 Agu 2024 08:00',aktor:'Monitor.Ai',aksi:'Sistem Inisialisasi',detail:'Sistem dimulai'}],settings:{namaTPQ:'TPQ/TPA Al-Hidayah',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2024/2025',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5},liveMeeting:{active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]}};
+    state.data={guru:[],murid:[],pendingMurid:[],tagihan:[],pembayaran:[],tugas:[],materi:[],pengumpulan:[],materiSubs:[],notes:[],exams:[],examSubmissions:[],meetings:[],absensiGuru:[],absensiSantri:[],setoran:{},irapor:{},certificates:[],accounts:{admin:{username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'},guru:{username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'},santri:[]},logs:[{id:'l1',waktu:'01 Agu 2024 08:00',aktor:'Monitor.Ai',aksi:'Sistem Inisialisasi',detail:'Sistem dimulai'}],settings:{namaTPQ:'TPQ/TPA Al-Hidayah',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2026/2030',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5},liveMeeting:{active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]}};
     saveData();
 }
 
@@ -237,11 +237,11 @@ function formatRupiah(n){return 'Rp ' + (Number(n)||0).toLocaleString('id-ID');}
 function getGuru(id){return state.data.guru.find(g=>g.id===id)}
 function getSantri(id){return state.data.santri.find(s=>s.id===id)}
 function getTagihanSantri(sid){return state.data.tagihan.filter(t=>t.santri_id===sid)}
-function getPembayaranSantri(sid){return state.data.pembayaran.filter(p=>p.santri_id===sid).sort((a,b)=>b.tanggal.localeCompare(a.tanggal))}
+function getPembayaranSantri(sid){return state.data.pembayaran.filter(p=>p.murid_id===sid).sort((a,b)=>b.tanggal.localeCompare(a.tanggal))}
 
 function getGuruSantriScope(){
     if(!state.currentUser)return [];
-    if(state.currentUser.role==='admin'&&state.currentUser.guruId===null)return state.data.santri;
+    if(state.currentUser.role==='admin'&&state.currentUser.guruId===null)return state.data.murid;
     if(state.currentUser.role==='guru'&&state.currentUser.guruId){
         return state.data.santri.filter(s=>s.guru_id===state.currentUser.guruId);
     }
@@ -576,11 +576,11 @@ function createSantriAcc(nama,tempat,tgl,ayah,ibu,alamat,guru_id,isPending){
         for(let i=0;i<6;i++){
             const m=(now.getMonth()+i)%12;
             const y=now.getFullYear()+Math.floor((now.getMonth()+i)/12);
-            state.data.tagihan.push({id:'tg'+Date.now()+'_'+i,santri_id:id,jenis:'SPP Bulanan',periode:`${bN[m]} ${y}`,nominal:50000,deadline:`${y}-${String(m+1).padStart(2,'0')}-15`,status:'belum'});
+            state.data.tagihan.push({id:'tg'+Date.now()+'_'+i,Murid_id:id,jenis:'SPP Bulanan',periode:`${bN[m]} ${y}`,nominal:25000,deadline:`${y}-${String(m+1).padStart(2,'0')}-15`,status:'belum'});
         }
-        state.data.tagihan.push({id:'tgr'+Date.now(),santri_id:id,jenis:'Pendaftaran',periode:'Sekali Bayar',nominal:100000,deadline:`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-30`,status:'belum'});
+        state.data.tagihan.push({id:'tgr'+Date.now(),santri_id:id,jenis:'Pendaftaran',periode:'Sekali Bayar',nominal:50000,deadline:`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-30`,status:'belum'});
     }
-    return{id,nis,password:'santri123'};
+    return{id,nis,password:'murid12'};
 }
 
 function showGuruApp(){
