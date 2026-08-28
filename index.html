@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
 :root{--bg:#f5f1e8;--bg-2:#ede6d3;--fg:#1a2e26;--muted:#6b7a72;--primary:#0f5c4a;--primary-dark:#0a3d31;--primary-light:#1a8a6e;--accent:#c89844;--card:#fff;--border:#d9d2c2;--danger:#b03a2e;--success:#1e8449;--warn:#d68910;--royal:#6b21a8;--royal-light:#9333ea}
@@ -47,6 +48,25 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 .video-tile video{width:100%;height:100%;object-fit:cover}
 .video-tile .name-tag{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.6);color:#fff;padding:2px 6px;border-radius:4px;font-size:10px}
 @media print { body * { visibility: hidden; } #printArea, #printArea * { visibility: visible; } #printArea { position: absolute; left: 0; top: 0; width: 100%; } }
+/* === Kartu Identitas Murid — Bunga Matahari Berfotosintesis + Batik === */
+.sunflower-card{position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 50%,#fde68a 100%);box-shadow:0 20px 50px -10px rgba(202,138,4,.35),0 0 0 3px rgba(202,138,4,.15) inset}
+.sunflower-card::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 50% 0%,rgba(245,158,11,.18) 0%,transparent 35%),radial-gradient(circle at 0% 100%,rgba(15,92,74,.10) 0%,transparent 30%),radial-gradient(circle at 100% 100%,rgba(107,33,168,.08) 0%,transparent 30%);pointer-events:none}
+.batik-pattern{background-color:#fef3c7;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='%23c89844' fill-opacity='0.12'%3E%3Cpath d='M30 5c5 0 9 4 9 9 0 5-4 9-9 9s-9-4-9-9c0-5 4-9 9-9zm0 4c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5z'/%3E%3Cpath d='M30 5l3 6-3 6-3-6 3-6z' opacity='0.5'/%3E%3Ccircle cx='30' cy='30' r='2' fill='%23c89844' fill-opacity='0.2'/%3E%3Cpath d='M5 30c5 0 9 4 9 9 0 5-4 9-9 9s-9-4-9-9c0-5 4-9 9-9z' opacity='0.3'/%3E%3Cpath d='M55 30c5 0 9 4 9 9 0 5-4 9-9 9s-9-4-9-9c0-5 4-9 9-9z' opacity='0.3'/%3E%3Cpath d='M5 30l3 6-3 6-3-6 3-6z' opacity='0.2'/%3E%3Cpath d='M55 30l3 6-3 6-3-6 3-6z' opacity='0.2'/%3E%3C/g%3E%3C/svg%3E")}
+.sunflower-petals{position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:280px;height:120px;pointer-events:none}
+.sunflower-petals svg{width:100%;height:100%}
+.sunflower-icon{display:inline-block;width:48px;height:48px;background:radial-gradient(circle,#78350f 0%,#92400e 30%,#fbbf24 32%,#f59e0b 70%,#fbbf24 100%);border-radius:50%;position:relative;box-shadow:0 0 20px rgba(245,158,11,.6)}
+.sunflower-icon::before,.sunflower-icon::after{content:'';position:absolute;inset:-8px;background:conic-gradient(from 0deg,#fbbf24 0deg 22.5deg,#f59e0b 22.5deg 45deg,#fbbf24 45deg 67.5deg,#f59e0b 67.5deg 90deg,#fbbf24 90deg 112.5deg,#f59e0b 112.5deg 135deg,#fbbf24 135deg 157.5deg,#f59e0b 157.5deg 180deg,#fbbf24 180deg 202.5deg,#f59e0b 202.5deg 225deg,#fbbf24 225deg 247.5deg,#f59e0b 247.5deg 270deg,#fbbf24 270deg 292.5deg,#f59e0b 292.5deg 315deg,#fbbf24 315deg 337.5deg,#f59e0b 337.5deg 360deg);border-radius:50%;z-index:-1;mask:radial-gradient(circle,transparent 50%,black 51%);-webkit-mask:radial-gradient(circle,transparent 50%,black 51%)}
+.sunflower-mini{width:24px;height:24px;background:radial-gradient(circle,#78350f 0%,#92400e 30%,#fbbf24 32%,#f59e0b 70%,#fbbf24 100%);border-radius:50%;position:relative;box-shadow:0 0 8px rgba(245,158,11,.6)}
+.sunflower-mini::before{content:'';position:absolute;inset:-4px;background:conic-gradient(from 0deg,#fbbf24 0deg 22.5deg,#f59e0b 22.5deg 45deg,#fbbf24 45deg 67.5deg,#f59e0b 67.5deg 90deg,#fbbf24 90deg 112.5deg,#f59e0b 112.5deg 135deg,#fbbf24 135deg 157.5deg,#f59e0b 157.5deg 180deg,#fbbf24 180deg 202.5deg,#f59e0b 202.5deg 225deg,#fbbf24 225deg 247.5deg,#f59e0b 247.5deg 270deg,#fbbf24 270deg 292.5deg,#f59e0b 292.5deg 315deg,#fbbf24 315deg 337.5deg,#f59e0b 337.5deg 360deg);border-radius:50%;z-index:-1;mask:radial-gradient(circle,transparent 50%,black 51%);-webkit-mask:radial-gradient(circle,transparent 50%,black 51%)}
+.leaf-deco{position:absolute;width:40px;height:60px;background:linear-gradient(135deg,#0f5c4a,#1a8a6e);border-radius:0 100% 0 100%;opacity:.7}
+.leaf-deco.left{top:50%;left:-12px;transform:translateY(-50%) rotate(-30deg)}
+.leaf-deco.right{top:50%;right:-12px;transform:translateY(-50%) rotate(210deg)}
+.barcode-area{background:#fff;border:2px solid #92400e;border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.barcode-area svg{display:block}
+.scan-barcode-frame{position:absolute;inset:15%;border:3px solid rgba(202,138,4,.9);border-radius:16px;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,.55)}
+.scan-barcode-frame::before,.scan-barcode-frame::after{content:'';position:absolute;width:30px;height:30px;border:5px solid #f59e0b}
+.scan-barcode-frame::before{top:-3px;left:-3px;border-right:none;border-bottom:none;border-radius:8px 0 0 0}
+.scan-barcode-frame::after{bottom:-3px;right:-3px;border-left:none;border-top:none;border-radius:0 0 8px 0}
 </style>
 </head>
 <body>
@@ -108,9 +128,11 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <div class="px-3 mb-2 text-xs font-bold text-emerald-100/40 uppercase tracking-wider">Menu Utama</div>
 <a class="nav-item active flex items-center gap-3 px-5 py-3 text-sm" data-page="dashboard" onclick="navigateGuru('dashboard')"><i data-lucide="layout-dashboard" style="width:18px;height:18px"></i> Dashboard</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="absensi" onclick="navigateGuru('absensi')"><i data-lucide="scan-face" style="width:18px;height:18px"></i> Absensi Masuk Guru</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="absensi-barcode" onclick="navigateGuru('absensi-barcode')"><i data-lucide="scan-barcode" style="width:18px;height:18px"></i> Absensi Barcode Murid</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="absensi-santri" onclick="navigateGuru('absensi-santri')"><i data-lucide="user-check" style="width:18px;height:18px"></i> Absensi Kehadiran Murid</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="pendaftaran" onclick="navigateGuru('pendaftaran')"><i data-lucide="qr-code" style="width:18px;height:18px"></i> Pendaftaran Murid</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="santri" onclick="navigateGuru('santri')"><i data-lucide="users" style="width:18px;height:18px"></i> Daftar Murid</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="jadwal" onclick="navigateGuru('jadwal')"><i data-lucide="calendar-clock" style="width:18px;height:18px"></i> Jadwal</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="setoran" onclick="navigateGuru('setoran')"><i data-lucide="notebook-pen" style="width:18px;height:18px"></i> Buku Setoran</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="kontrol" onclick="navigateGuru('kontrol')"><i data-lucide="clipboard-list" style="width:18px;height:18px"></i> Kartu Kontrol</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="pembayaran" onclick="navigateGuru('pembayaran')"><i data-lucide="wallet" style="width:18px;height:18px"></i> Pembayaran</a>
@@ -134,6 +156,8 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <nav class="flex-1 overflow-y-auto py-4">
 <div class="px-3 mb-2 text-xs font-bold text-emerald-100/40 uppercase tracking-wider">Menu Saya</div>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="beranda" onclick="navigateSantri('beranda')"><i data-lucide="home" style="width:18px;height:18px"></i> Beranda</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="kartu" onclick="navigateSantri('kartu')"><i data-lucide="id-card" style="width:18px;height:18px"></i> Kartu Identitas Murid</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="jadwal" onclick="navigateSantri('jadwal')"><i data-lucide="calendar-clock" style="width:18px;height:18px"></i> Jadwal</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="absensi" onclick="navigateSantri('absensi')"><i data-lucide="scan-face" style="width:18px;height:18px"></i> Absensi Wajah</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="materi" onclick="navigateSantri('materi')"><i data-lucide="library" style="width:18px;height:18px"></i> Materi</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="tugas" onclick="navigateSantri('tugas')"><i data-lucide="pencil-ruler" style="width:18px;height:18px"></i> Tugas</a>
@@ -158,6 +182,7 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <a class="nav-item active flex items-center gap-3 px-5 py-3 text-sm" data-page="dashboard" onclick="navigateAdmin('dashboard')"><i data-lucide="layout-dashboard" style="width:18px;height:18px"></i> Dashboard</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="monitor-ai" onclick="navigateAdmin('monitor-ai')"><i data-lucide="bot" style="width:18px;height:18px"></i> Monitor.Ai</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="absensi-guru" onclick="navigateAdmin('absensi-guru')"><i data-lucide="scan-face" style="width:18px;height:18px"></i> Absensi Guru</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="absensi-barcode" onclick="navigateAdmin('absensi-barcode')"><i data-lucide="scan-barcode" style="width:18px;height:18px"></i> Absensi Barcode Murid</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="akun-guru" onclick="navigateAdmin('akun-guru')"><i data-lucide="graduation-cap" style="width:18px;height:18px"></i> Akun Guru</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="akun-santri" onclick="navigateAdmin('akun-santri')"><i data-lucide="users" style="width:18px;height:18px"></i> Akun Murid</a>
 <a class="nav-item flex items-center justify-between px-5 py-3 text-sm" data-page="meeting" onclick="navigateAdmin('meeting')"><div class="flex items-center gap-3"><i data-lucide="video" style="width:18px;height:18px"></i> Room Meeting</div><span class="meeting-badge text-xs px-2 py-0.5 rounded-full font-bold hidden"></span></a>
@@ -183,8 +208,8 @@ const METODE_PEMBAYARAN=['Tunai','Transfer Bank (BSI)','Transfer Bank (BNI)','Tr
 let state={currentUser:null,currentRole:null,guruPage:'dashboard',santriPage:'beranda',adminPage:'dashboard',data:null,registerRole:null,registerData:null,cameraStream:null,scanInterval:null,_santriSearch:'',_adminSantriSearch:'',examState:{active:false,violations:0,timerInterval:null,timeLeft:0,subId:null},liveMeetingStream:null,screenShareStream:null,certSignCount:3};
 let tempQuestions=[];
 
-function loadData(){try{const s=localStorage.getItem(STORAGE_KEY);if(s){state.data=JSON.parse(s);if(!state.data.accounts)state.data.accounts={};if(!state.data.accounts.admin)state.data.accounts.admin={username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'};if(!state.data.accounts.guru)state.data.accounts.guru={username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'};if(!state.data.accounts.santri)state.data.accounts.santri=[];if(!state.data.guru)state.data.guru=[];if(!state.data.santri)state.data.santri=[];if(!state.data.pendingSantri)state.data.pendingSantri=[];if(!state.data.tagihan)state.data.tagihan=[];if(!state.data.pembayaran)state.data.pembayaran=[];if(!state.data.tugas)state.data.tugas=[];if(!state.data.materi)state.data.materi=[];if(!state.data.pengumpulan)state.data.pengumpulan=[];if(!state.data.materiSubs)state.data.materiSubs=[];if(!state.data.notes)state.data.notes=[];if(!state.data.exams)state.data.exams=[];if(!state.data.examSubmissions)state.data.examSubmissions=[];if(!state.data.meetings)state.data.meetings=[];if(!state.data.absensiGuru)state.data.absensiGuru=[];if(!state.data.absensiSantri)state.data.absensiSantri=[];if(!state.data.setoran)state.data.setoran={};if(!state.data.irapor)state.data.irapor={};if(!state.data.certificates)state.data.certificates=[];if(!state.data.logs)state.data.logs=[];if(!state.data.settings)state.data.settings={namaTPQ:'H.Ai Pusat Kurikulum',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2024/2025',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5};if(!state.data.liveMeeting)state.data.liveMeeting={active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]};saveData()}else{initFresh()}}catch(e){initFresh()}}
-function initFresh(){state.data={guru:[],santri:[],pendingSantri:[],tagihan:[],pembayaran:[],tugas:[],materi:[],pengumpulan:[],materiSubs:[],notes:[],exams:[],examSubmissions:[],meetings:[],absensiGuru:[],absensiSantri:[],setoran:{},irapor:{},certificates:[],accounts:{admin:{username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'},guru:{username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'},santri:[]},logs:[{id:'l1',waktu:'01 Agu 2024 08:00',aktor:'Monitor.Ai',aksi:'Sistem Inisialisasi',detail:'Sistem dimulai'}],settings:{namaTPQ:'H.Ai Pusat Kurikulum',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2024/2025',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5},liveMeeting:{active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]}};saveData()}
+function loadData(){try{const s=localStorage.getItem(STORAGE_KEY);if(s){state.data=JSON.parse(s);if(!state.data.accounts)state.data.accounts={};if(!state.data.accounts.admin)state.data.accounts.admin={username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'};if(!state.data.accounts.guru)state.data.accounts.guru={username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'};if(!state.data.accounts.santri)state.data.accounts.santri=[];if(!state.data.guru)state.data.guru=[];if(!state.data.santri)state.data.santri=[];if(!state.data.pendingSantri)state.data.pendingSantri=[];if(!state.data.tagihan)state.data.tagihan=[];if(!state.data.pembayaran)state.data.pembayaran=[];if(!state.data.tugas)state.data.tugas=[];if(!state.data.materi)state.data.materi=[];if(!state.data.pengumpulan)state.data.pengumpulan=[];if(!state.data.materiSubs)state.data.materiSubs=[];if(!state.data.notes)state.data.notes=[];if(!state.data.exams)state.data.exams=[];if(!state.data.examSubmissions)state.data.examSubmissions=[];if(!state.data.meetings)state.data.meetings=[];if(!state.data.absensiGuru)state.data.absensiGuru=[];if(!state.data.absensiSantri)state.data.absensiSantri=[];if(!state.data.setoran)state.data.setoran={};if(!state.data.irapor)state.data.irapor={};if(!state.data.certificates)state.data.certificates=[];if(!state.data.logs)state.data.logs=[];if(!state.data.settings)state.data.settings={namaTPQ:'H.Ai Pusat Kurikulum',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2024/2025',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5};if(!state.data.liveMeeting)state.data.liveMeeting={active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]};if(!state.data.jadwal){state.data.jadwal={Senin:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Selasa:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Rabu:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Kamis:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Jumat:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Sabtu:{waktu:'08:00 - 10:00',status:'on',alamat:'Online via Zoom',link_maps:''},Minggu:{waktu:'08:00 - 10:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'}};state.data.jadwalPublishedAt=null;state.data.jadwalPublishedBy=null;}if(!state.data.absensiBarcodeMurid)state.data.absensiBarcodeMurid=[];if(!state.data.passwordCounter||state.data.passwordCounter<1000)state.data.passwordCounter=1000;saveData()}else{initFresh()}}catch(e){initFresh()}}
+function initFresh(){state.data={guru:[],santri:[],pendingSantri:[],tagihan:[],pembayaran:[],tugas:[],materi:[],pengumpulan:[],materiSubs:[],notes:[],exams:[],examSubmissions:[],meetings:[],absensiGuru:[],absensiSantri:[],setoran:{},irapor:{},certificates:[],accounts:{admin:{username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'},guru:{username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'},santri:[]},logs:[{id:'l1',waktu:'01 Agu 2024 08:00',aktor:'Monitor.Ai',aksi:'Sistem Inisialisasi',detail:'Sistem dimulai'}],settings:{namaTPQ:'H.Ai Pusat Kurikulum',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2024/2025',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5},liveMeeting:{active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]},jadwal:{Senin:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Selasa:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Rabu:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Kamis:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Jumat:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Sabtu:{waktu:'08:00 - 10:00',status:'on',alamat:'Online via Zoom',link_maps:''},Minggu:{waktu:'08:00 - 10:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'}},jadwalPublishedAt:null,jadwalPublishedBy:null,absensiBarcodeMurid:[],passwordCounter:1000};saveData()}
 function saveData(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state.data))}catch(e){toast('Penyimpanan penuh! Hapus file besar.','error')}}
 function addLog(a,d){const n=new Date();const b=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];const w=`${String(n.getDate()).padStart(2,'0')} ${b[n.getMonth()]} ${n.getFullYear()} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;state.data.logs.unshift({id:'l'+Date.now(),waktu:w,aktor:state.currentUser?.nama||'Sistem',aksi:a,detail:d});saveData()}
 function formatRupiah(n){return 'Rp ' + (Number(n)||0).toLocaleString('id-ID');}
@@ -227,15 +252,15 @@ function nextStep(){const c=document.getElementById('rg_code');state.registerDat
 function renderStep2(){const isGuru=state.registerRole==='guru';const isManualNoCode=state.registerRole==='santri_nocode';document.getElementById('registerStep2').innerHTML=`<h3 class="text-xl font-bold text-gray-800 mb-1">${isGuru?'Data Diri Guru':'Data Diri Murid'}</h3><p class="text-sm text-gray-500 mb-4">Lengkapi formulir di bawah ini</p><form onsubmit="submitRegForm(event)" class="space-y-4">${!isGuru?`<div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap *</label><input id="rg_nama" type="text" class="input-field" required></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tempat Lahir *</label><input id="rg_tempat" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tanggal Lahir *</label><input id="rg_tgl" type="date" class="input-field" required></div></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Ayah (Wali) *</label><input id="rg_ayah" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Ibu (Wali) *</label><input id="rg_ibu" type="text" class="input-field" required></div></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telp / WhatsApp Ortu/Wali *</label><input id="rg_telp_ortu" type="tel" class="input-field" placeholder="08xxxxxxxxxx" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telp / WhatsApp Murid</label><input id="rg_telp_santri" type="tel" class="input-field" placeholder="08xxxxxxxxxx (khusus murid)"></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat *</label><textarea id="rg_alamat" class="input-field" rows="2" required></textarea></div>${isManualNoCode?'<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800"><p class="font-semibold">ℹ️ Catatan:</p><p>Pendaftaran tanpa kode guru akan diproses oleh Admin. Admin akan memilihkan guru yang cocok dengan mata pelajaran untuk Anda.</p></div>':''}`:`<div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Lengkap *</label><input id="rg_nama" type="text" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Mata Pelajaran *</label><input id="rg_mapel" type="text" class="input-field" required></div></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">No. Telp / WhatsApp (Aktif) *</label><input id="rg_telepon" type="tel" class="input-field" placeholder="08xxxxxxxxxx (yang aktif)" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Jenis Kelamin *</label><select id="rg_gender" class="input-field"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat</label><textarea id="rg_alamat" class="input-field" rows="2"></textarea></div>`}<div class="flex gap-3 pt-2"><button type="button" onclick="setStep(1);renderStep1()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Kembali</button><button type="submit" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Lanjut</button></div></form>`;lucide.createIcons()}
 function submitRegForm(e){e.preventDefault();state.registerData={...state.registerData,nama:document.getElementById('rg_nama').value.trim()};if(state.registerRole==='santri'||state.registerRole==='santri_manual'||state.registerRole==='santri_nocode'){state.registerData.tempat=document.getElementById('rg_tempat').value.trim();state.registerData.tgl=document.getElementById('rg_tgl').value;state.registerData.ayah=document.getElementById('rg_ayah').value.trim();state.registerData.ibu=document.getElementById('rg_ibu').value.trim();state.registerData.alamat=document.getElementById('rg_alamat').value.trim();state.registerData.telp_ortu=document.getElementById('rg_telp_ortu')?.value.trim()||'';state.registerData.telp_santri=document.getElementById('rg_telp_santri')?.value.trim()||''}else{state.registerData.mapel=document.getElementById('rg_mapel').value.trim();state.registerData.telepon=document.getElementById('rg_telepon').value.trim();state.registerData.gender=document.getElementById('rg_gender').value;state.registerData.alamat=document.getElementById('rg_alamat').value.trim()}setStep(3);renderStep3()}
 function renderStep3(){const d=state.registerData;const isGuru=state.registerRole==='guru';document.getElementById('registerStep3').innerHTML=`<h3 class="text-xl font-bold text-gray-800 mb-1">Konfirmasi Data</h3><p class="text-sm text-gray-500 mb-4">Pastikan data berikut sudah benar</p><div class="bg-stone-50 border border-stone-200 rounded-xl p-5 space-y-3 text-sm mb-5"><div class="flex justify-between"><span class="text-gray-500">Nama</span><span class="font-semibold text-gray-800">${d.nama}</span></div>${!isGuru?`<div class="flex justify-between"><span class="text-gray-500">Tempat, Tgl Lahir</span><span class="text-gray-800">${d.tempat}, ${d.tgl}</span></div><div class="flex justify-between"><span class="text-gray-500">Ayah</span><span class="text-gray-800">${d.ayah}</span></div><div class="flex justify-between"><span class="text-gray-500">Ibu</span><span class="text-gray-800">${d.ibu}</span></div><div class="flex justify-between"><span class="text-gray-500">No. Telp/WA Ortu</span><span class="text-gray-800">${d.telp_ortu||'-'}</span></div><div class="flex justify-between"><span class="text-gray-500">No. Telp/WA Murid</span><span class="text-gray-800">${d.telp_santri||'-'}</span></div><div class="flex justify-between"><span class="text-gray-500">Alamat</span><span class="text-gray-800 text-right">${d.alamat}</span></div>${state.registerRole==='santri_nocode'?'<div class="flex justify-between"><span class="text-gray-500">Status</span><span class="font-semibold text-amber-700">Menunggu Persetujuan Admin</span></div>':''}`:`<div class="flex justify-between"><span class="text-gray-500">Mata Pelajaran</span><span class="text-gray-800">${d.mapel}</span></div><div class="flex justify-between"><span class="text-gray-500">No. Telp/WA (Aktif)</span><span class="text-gray-800">${d.telepon}</span></div><div class="flex justify-between"><span class="text-gray-500">Alamat</span><span class="text-gray-800 text-right">${d.alamat}</span></div>`}</div><div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-5 text-xs text-amber-800"><p class="font-semibold">ℹ️ Catatan:</p><p>${isGuru?'Pendaftaran guru akan diproses oleh admin. Username & password akan dikirim via WhatsApp setelah disetujui.':state.registerRole==='santri_nocode'?'Pendaftaran tanpa kode guru akan diproses Admin. Username & password akan dikirim via WhatsApp setelah Admin menyetujui dan memilih guru yang cocok.':'Sistem akan membuatkan Username (NIS) dan Password, lalu mengirimkannya via WhatsApp ke Ortu/Wali & Murid.'}</p></div><div class="flex gap-3"><button onclick="setStep(2);renderStep2()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Kembali</button><button onclick="submitRegFinal()" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Kirim Pendaftaran</button></div>`;lucide.createIcons()}
-function submitRegFinal(){const d=state.registerData;if(state.registerRole==='santri'||state.registerRole==='santri_manual'||state.registerRole==='santri_nocode'){if(state.registerRole==='santri_nocode'){if(!state.data.pendingSantriNocode)state.data.pendingSantriNocode=[];state.data.pendingSantriNocode.push({id:'pnocode'+Date.now(),nama:d.nama,tempat:d.tempat,tgl:d.tgl,ayah:d.ayah,ibu:d.ibu,alamat:d.alamat,telp_ortu:d.telp_ortu,telp_santri:d.telp_santri,status:'pending',tanggal_daftar:new Date().toLocaleString('id-ID')});saveData();addLog('Pendaftaran Murid (Tanpa Kode)',`Murid ${d.nama} menunggu persetujuan admin`);showModal(`<div class="text-center py-4"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 mb-4"><i data-lucide="clock" class="text-amber-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Pendaftaran Diterima!</h3><p class="text-sm text-gray-600 mb-4">Pendaftaran Anda tanpa kode guru sedang menunggu persetujuan Admin. Admin akan memilihkan guru yang cocok dengan mata pelajaran untuk Anda.</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800"><p>Setelah disetujui, Username & Password akan dikirim otomatis via WhatsApp ke:</p><p class="font-mono font-bold mt-1">${d.telp_ortu||'Ortu/Wali'}${d.telp_santri?' & '+d.telp_santri:''}</p></div><button onclick="closeModal();showSplash()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Selesai</button></div>`);return}const g=state.data.guru.find(g=>g.id===d.guru_id);if(g){const res=createSantriAcc(d.nama,d.tempat,d.tgl,d.ayah,d.ibu,d.alamat,g.id,false,d.telp_ortu,d.telp_santri);addLog('Pendaftaran Murid',`Murid ${d.nama} terdaftar`);saveData();showModal(`<div class="text-center py-4"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-4"><i data-lucide="check-circle" class="text-emerald-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Pendaftaran Berhasil!</h3><div class="bg-stone-50 border border-stone-200 rounded-xl p-4 mt-4 text-left text-sm"><p class="text-gray-600">Username: <span class="font-bold text-gray-800 font-mono">${res.nis}</span></p><p class="text-gray-600">Password: <span class="font-bold text-gray-800 font-mono">${res.password}</span></p></div><p class="text-xs text-gray-500 mt-3">Gunakan NIS dan password di atas untuk login di Panel Murid.</p><div class="flex flex-col gap-2 mt-4"><button onclick="sendCredentialsWA('${d.telp_ortu}','${res.nis}','${res.password}','${d.nama}','ortu')" class="btn-royal w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="message-circle" style="width:16px;height:16px"></i> Kirim ke Ortu/Wali (WA)</button>${d.telp_santri?`<button onclick="sendCredentialsWA('${d.telp_santri}','${res.nis}','${res.password}','${d.nama}','santri')" class="btn-primary w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="send" style="width:16px;height:16px"></i> Kirim ke Murid (WA)</button>`:''}<button onclick="closeModal();showSplash()" class="btn-ghost w-full py-3 rounded-xl font-semibold">Selesai</button></div></div>`)}else{toast('Kode guru tidak valid','error');setStep(1);renderStep1()}}else{if(!state.data.pendingGuru)state.data.pendingGuru=[];state.data.pendingGuru.push({id:'gp'+Date.now(),nama:d.nama,mapel:d.mapel,telepon:d.telepon,gender:d.gender,alamat:d.alamat,status:'pending'});saveData();addLog('Pendaftaran Guru',`Guru ${d.nama} mendaftar (pending)`);showModal(`<div class="text-center py-4"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-4"><i data-lucide="check-circle" class="text-emerald-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Pendaftaran Berhasil!</h3><p class="text-sm text-gray-600 mb-4">Pendaftaran Anda akan diproses Admin. Setelah disetujui, Username & Password akan dikirim via WhatsApp ke <strong class="font-mono">${d.telepon}</strong>.</p><button onclick="closeModal();showSplash()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Selesai</button></div>`)}}
-function createSantriAcc(nama,tempat,tgl,ayah,ibu,alamat,guru_id,isPending,telp_ortu='',telp_santri=''){const id=isPending?'pending_'+Date.now():'s'+Date.now();const nis='S'+String(Date.now()).slice(-6);let ttl='-';if(tgl){const dt=new Date(tgl);const b=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];ttl=`${tempat}, ${dt.getDate()} ${b[dt.getMonth()]} ${dt.getFullYear()}`}const s={id,nis,nama,tempat,tgl_lahir:tgl,ttl,ayah,ibu,alamat,guru_id,telp_ortu,telp_santri,status:isPending?'pending':'active'};if(isPending){state.data.pendingSantri.push(s)}else{state.data.santri.push(s);const password='santri123';state.data.accounts.santri.push({username:nis,password:password,nama,santri_id:id,role:'santri'});const now=new Date();const bN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];for(let i=0;i<6;i++){const m=(now.getMonth()+i)%12;const y=now.getFullYear()+Math.floor((now.getMonth()+i)/12);state.data.tagihan.push({id:'tg'+Date.now()+'_'+i,santri_id:id,jenis:'Iuran Bulanan',periode:`${bN[m]} ${y}`,nominal:25000,deadline:`${y}-${String(m+1).padStart(2,'0')}-15`,status:'belum'})}state.data.tagihan.push({id:'tgr'+Date.now(),santri_id:id,jenis:'Pendaftaran',periode:'Sekali Bayar',nominal:50000,deadline:`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-30`,status:'belum'})}return{id,nis,password:'santri123'}}
+function submitRegFinal(){const d=state.registerData;if(state.registerRole==='santri'||state.registerRole==='santri_manual'||state.registerRole==='santri_nocode'){if(state.registerRole==='santri_nocode'){if(!state.data.pendingSantriNocode)state.data.pendingSantriNocode=[];state.data.pendingSantriNocode.push({id:'pnocode'+Date.now(),nama:d.nama,tempat:d.tempat,tgl:d.tgl,ayah:d.ayah,ibu:d.ibu,alamat:d.alamat,telp_ortu:d.telp_ortu,telp_santri:d.telp_santri,status:'pending',tanggal_daftar:new Date().toLocaleString('id-ID')});saveData();addLog('Pendaftaran Murid (Tanpa Kode)',`Murid ${d.nama} menunggu persetujuan admin`);showModal(`<div class="text-center py-4"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 mb-4"><i data-lucide="clock" class="text-amber-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Pendaftaran Diterima!</h3><p class="text-sm text-gray-600 mb-4">Pendaftaran Anda tanpa kode guru sedang menunggu persetujuan Admin. Admin akan memilihkan guru yang cocok dengan mata pelajaran untuk Anda.</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800"><p>Setelah disetujui, Username & Password akan dikirim otomatis via WhatsApp ke:</p><p class="font-mono font-bold mt-1">${d.telp_ortu||'Ortu/Wali'}${d.telp_santri?' & '+d.telp_santri:''}</p></div><button onclick="closeModal();showSplash()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Selesai</button></div>`);return}const g=state.data.guru.find(g=>g.id===d.guru_id);if(g){const res=createSantriAcc(d.nama,d.tempat,d.tgl,d.ayah,d.ibu,d.alamat,g.id,false,d.telp_ortu,d.telp_santri);addLog('Pendaftaran Murid',`Murid ${d.nama} terdaftar dengan password ${res.password}`);saveData();const st=state.data.settings;const barcodeId='regBarcode_'+Date.now();showModal(`<div class="text-center py-4"><div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-50 mb-3"><i data-lucide="check-circle" class="text-emerald-600" style="width:40px;height:40px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-1">Pendaftaran Berhasil!</h3><p class="text-xs text-gray-500 mb-3">Kartu identitas sementara telah dibuat otomatis</p><div class="sunflower-card batik-pattern relative mx-auto" style="max-width:380px;padding:18px"><div class="relative z-10 text-center pb-2 mb-3 border-b-2 border-amber-600/40"><div class="flex items-center justify-center gap-1 mb-1"><span class="sunflower-mini"></span><h2 class="text-base font-black text-amber-800 tracking-wide">H.Ai</h2><span class="sunflower-mini"></span></div><p class="text-[9px] font-bold text-amber-700 uppercase tracking-widest">Kartu Identitas Murid (Sementara)</p><p class="text-xs text-stone-700 font-semibold mt-0.5">${st.namaTPQ}</p></div><div class="relative z-10 flex gap-2 mb-3"><div class="flex-shrink-0"><div class="w-16 h-20 rounded-lg overflow-hidden border-2 border-amber-500/50 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center"><span class="text-2xl font-black text-amber-700">${d.nama.charAt(0)}</span></div></div><div class="flex-1 text-xs space-y-1"><div><p class="text-[9px] text-amber-700 uppercase font-bold">Nama</p><p class="text-xs font-bold text-stone-800 leading-tight">${d.nama}</p></div><div><p class="text-[9px] text-amber-700 uppercase font-bold">Username (NIS)</p><p class="text-xs font-mono font-bold text-stone-800">${res.nis}</p></div><div><p class="text-[9px] text-amber-700 uppercase font-bold">Password</p><p class="text-xs font-mono font-bold text-emerald-700">${res.password}</p></div><div><p class="text-[9px] text-amber-700 uppercase font-bold">Guru Wali</p><p class="text-xs text-stone-800 leading-tight">${g.nama}</p></div></div></div><div class="relative z-10 barcode-area"><svg id="${barcodeId}"></svg><p class="text-[9px] text-stone-500">Pindai barcode ini untuk absensi</p></div></div><p class="text-xs text-gray-500 mt-3">Gunakan NIS & password di atas untuk login di Panel Murid. Kartu identitas lengkap dapat dilihat di menu <strong>Kartu Identitas Murid</strong>.</p><div class="flex flex-col gap-2 mt-4"><button onclick="sendCredentialsWA('${d.telp_ortu}','${res.nis}','${res.password}','${d.nama}','ortu')" class="btn-royal w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="message-circle" style="width:16px;height:16px"></i> Kirim ke Ortu/Wali (WA)</button>${d.telp_santri?`<button onclick="sendCredentialsWA('${d.telp_santri}','${res.nis}','${res.password}','${d.nama}','santri')" class="btn-primary w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="send" style="width:16px;height:16px"></i> Kirim ke Murid (WA)</button>`:''}<button onclick="closeModal();showSplash()" class="btn-ghost w-full py-3 rounded-xl font-semibold">Selesai</button></div></div>`,'max-w-md');setTimeout(()=>{try{const svgEl=document.getElementById('${barcodeId}');if(svgEl&&typeof JsBarcode!=='undefined'){JsBarcode(svgEl,'HAI'+res.nis.replace(/\\D/g,'').padEnd(6,'0').slice(0,6),{format:'CODE128',width:2,height:40,displayValue:false,margin:0,background:'transparent',lineColor:'#1c1917'})}}catch(e){console.warn(e)}},200);lucide.createIcons()}else{toast('Kode guru tidak valid','error');setStep(1);renderStep1()}}else{if(!state.data.pendingGuru)state.data.pendingGuru=[];state.data.pendingGuru.push({id:'gp'+Date.now(),nama:d.nama,mapel:d.mapel,telepon:d.telepon,gender:d.gender,alamat:d.alamat,status:'pending'});saveData();addLog('Pendaftaran Guru',`Guru ${d.nama} mendaftar (pending)`);showModal(`<div class="text-center py-4"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-4"><i data-lucide="check-circle" class="text-emerald-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Pendaftaran Berhasil!</h3><p class="text-sm text-gray-600 mb-4">Pendaftaran Anda akan diproses Admin. Setelah disetujui, Username & Password akan dikirim via WhatsApp ke <strong class="font-mono">${d.telepon}</strong>.</p><button onclick="closeModal();showSplash()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Selesai</button></div>`)}}
+function createSantriAcc(nama,tempat,tgl,ayah,ibu,alamat,guru_id,isPending,telp_ortu='',telp_santri=''){const id=isPending?'pending_'+Date.now():'s'+Date.now();const nis='S'+String(Date.now()).slice(-6);let ttl='-';if(tgl){const dt=new Date(tgl);const b=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];ttl=`${tempat}, ${dt.getDate()} ${b[dt.getMonth()]} ${dt.getFullYear()}`}const s={id,nis,nama,tempat,tgl_lahir:tgl,ttl,ayah,ibu,alamat,guru_id,telp_ortu,telp_santri,status:isPending?'pending':'active'};if(isPending){state.data.pendingSantri.push(s)}else{state.data.santri.push(s);if(!state.data.passwordCounter||state.data.passwordCounter<1000)state.data.passwordCounter=1000;state.data.passwordCounter=state.data.passwordCounter+1;const password=String(state.data.passwordCounter);state.data.accounts.santri.push({username:nis,password:password,nama,santri_id:id,role:'santri'});const now=new Date();const bN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];for(let i=0;i<6;i++){const m=(now.getMonth()+i)%12;const y=now.getFullYear()+Math.floor((now.getMonth()+i)/12);state.data.tagihan.push({id:'tg'+Date.now()+'_'+i,santri_id:id,jenis:'Iuran Bulanan',periode:`${bN[m]} ${y}`,nominal:25000,deadline:`${y}-${String(m+1).padStart(2,'0')}-15`,status:'belum'})}state.data.tagihan.push({id:'tgr'+Date.now(),santri_id:id,jenis:'Pendaftaran',periode:'Sekali Bayar',nominal:50000,deadline:`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-30`,status:'belum'})}return{id,nis,password:state.data.passwordCounter?String(state.data.passwordCounter):'1001'}}
 
 function showGuruApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('guruApp').classList.remove('hidden');document.getElementById('guruName').textContent=state.currentUser.nama;document.getElementById('guruAvatar').textContent=state.currentUser.nama.charAt(0);navigateGuru('dashboard');updateClock();lucide.createIcons()}
-function navigateGuru(page){state.guruPage=page;document.querySelectorAll('#guruSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#guruSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={dashboard:['Dashboard','Ringkasan administrasi'],absensi:['Absensi Masuk','Absensi kehadiran harian'],'absensi-santri':['Absensi Murid','Catat kehadiran murid mengaji'],pendaftaran:['Pendaftaran Murid','Generate QR Code'],santri:['Daftar Murid','Kelola data murid & persetujuan'],setoran:['Buku Setoran','Catatan setoran hafalan'],kontrol:['Kartu Kontrol','Pantau tagihan murid'],pembayaran:['Pembayaran','Kelola pembayaran'],'tugas-materi':['Tugas & Materi','Bagikan tugas dan materi'],ujian:['Ujian Murid','Buat soal ujian & lihat hasil'],irapor:['IRapor & Open_Close.AI','Rekap nilai & sertifikat'],meeting:['Room Meeting','Tatap muka online'],profil:['Profil Saya','Edit, simpan, kirim data diri']};document.getElementById('guruPageTitle').textContent=t[page][0];document.getElementById('guruPageSubtitle').textContent=t[page][1];const main=document.getElementById('guruMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='dashboard')main.innerHTML=renderGuruDashboard();else if(page==='absensi')main.innerHTML=renderAbsensiGuru();else if(page==='absensi-santri')main.innerHTML=renderAbsensiSantriGuru();else if(page==='pendaftaran')main.innerHTML=renderPendaftaran();else if(page==='santri')main.innerHTML=renderGuruSantri();else if(page==='setoran')main.innerHTML=renderSetoran();else if(page==='kontrol')main.innerHTML=renderKartuKontrolGuru();else if(page==='pembayaran')main.innerHTML=renderGuruPembayaran();else if(page==='tugas-materi')main.innerHTML=renderTugasMateri();else if(page==='ujian')main.innerHTML=renderGuruExam();else if(page==='irapor')main.innerHTML=renderGuruIRapor();else if(page==='meeting')main.innerHTML=renderGuruMeeting();else if(page==='profil')main.innerHTML=renderGuruProfil();if(page==='pendaftaran')initGuruQR();updateMeetingStatus('guru');lucide.createIcons()}
+function navigateGuru(page){state.guruPage=page;document.querySelectorAll('#guruSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#guruSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={dashboard:['Dashboard','Ringkasan administrasi'],absensi:['Absensi Masuk','Absensi kehadiran harian'],'absensi-barcode':['Absensi Barcode Murid','Scan kartu identitas murid'],'absensi-santri':['Absensi Murid','Catat kehadiran murid mengaji'],pendaftaran:['Pendaftaran Murid','Generate QR Code'],santri:['Daftar Murid','Kelola data murid & persetujuan'],jadwal:['Jadwal','Jadwal Online/Offline mingguan'],setoran:['Buku Setoran','Catatan setoran hafalan'],kontrol:['Kartu Kontrol','Pantau tagihan murid'],pembayaran:['Pembayaran','Kelola pembayaran'],'tugas-materi':['Tugas & Materi','Bagikan tugas dan materi'],ujian:['Ujian Murid','Buat soal ujian & lihat hasil'],irapor:['IRapor & Open_Close.AI','Rekap nilai & sertifikat'],meeting:['Room Meeting','Tatap muka online'],profil:['Profil Saya','Edit, simpan, kirim data diri']};document.getElementById('guruPageTitle').textContent=t[page][0];document.getElementById('guruPageSubtitle').textContent=t[page][1];const main=document.getElementById('guruMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='dashboard')main.innerHTML=renderGuruDashboard();else if(page==='absensi')main.innerHTML=renderAbsensiGuru();else if(page==='absensi-barcode')main.innerHTML=renderScanBarcodeMurid('guru');else if(page==='absensi-santri')main.innerHTML=renderAbsensiSantriGuru();else if(page==='pendaftaran')main.innerHTML=renderPendaftaran();else if(page==='santri')main.innerHTML=renderGuruSantri();else if(page==='jadwal')main.innerHTML=renderGuruJadwal();else if(page==='setoran')main.innerHTML=renderSetoran();else if(page==='kontrol')main.innerHTML=renderKartuKontrolGuru();else if(page==='pembayaran')main.innerHTML=renderGuruPembayaran();else if(page==='tugas-materi')main.innerHTML=renderTugasMateri();else if(page==='ujian')main.innerHTML=renderGuruExam();else if(page==='irapor')main.innerHTML=renderGuruIRapor();else if(page==='meeting')main.innerHTML=renderGuruMeeting();else if(page==='profil')main.innerHTML=renderGuruProfil();if(page==='pendaftaran')initGuruQR();updateMeetingStatus('guru');lucide.createIcons();if(page==='absensi-barcode')initBarcodeScanner('guru')}
 function showSantriApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('santriApp').classList.remove('hidden');const s=getSantri(state.currentUser.santri_id);if(!s){logout();return}document.getElementById('santriName').textContent=s.nama;document.getElementById('santriKelasBadge').textContent=s.kelas||'-';document.getElementById('santriAvatar').textContent=s.nama.charAt(0);navigateSantri('beranda');updateClock();lucide.createIcons()}
-function navigateSantri(page){state.santriPage=page;document.querySelectorAll('#santriSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#santriSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={beranda:['Beranda','Informasi pembayaran'],absensi:['Absensi Wajah','Verifikasi wajah & kirim ke Guru'],materi:['Materi','Catat materi pembelajaran'],tugas:['Tugas','Kerjakan tugas dari guru'],ujian:['Ujian Murid','Kerjakan ujian dari guru'],kontrol:['Kartu Kontrol','Status tagihan'],meeting:['Room Meeting','Tatap muka online'],profil:['Profil Saya','Edit, simpan, kirim data diri']};document.getElementById('santriPageTitle').textContent=t[page][0];document.getElementById('santriPageSubtitle').textContent=t[page][1];const main=document.getElementById('santriMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='beranda')main.innerHTML=renderSantriBeranda();else if(page==='absensi')main.innerHTML=renderSantriAbsensiWajah();else if(page==='materi')main.innerHTML=renderSantriMateri();else if(page==='tugas')main.innerHTML=renderSantriTugas();else if(page==='ujian')main.innerHTML=renderSantriExam();else if(page==='kontrol')main.innerHTML=renderKartuKontrolSantri();else if(page==='meeting')main.innerHTML=renderSantriMeeting();else if(page==='profil')main.innerHTML=renderSantriProfil();updateMeetingStatus('santri');lucide.createIcons()}
+function navigateSantri(page){state.santriPage=page;document.querySelectorAll('#santriSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#santriSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={beranda:['Beranda','Informasi pembayaran'],kartu:['Kartu Identitas Murid','Lihat & cetak kartu identitas berbarcode'],jadwal:['Jadwal','Lihat jadwal Online/Offline mingguan'],absensi:['Absensi Wajah','Verifikasi wajah & kirim ke Guru'],materi:['Materi','Catat materi pembelajaran'],tugas:['Tugas','Kerjakan tugas dari guru'],ujian:['Ujian Murid','Kerjakan ujian dari guru'],kontrol:['Kartu Kontrol','Status tagihan'],meeting:['Room Meeting','Tatap muka online'],profil:['Profil Saya','Edit, simpan, kirim data diri']};document.getElementById('santriPageTitle').textContent=t[page][0];document.getElementById('santriPageSubtitle').textContent=t[page][1];const main=document.getElementById('santriMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='beranda')main.innerHTML=renderSantriBeranda();else if(page==='kartu')main.innerHTML=renderSantriKartuIdentitas();else if(page==='jadwal')main.innerHTML=renderSantriJadwal();else if(page==='absensi')main.innerHTML=renderSantriAbsensiWajah();else if(page==='materi')main.innerHTML=renderSantriMateri();else if(page==='tugas')main.innerHTML=renderSantriTugas();else if(page==='ujian')main.innerHTML=renderSantriExam();else if(page==='kontrol')main.innerHTML=renderKartuKontrolSantri();else if(page==='meeting')main.innerHTML=renderSantriMeeting();else if(page==='profil')main.innerHTML=renderSantriProfil();updateMeetingStatus('santri');lucide.createIcons();if(page==='kartu')initSantriBarcode()}
 function showAdminApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('adminApp').classList.remove('hidden');document.getElementById('adminName').textContent=state.currentUser.nama;document.getElementById('adminAvatar').textContent=state.currentUser.nama.charAt(0);navigateAdmin('dashboard');updateClock();lucide.createIcons()}
-function navigateAdmin(page){state.adminPage=page;document.querySelectorAll('#adminSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#adminSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={dashboard:['Dashboard','Ringkasan sistem'],'monitor-ai':['Monitor.Ai','Pengawasan AI'],'absensi-guru':['Absensi Guru','Rekap absensi guru'],'akun-guru':['Akun Guru','Kelola akun guru'],'akun-santri':['Akun Murid','Kelola akun murid & persetujuan'],meeting:['Room Meeting','Kontrol meeting'],storage:['Upgrade Penyimpanan','Kelola kapasitas cloud'],pengaturan:['Pengaturan','Konfigurasi sistem']};document.getElementById('adminPageTitle').innerHTML=t[page][0]+(page==='dashboard'?' <span class="crown-badge text-xs px-2 py-0.5 rounded-full font-bold">OWNER</span>':'');document.getElementById('adminPageSubtitle').textContent=t[page][1];const main=document.getElementById('adminMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='dashboard')main.innerHTML=renderAdminDashboard();else if(page==='monitor-ai')main.innerHTML=renderMonitorAi();else if(page==='absensi-guru')main.innerHTML=renderAdminAbsensi();else if(page==='akun-guru')main.innerHTML=renderAdminGuru();else if(page==='akun-santri')main.innerHTML=renderAdminSantriWithNocode();else if(page==='meeting')main.innerHTML=renderAdminMeeting();else if(page==='storage')main.innerHTML=renderAdminStorage();else if(page==='pengaturan')main.innerHTML=renderAdminPengaturan();updateMeetingStatus('admin');lucide.createIcons()}
+function navigateAdmin(page){state.adminPage=page;document.querySelectorAll('#adminSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#adminSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={dashboard:['Dashboard','Ringkasan sistem'],'monitor-ai':['Monitor.Ai','Pengawasan AI'],'absensi-guru':['Absensi Guru','Rekap absensi guru'],'absensi-barcode':['Absensi Barcode Murid','Scan kartu identitas murid'],'akun-guru':['Akun Guru','Kelola akun guru'],'akun-santri':['Akun Murid','Kelola akun murid & persetujuan'],meeting:['Room Meeting','Kontrol meeting'],storage:['Upgrade Penyimpanan','Kelola kapasitas cloud'],pengaturan:['Pengaturan','Konfigurasi sistem']};document.getElementById('adminPageTitle').innerHTML=t[page][0]+(page==='dashboard'?' <span class="crown-badge text-xs px-2 py-0.5 rounded-full font-bold">OWNER</span>':'');document.getElementById('adminPageSubtitle').textContent=t[page][1];const main=document.getElementById('adminMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='dashboard')main.innerHTML=renderAdminDashboard();else if(page==='monitor-ai')main.innerHTML=renderMonitorAi();else if(page==='absensi-guru')main.innerHTML=renderAdminAbsensi();else if(page==='absensi-barcode')main.innerHTML=renderScanBarcodeMurid('admin');else if(page==='akun-guru')main.innerHTML=renderAdminGuru();else if(page==='akun-santri')main.innerHTML=renderAdminSantriWithNocode();else if(page==='meeting')main.innerHTML=renderAdminMeeting();else if(page==='storage')main.innerHTML=renderAdminStorage();else if(page==='pengaturan')main.innerHTML=renderAdminPengaturan();updateMeetingStatus('admin');lucide.createIcons();if(page==='absensi-barcode')initBarcodeScanner('admin')}
 
 function renderGuruDashboard(){const ts=getGuruSantriScope().length;const tg=state.data.guru.length;const tt=getGuruSantriScope().reduce((sum,s)=>sum+getTagihanSantri(s.id).reduce((s,t)=>s+t.nominal,0),0);const tl=getGuruSantriScope().reduce((sum,s)=>sum+getTagihanSantri(s.id).filter(t=>t.status==='lunas').reduce((s,t)=>s+t.nominal,0),0);const tb=tt-tl;const pl=tt?Math.round(tl/tt*100):0;const r=[...state.data.pembayaran].filter(p=>getGuruSantriScope().find(s=>s.id===p.santri_id)).sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).slice(0,5);return `<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"><div class="card p-5"><div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mb-3"><i data-lucide="users" class="text-emerald-600" style="width:20px;height:20px"></i></div><p class="text-3xl font-black text-gray-800">${ts}</p><p class="text-xs text-gray-500 mt-1">Total Murid Bimbingan</p></div><div class="card p-5"><div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center mb-3"><i data-lucide="graduation-cap" class="text-amber-600" style="width:20px;height:20px"></i></div><p class="text-3xl font-black text-gray-800">${tg}</p><p class="text-xs text-gray-500 mt-1">Total Guru</p></div><div class="card p-5"><div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3"><i data-lucide="wallet" class="text-blue-600" style="width:20px;height:20px"></i></div><p class="text-2xl font-black text-gray-800">${formatRupiah(tl)}</p><p class="text-xs text-gray-500 mt-1">Pemasukan</p></div><div class="card p-5"><div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center mb-3"><i data-lucide="alert-circle" class="text-red-600" style="width:20px;height:20px"></i></div><p class="text-2xl font-black text-gray-800">${formatRupiah(tb)}</p><p class="text-xs text-gray-500 mt-1">Tunggakan</p></div></div><div class="card p-6 mb-6"><div class="flex items-center justify-between mb-5"><h3 class="font-bold text-gray-800">Progress Pembayaran</h3><p class="text-2xl font-black text-emerald-700">${pl}%</p></div><div class="progress-track mb-2" style="height:14px"><div class="progress-fill" style="width:${pl}%"></div></div><div class="flex justify-between text-xs text-gray-500"><span>${formatRupiah(tl)} terkumpul</span><span>${formatRupiah(tt)} total</span></div></div><div class="card p-6"><h3 class="font-bold text-gray-800 mb-4">Transaksi Terbaru</h3><table class="w-full text-sm"><thead><tr class="text-left text-xs text-gray-500 uppercase border-b border-stone-200"><th class="pb-3 pr-4">ID</th><th class="pb-3 pr-4">Murid</th><th class="pb-3 pr-4">Tanggal</th><th class="pb-3 pr-4">Metode</th><th class="pb-3 pr-4 text-right">Jumlah</th></tr></thead><tbody>${r.length>0?r.map(p=>{const s=getSantri(p.santri_id);if(!s)return'';return `<tr class="border-b border-stone-100"><td class="py-3 pr-4 font-mono text-xs">${p.id}</td><td class="py-3 pr-4 font-semibold">${s.nama}</td><td class="py-3 pr-4">${p.tanggal}</td><td class="py-3 pr-4"><span class="text-xs px-2 py-1 bg-stone-100 rounded">${p.metode}</span></td><td class="py-3 pr-4 text-right font-bold text-emerald-700">${formatRupiah(p.jumlah)}</td></tr>`}).join(''):'<tr><td colspan="5" class="py-6 text-center text-gray-400">Belum ada transaksi</td></tr>'}</tbody></table></div>`}
 function renderAbsensiGuru(){return `<div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2"><i data-lucide="scan-face" style="width:20px;height:20px"></i> Absensi Kehadiran Guru</h3><p class="text-sm text-gray-500 mb-6">Silakan lakukan absensi masuk menggunakan salah satu metode di bawah ini.</p><div class="grid md:grid-cols-3 gap-4"><button onclick="openCameraAbsensi()" class="p-6 border-2 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl text-center"><i data-lucide="camera" class="text-emerald-600 mb-3" style="width:32px;height:32px"></i><p class="font-bold text-gray-800">Scan Wajah</p><p class="text-xs text-gray-500">Gunakan kamera</p></button><button onclick="absensiSidikJari()" class="p-6 border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 rounded-xl text-center"><i data-lucide="fingerprint" class="text-blue-600 mb-3" style="width:32px;height:32px"></i><p class="font-bold text-gray-800">Sidik Jari</p><p class="text-xs text-gray-500">Verifikasi biometrik</p></button><button onclick="openLinkAbsensi()" class="p-6 border-2 border-amber-200 hover:border-amber-400 hover:bg-amber-50 rounded-xl text-center"><i data-lucide="link" class="text-amber-600 mb-3" style="width:32px;height:32px"></i><p class="font-bold text-gray-800">Link Absensi</p><p class="text-xs text-gray-500">Input link manual</p></button></div></div>`}
@@ -248,7 +273,7 @@ function captureAbsensi(m){const video=document.getElementById('camVid');let pho
 function submitAbsensi(metode,ket='',photoData=null){const n=new Date();const b=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];const tgl=`${n.getDate()} ${b[n.getMonth()]} ${n.getFullYear()}`;const waktu=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;if(!state.data.absensiGuru)state.data.absensiGuru=[];const absId='abs'+Date.now();state.data.absensiGuru.unshift({id:absId,guru_id:state.currentUser.guruId||'admin',nama:state.currentUser.nama,tanggal:tgl,waktu,metode,keterangan:ket||'-',status:'Tepat Waktu',photo:photoData||null,sent_to:'admin'});saveData();addLog('Absensi Guru',`${state.currentUser.nama} absensi via ${metode}${photoData?' (dengan foto verifikasi)':''}`);closeModal();toast('Absensi berhasil! Foto verifikasi terkirim ke Admin.','success');navigateGuru('absensi')}
 function renderAbsensiSantriGuru(){const today=new Date().toISOString().split('T')[0];const list=getGuruSantriScope();const absData=state.data.absensiSantri||[];return `<div class="card p-6 mb-5"><h3 class="font-bold text-gray-800 text-lg">Absensi Kehadiran Murid Mengaji</h3><p class="text-sm text-gray-500 mt-1">Catat kehadiran murid yang serius mengaji harian.</p></div><div class="card p-6"><div class="flex justify-between items-center mb-4 flex-wrap gap-2"><div class="flex items-center gap-2"><i data-lucide="calendar-days" class="text-gray-500"></i><input type="date" id="absDate" value="${today}" class="input-field" style="width:auto"></div><button onclick="saveAbsensiSantri()" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="save" style="width:16px;height:16px"></i> Simpan Absensi</button></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-stone-50 border-b border-stone-200"><tr class="text-left text-xs text-gray-600 uppercase"><th class="px-4 py-3">Murid</th><th class="px-4 py-3 text-center">Status Kehadiran</th><th class="px-4 py-3 text-center">Serius Mengaji?</th></tr></thead><tbody>${list.map(s=>{const rec=absData.find(a=>a.santri_id===s.id&&a.tanggal===today)||{};return `<tr class="border-b border-stone-100"><td class="px-4 py-3 font-semibold">${s.nama}</td><td class="px-4 py-3 text-center"><select id="abs_stat_${s.id}" class="input-field" style="width:auto;display:inline-block"><option value="Hadir" ${rec.status==='Hadir'?'selected':''}>Hadir</option><option value="Sakit" ${rec.status==='Sakit'?'selected':''}>Sakit</option><option value="Izin" ${rec.status==='Izin'?'selected':''}>Izin</option><option value="Alpa" ${rec.status==='Alpa'||!rec.status?'selected':''}>Alpa</option></select></td><td class="px-4 py-3 text-center"><input type="checkbox" id="abs_serius_${s.id}" ${rec.serius?'checked':''} class="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500"></td></tr>`}).join('')||'<tr><td colspan="3" class="text-center py-4 text-gray-400">Tidak ada murid</td></tr>'}</tbody></table></div></div>`}
 function saveAbsensiSantri(){const date=document.getElementById('absDate').value;getGuruSantriScope().forEach(s=>{const stat=document.getElementById(`abs_stat_${s.id}`).value;const serius=document.getElementById(`abs_serius_${s.id}`).checked;const idx=state.data.absensiSantri.findIndex(a=>a.santri_id===s.id&&a.tanggal===date);if(idx>-1){state.data.absensiSantri[idx].status=stat;state.data.absensiSantri[idx].serius=serius}else{state.data.absensiSantri.push({id:'abss'+Date.now()+Math.random(),santri_id:s.id,tanggal:date,status:stat,serius:serius})}});saveData();addLog('Absensi Murid','Guru menyimpan absensi santri');toast('Absensi santri tersimpan','success')}
-function renderPendaftaran(){const wl=state.data.settings.linkWebsite||WEBSITE_LINK_DEFAULT;return `<div class="card p-6 mb-6"><h3 class="font-bold text-gray-800 text-lg mb-1">Kartu Pengenal Murid</h3><p class="text-sm text-gray-500 mb-4">Buat QR Code kartu identitas</p><div class="flex gap-3 flex-wrap items-end"><div class="flex-1 min-w-[200px]"><label class="block text-xs font-semibold text-gray-600 mb-1.5">Pilih Murid</label><select id="idCardSantri" class="input-field" ${state.data.santri.length===0?'disabled':''}>${state.data.santri.length>0?state.data.santri.map(s=>`<option value="${s.id}">${s.nama} - ${s.nis}</option>`).join(''):'<option value="">Belum ada murid</option>'}</select></div><button onclick="generateIdCard()" class="btn-primary px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2" ${state.data.santri.length===0?'disabled':''}><i data-lucide="id-card" style="width:16px;height:16px"></i> Buat Kartu</button></div></div><div class="grid lg:grid-cols-2 gap-6 mb-6"><div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-4">QR Code Pendaftaran</h3><div class="bg-gradient-to-br from-emerald-50 to-amber-50 border-2 border-emerald-200 rounded-2xl p-6"><div id="mainQrCode" class="flex justify-center mb-4"></div><div class="text-center"><p class="font-mono font-bold text-xl text-emerald-700">TPQ-ALQURAN-DAFTAR</p><p class="text-sm font-semibold text-gray-700 mt-2">Taman Pendidikan Al-Qur'an</p></div></div></div><div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-4">QR Code Link Website</h3><div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6"><div id="linkQrCode" class="flex justify-center mb-4"></div><div class="text-center"><p class="font-mono font-bold text-sm text-blue-700 break-all">${wl}#daftar</p></div></div></div></div><div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-1">Kode Per Guru</h3><p class="text-sm text-gray-500 mb-4">Setiap guru punya kode unik</p><div class="space-y-3">${state.data.guru.length>0?state.data.guru.map(g=>{const c=state.data.santri.filter(s=>s.guru_id===g.id).length;return `<div class="border border-stone-200 rounded-xl p-4"><div class="flex items-center gap-3 mb-3"><div class="avatar-circle w-10 h-10 text-sm" style="background:${g.gender==='L'?'#0f5c4a':'#c89844'}">${g.nama.charAt(0)}</div><div class="flex-1"><p class="font-semibold text-gray-800 text-sm">${g.nama}</p><p class="text-xs text-gray-500">${g.mapel} • ${c} murid</p></div><button onclick="copyToClipboard('${g.code}')" class="text-xs btn-ghost px-2 py-1 rounded font-semibold">Salin</button></div><div class="bg-stone-100 rounded-lg px-3 py-2"><code class="font-mono text-sm font-bold text-emerald-700">${g.code}</code></div></div>`}).join(''):'<p class="text-center text-gray-400 py-4">Belum ada guru</p>'}</div></div>`}
+function renderPendaftaran(){const wl=state.data.settings.linkWebsite||WEBSITE_LINK_DEFAULT;const me=state.currentUser;const myGuruData=state.data.guru.find(g=>g.id===(me?.guruId||me?.guru_id))||state.data.guru[0]||null;const myGuruCode=myGuruData?.code||'TPQ-G1-GURU';const myGuruName=myGuruData?.nama||me?.nama||'Guru';const myGuruMapel=myGuruData?.mapel||'-';return `<div class="card p-6 mb-6"><h3 class="font-bold text-gray-800 text-lg mb-1">Kartu Pengenal Murid</h3><p class="text-sm text-gray-500 mb-4">Buat QR Code kartu identitas</p><div class="flex gap-3 flex-wrap items-end"><div class="flex-1 min-w-[200px]"><label class="block text-xs font-semibold text-gray-600 mb-1.5">Pilih Murid</label><select id="idCardSantri" class="input-field" ${state.data.santri.length===0?'disabled':''}>${state.data.santri.length>0?state.data.santri.map(s=>`<option value="${s.id}">${s.nama} - ${s.nis}</option>`).join(''):'<option value="">Belum ada murid</option>'}</select></div><button onclick="generateIdCard()" class="btn-primary px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2" ${state.data.santri.length===0?'disabled':''}><i data-lucide="id-card" style="width:16px;height:16px"></i> Buat Kartu</button></div></div><div class="grid lg:grid-cols-2 gap-6 mb-6"><div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-2 flex items-center gap-2"><i data-lucide="qr-code" class="text-emerald-600" style="width:20px;height:20px"></i> Kode Per Guru</h3><p class="text-xs text-gray-500 mb-4">QR Code unik milik <strong class="text-emerald-700">${myGuruName}</strong> — pindai dengan kamera pada saat pendaftaran untuk verifikasi otomatis.</p><div class="bg-gradient-to-br from-emerald-50 to-amber-50 border-2 border-emerald-200 rounded-2xl p-6"><div id="mainQrCode" class="flex justify-center mb-4"></div><div class="text-center"><p class="font-bold text-sm text-emerald-700 uppercase tracking-wider">Kode Per Guru</p><p class="font-mono font-black text-2xl text-amber-700 mt-2 tracking-wide">${myGuruCode}</p><p class="text-xs text-gray-500 mt-2">${myGuruName} • ${myGuruMapel}</p></div></div></div><div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-4">QR Code Link Website</h3><div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6"><div id="linkQrCode" class="flex justify-center mb-4"></div><div class="text-center"><p class="font-mono font-bold text-sm text-blue-700 break-all">${wl}#daftar</p></div></div></div></div><div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-1">Daftar Kode Per Guru</h3><p class="text-sm text-gray-500 mb-4">Setiap guru punya kode unik</p><div class="space-y-3">${state.data.guru.length>0?state.data.guru.map(g=>{const c=state.data.santri.filter(s=>s.guru_id===g.id).length;const isMe=g.code===myGuruCode;return `<div class="border ${isMe?'border-emerald-400 bg-emerald-50/40':'border-stone-200'} rounded-xl p-4"><div class="flex items-center gap-3"><div class="avatar-circle w-10 h-10 text-sm" style="background:${g.gender==='L'?'#0f5c4a':'#c89844'}">${g.nama.charAt(0)}</div><div class="flex-1"><p class="font-semibold text-gray-800 text-sm">${g.nama}${isMe?' <span class=\"text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-white ml-1\">Anda</span>':''}</p><p class="text-xs text-gray-500">${g.mapel} • ${c} murid</p></div></div><div class="bg-stone-100 rounded-lg px-3 py-2 mt-3"><code class="font-mono text-sm font-bold text-emerald-700">${g.code}</code></div></div>`}).join(''):'<p class="text-center text-gray-400 py-4">Belum ada guru</p>'}</div></div>`}
 function generateIdCard(){const sid=document.getElementById('idCardSantri').value;const s=getSantri(sid);if(!s)return;const st=state.data.settings;showModal(`<div class="text-center mb-4"><h3 class="text-xl font-bold text-gray-800">Kartu Pengenal Murid</h3></div><div class="border-2 border-stone-300 rounded-2xl p-6 max-w-sm mx-auto bg-white"><div class="text-center border-b-2 border-emerald-600 pb-4 mb-4"><h2 class="text-xl font-black text-emerald-700">${st.namaTPQ}</h2><p class="text-xs text-gray-500">${st.alamatTPQ}</p></div><div class="flex flex-col items-center gap-4"><div class="avatar-circle w-24 h-24 text-3xl border-4 border-emerald-100" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><div id="idCardQr" class="bg-white p-2 rounded-lg border border-stone-200"></div><div class="text-center w-full"><p class="text-lg font-bold text-gray-800">${s.nama}</p><p class="text-sm text-gray-600 font-mono">${s.nis}</p></div></div></div><div class="flex gap-3 mt-6"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Tutup</button><button onclick="window.print()" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Cetak</button></div>`,'max-w-md');generateQR('idCardQr',s.nis,120);lucide.createIcons()}
 function renderGuruSantri(){const q=(state._santriSearch||'').toLowerCase();let l=getGuruSantriScope();if(q)l=l.filter(s=>s.nama.toLowerCase().includes(q)||s.nis.toLowerCase().includes(q));return `<div class="card p-5 mb-5"><div class="relative"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" style="width:18px;height:18px"></i><input type="text" placeholder="Nama atau NIS..." value="${state._santriSearch||''}" oninput="state._santriSearch=this.value;document.getElementById('guruMain').innerHTML=renderGuruSantri();lucide.createIcons()" class="input-field pl-10"></div></div><div class="card p-5 mb-5 border-l-4 border-emerald-500 bg-emerald-50/40"><div class="flex items-start gap-3"><i data-lucide="info" class="text-emerald-600 mt-0.5" style="width:20px;height:20px"></i><div class="text-sm"><p class="font-bold text-emerald-800">Sistem Persetujuan Guru–Murid</p><p class="text-emerald-700 text-xs mt-1">Setiap murid memiliki tanda <span class="font-bold text-emerald-600">✓ Hijau (Terima)</span> untuk menerima murid sebagai bimbingan Anda, dan <span class="font-bold text-red-600">❌ Merah Tebal (Tolak)</span> untuk menolak. Arahkan kursor ke tanda untuk melihat keterangan detail.</p></div></div></div><div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">${l.length>0?l.map(s=>{const g=getGuru(s.guru_id);const tl=state.data.tagihan.filter(t=>t.santri_id===s.id&&t.status==='lunas').length;const tt=state.data.tagihan.filter(t=>t.santri_id===s.id).length;const tg=state.data.tagihan.filter(t=>t.santri_id===s.id&&t.status!=='lunas').reduce((a,b)=>a+b.nominal,0);const accStatus=s.guru_approved||'pending';const isApproved=accStatus==='approved';const isRejected=accStatus==='rejected';const approvalBadge=isApproved?'<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Diterima</span>':isRejected?'<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Ditolak</span>':'<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Menunggu</span>';return `<div class="card p-5 ${isRejected?'opacity-60':''}"><div class="flex items-start gap-3 mb-4"><div class="avatar-circle w-12 h-12" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><div class="flex-1 min-w-0"><h3 class="font-bold text-gray-800 truncate">${s.nama}</h3><p class="text-xs text-gray-500 font-mono">${s.nis}</p>${approvalBadge}</div></div><div class="text-xs text-gray-600 mb-3 space-y-1"><div class="flex items-center gap-1.5"><i data-lucide="phone" style="width:11px;height:11px"></i> Ortu: <span class="font-semibold">${s.telp_ortu||'-'}</span></div>${s.telp_santri?`<div class="flex items-center gap-1.5"><i data-lucide="smartphone" style="width:11px;height:11px"></i> Murid: <span class="font-semibold">${s.telp_santri}</span></div>`:''}</div><div class="pt-4 border-t border-stone-100 grid grid-cols-2 gap-3 mb-3"><div><p class="text-[10px] text-gray-500">Lunas</p><p class="text-sm font-bold text-emerald-700">${tl}/${tt}</p></div><div><p class="text-[10px] text-gray-500">Tunggakan</p><p class="text-sm font-bold ${tg>0?'text-red-600':'text-emerald-700'}">${formatRupiah(tg)}</p></div></div><div class="pt-3 border-t border-stone-100 flex items-center justify-between gap-2"><div class="flex gap-2">${isApproved?`<button title="Murid sudah diterima sebagai bimbingan Anda" class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-500 text-white"><i data-lucide="check" style="width:14px;height:14px"></i> Diterima</button>`:`<button title="Terima murid ini sebagai bimbingan Anda — guru yang cocok akan menerima murid" onclick="approveSantriByGuru('${s.id}')" class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"><i data-lucide="check" style="width:14px;height:14px"></i> Terima</button>`}${isRejected?`<button title="Pendaftaran murid ini sudah ditolak" class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-red-600 text-white"><i data-lucide="x" style="width:14px;height:14px"></i> Ditolak</button>`:`<button title="Tolak pendaftaran murid ini — murid akan dihapus dari daftar bimbingan" onclick="rejectSantriByGuru('${s.id}')" class="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors border-2 border-red-700"><i data-lucide="x" style="width:14px;height:14px"></i> Tolak</button>`}</div><button onclick="openSantriDetail('${s.id}')" class="text-xs btn-ghost px-2 py-1.5 rounded font-semibold">Detail</button></div></div>`}).join(''):'<div class="col-span-full text-center py-16 text-gray-400">Belum ada murid di bimbingan Anda</div>'}</div>`}
 function openSantriDetail(sid){const s=getSantri(sid);if(!s)return;const g=getGuru(s.guru_id);const t=getTagihanSantri(sid);const l=t.filter(x=>x.status==='lunas').length;const tg=t.filter(x=>x.status!=='lunas').reduce((a,b)=>a+b.nominal,0);showModal(`<div class="text-center mb-5"><div class="avatar-circle w-20 h-20 text-2xl mx-auto mb-3" style="background:${s.gender==='L'?'#0f5c4a':'#c89844'}">${s.nama.charAt(0)}</div><h3 class="text-xl font-black text-gray-800">${s.nama}</h3><p class="text-xs text-gray-500 font-mono">${s.nis}</p></div><div class="grid grid-cols-3 gap-2 mb-5"><div class="bg-emerald-50 rounded-xl p-3 text-center"><p class="text-lg font-black text-emerald-700">${l}</p><p class="text-[10px] text-gray-600">Lunas</p></div><div class="bg-amber-50 rounded-xl p-3 text-center"><p class="text-lg font-black text-amber-700">${t.length-l}</p><p class="text-[10px] text-gray-600">Belum</p></div><div class="bg-red-50 rounded-xl p-3 text-center"><p class="text-sm font-black text-red-700">${formatRupiah(tg)}</p><p class="text-[10px] text-gray-600">Tunggakan</p></div></div><div class="card p-4 mb-4"><h4 class="font-bold text-gray-800 text-sm mb-3">Data Diri</h4><div class="grid grid-cols-2 gap-3 text-sm"><div><p class="text-xs text-gray-500">Nama</p><p class="font-semibold">${s.nama}</p></div><div><p class="text-xs text-gray-500">TTL</p><p class="font-semibold">${s.ttl||'-'}</p></div><div><p class="text-xs text-gray-500">Ayah</p><p class="font-semibold">${s.ayah||'-'}</p></div><div><p class="text-xs text-gray-500">Ibu</p><p class="font-semibold">${s.ibu||'-'}</p></div><div class="col-span-2"><p class="text-xs text-gray-500">Alamat</p><p class="font-semibold">${s.alamat}</p></div></div></div><div class="flex gap-3 mt-5"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Tutup</button></div>`,'max-w-2xl')}
@@ -647,7 +672,7 @@ function renderAdminPengaturan(){const s=state.data.settings;return `<div class=
 function saveSettings(e){e.preventDefault();state.data.settings.namaTPQ=document.getElementById('set_nama').value.trim();state.data.settings.tahunAjaran=document.getElementById('set_tahun').value.trim();state.data.settings.alamatTPQ=document.getElementById('set_alamat').value.trim();state.data.settings.teleponTPQ=document.getElementById('set_telepon').value.trim();state.data.settings.linkWebsite=document.getElementById('set_link').value.trim();saveData();addLog('Pengaturan','Pengaturan diperbarui');toast('Pengaturan disimpan','success')}
 function changePass(e){e.preventDefault();const o=document.getElementById('old_pass').value.trim();const n=document.getElementById('new_pass').value.trim();const c=document.getElementById('conf_pass').value.trim();if(o!==state.data.accounts.admin.password){toast('Password lama salah','error');return}if(n.length<4){toast('Minimal 4 karakter','error');return}if(n!==c){toast('Konfirmasi tidak cocok','error');return}state.data.accounts.admin.password=n;saveData();addLog('Ubah Password','Password owner diubah');toast('Password diubah','success')}
 function updateMeetingStatus(role) {const current = getCurrentMeeting();const el = document.getElementById(`meetingStatus${role.charAt(0).toUpperCase() + role.slice(1)}`);if (el) {if (current.type === 'active') {el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-green-100 text-green-800 font-bold transition-colors hover:bg-green-200";el.innerHTML = `<span class="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span> Host Aktif`;} else if (current.type === 'upcoming') {el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-orange-100 text-orange-800 font-bold transition-colors hover:bg-orange-200";el.innerHTML = `<i data-lucide="megaphone" style="width:14px;height:14px"></i> Pengumuman 📢`;} else {el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-red-100 text-red-800 font-bold transition-colors hover:bg-red-200";el.innerHTML = `<span class="w-2 h-2 bg-red-600 rounded-full"></span> Host Offline`;}}const navItem = document.querySelector(`#${role}Sidebar .nav-item[data-page="meeting"]`);if (navItem) {const badge = navItem.querySelector('.meeting-badge');if (badge) {badge.classList.remove('hidden');if (current.type === 'active') {badge.className = 'meeting-badge text-xs px-2 py-0.5 rounded-full font-bold bg-green-500 text-white animate-pulse';badge.textContent = 'Host';} else if (current.type === 'upcoming') {badge.className = 'meeting-badge text-xs px-2 py-0.5 rounded-full font-bold bg-orange-500 text-white animate-pulse';badge.textContent = '1';} else {badge.className = 'meeting-badge text-xs px-2 py-0.5 rounded-full font-bold bg-red-500 text-white';badge.textContent = 'Offline';}}}lucide.createIcons();}
-function initGuruQR(){generateQR('mainQrCode','TPQ_ALQURAN|REGISTER',192);const wl=state.data.settings.linkWebsite||WEBSITE_LINK_DEFAULT;generateQR('linkQrCode',wl+'#daftar',192)}
+function initGuruQR(){const me=state.currentUser;const myGuruData=state.data.guru.find(g=>g.id===(me?.guruId||me?.guru_id))||state.data.guru[0]||null;const myGuruCode=myGuruData?.code||'TPQ-G1-GURU';generateQR('mainQrCode',myGuruCode,192);const wl=state.data.settings.linkWebsite||WEBSITE_LINK_DEFAULT;generateQR('linkQrCode',wl+'#daftar',192)}
 function generateQR(id,text,size){const el=document.getElementById(id);if(!el)return;el.innerHTML='';try{new QRCode(el,{text,width:size,height:size,colorDark:'#0a3d31',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H})}catch(e){el.innerHTML='<div class="bg-stone-100 rounded-xl flex items-center justify-center text-xs text-gray-400" style="width:'+size+'px;height:'+size+'px">QR Error</div>'}}
 
 loadData();
@@ -1007,6 +1032,677 @@ function openCalendarModal(){
   const ha=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
   const tgl=`${ha[n.getDay()]}, ${n.getDate()} ${b[n.getMonth()]} ${n.getFullYear()}`;
   showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-3"><i data-lucide="calendar-days" class="text-emerald-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-1">Kalender</h3><p class="text-sm text-gray-500 mb-4">Tanggal & Waktu Saat Ini</p><div class="bg-stone-50 rounded-xl p-5 text-center"><p class="text-lg font-bold text-gray-800">${tgl}</p><p class="text-3xl font-black text-emerald-700 mt-2 font-mono">${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}</p></div><button onclick="closeModal()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Tutup</button></div>`);
+}
+
+/* =========================================================================
+   KARTU IDENTITAS MURID — Bunga Matahari Berfotosintesis + Batik + Barcode
+   ========================================================================= */
+function getSantriBarcode(s){
+  // Format: HAI<MuridID><6-digit-NIS>
+  const nis = (s.nis || '').replace(/\D/g,'').padEnd(6,'0').slice(0,6);
+  return 'HAI' + nis + (s.id || '').replace(/\D/g,'').slice(-4).padStart(4,'0');
+}
+
+function renderSantriKartuIdentitas(){
+  const sid = state.currentUser.santri_id;
+  const s = getSantri(sid);
+  if(!s) return '<div class="text-center py-12">Data murid tidak ditemukan</div>';
+  const g = getGuru(s.guru_id);
+  const st = state.data.settings;
+  const barcodeId = 'santriBarcode_' + Date.now();
+  const today = new Date();
+  const b = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const todayStr = `${today.getDate()} ${b[today.getMonth()]} ${today.getFullYear()}`;
+  const expireDate = new Date(today.getFullYear()+1, today.getMonth(), today.getDate());
+  const expireStr = `${expireDate.getDate()} ${b[expireDate.getMonth()]} ${expireDate.getFullYear()}`;
+  const photoUrl = s.photo || null;
+  const barcodeVal = getSantriBarcode(s);
+
+  return `<div class="card p-5 mb-5 border-l-4 border-amber-500 bg-amber-50/40">
+    <div class="flex items-start gap-3">
+      <i data-lucide="info" class="text-amber-600 mt-0.5" style="width:20px;height:20px"></i>
+      <div class="text-sm flex-1">
+        <p class="font-bold text-amber-800">Kartu Identitas Murid — Bunga Matahari Berfotosintesis</p>
+        <p class="text-amber-700 text-xs mt-1">Kartu ini dilengkapi dengan <strong>barcode</strong> untuk absensi. Guru/Admin dapat memindai barcode menggunakan menu "Absensi Barcode Murid" untuk mencatat kehadiran Anda. Desain berbentuk bunga matahari (melambangkan fotosintesis / pertumbuhan belajar) dengan motif batik.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-6">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+      <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i data-lucide="id-card" style="width:20px;height:20px"></i> Kartu Identitas Murid</h3>
+      <div class="flex gap-2">
+        <button onclick="downloadKartuIdentitas()" class="btn-ghost px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 border-amber-300 text-amber-700 hover:bg-amber-50">
+          <i data-lucide="download" style="width:16px;height:16px"></i> Unduh
+        </button>
+        <button onclick="window.print()" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+          <i data-lucide="printer" style="width:16px;height:16px"></i> Cetak
+        </button>
+      </div>
+    </div>
+
+    <div id="printArea" class="flex justify-center">
+      <div class="sunflower-card batik-pattern relative" style="width:100%;max-width:480px;padding:24px">
+        <!-- Petals decoration top -->
+        <div class="sunflower-petals">
+          <svg viewBox="0 0 280 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="petalGrad" cx="50%" cy="100%" r="50%">
+                <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.9"/>
+                <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#d97706" stop-opacity="0.6"/>
+              </radialGradient>
+            </defs>
+            ${Array.from({length:12}).map((_,i)=>{
+              const angle=(i*30)-90;
+              const x=140+Math.cos(angle*Math.PI/180)*70;
+              const y=120+Math.sin(angle*Math.PI/180)*40;
+              return `<ellipse cx="${x}" cy="${y}" rx="14" ry="32" fill="url(#petalGrad)" transform="rotate(${angle+90} ${x} ${y})" opacity="0.75"/>`;
+            }).join('')}
+            <circle cx="140" cy="120" r="22" fill="#78350f"/>
+            <circle cx="140" cy="120" r="14" fill="#92400e"/>
+            <circle cx="140" cy="120" r="6" fill="#fbbf24"/>
+          </svg>
+        </div>
+
+        <!-- Leaves decoration -->
+        <div class="leaf-deco left"></div>
+        <div class="leaf-deco right"></div>
+
+        <!-- Header -->
+        <div class="relative z-10 text-center pt-6 pb-3 border-b-2 border-amber-600/40 mb-4">
+          <div class="flex items-center justify-center gap-2 mb-1">
+            <span class="sunflower-mini"></span>
+            <h2 class="text-xl font-black text-amber-800 tracking-wide">H.Ai</h2>
+            <span class="sunflower-mini"></span>
+          </div>
+          <p class="text-[10px] font-bold text-amber-700 uppercase tracking-widest">Kartu Identitas Murid</p>
+          <p class="text-xs text-stone-700 font-semibold mt-1">${st.namaTPQ}</p>
+          <p class="text-[10px] text-stone-500">${st.alamatTPQ}</p>
+          <p class="text-[10px] text-stone-500">TA ${st.tahunAjaran}</p>
+        </div>
+
+        <!-- Body: photo + data -->
+        <div class="relative z-10 flex gap-3 mb-4">
+          <div class="flex-shrink-0">
+            <div class="w-20 h-24 rounded-lg overflow-hidden border-2 border-amber-500/50 bg-stone-100">
+              ${photoUrl?`<img src="${photoUrl}" class="w-full h-full object-cover" alt="Foto">`:`<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-amber-200"><span class="text-3xl font-black text-amber-700">${s.nama.charAt(0)}</span></div>`}
+            </div>
+            <p class="text-[9px] text-center mt-1 text-stone-600">Foto</p>
+          </div>
+          <div class="flex-1 text-xs space-y-1.5">
+            <div>
+              <p class="text-[9px] text-amber-700 uppercase font-bold">Nama Murid</p>
+              <p class="text-sm font-bold text-stone-800 leading-tight">${s.nama}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <p class="text-[9px] text-amber-700 uppercase font-bold">NIS</p>
+                <p class="text-xs font-mono font-bold text-stone-800">${s.nis}</p>
+              </div>
+              <div>
+                <p class="text-[9px] text-amber-700 uppercase font-bold">Jenis Kelamin</p>
+                <p class="text-xs text-stone-800">${s.gender==='P'?'Perempuan':'Laki-laki'}</p>
+              </div>
+            </div>
+            <div>
+              <p class="text-[9px] text-amber-700 uppercase font-bold">Tempat, Tgl Lahir</p>
+              <p class="text-xs text-stone-800 leading-tight">${s.ttl||'-'}</p>
+            </div>
+            <div>
+              <p class="text-[9px] text-amber-700 uppercase font-bold">Guru Wali</p>
+              <p class="text-xs text-stone-800 leading-tight">${g?.nama||'-'}</p>
+            </div>
+            <div>
+              <p class="text-[9px] text-amber-700 uppercase font-bold">Alamat</p>
+              <p class="text-xs text-stone-700 leading-tight">${s.alamat||'-'}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barcode -->
+        <div class="relative z-10 barcode-area">
+          <svg id="${barcodeId}"></svg>
+          <p class="text-[10px] font-mono font-bold text-stone-800">${barcodeVal}</p>
+          <p class="text-[9px] text-stone-500">Pindai barcode ini untuk absensi</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="relative z-10 mt-3 pt-3 border-t border-amber-600/30 flex justify-between text-[9px] text-stone-600">
+          <div>
+            <p>Diterbitkan: ${todayStr}</p>
+            <p>Berlaku s/d: ${expireStr}</p>
+          </div>
+          <div class="text-right">
+            <p class="font-bold text-amber-700">H.Ai — Proses Belajar & Mengajar</p>
+            <p>🌸 Bunga Matahari Berfotosintesis 🌸</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-5 p-4 bg-stone-50 border border-stone-200 rounded-xl">
+      <h4 class="font-bold text-gray-800 text-sm mb-2 flex items-center gap-2"><i data-lucide="info" style="width:16px;height:16px"></i> Petunjuk Penggunaan Kartu</h4>
+      <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
+        <li>Klik <strong>Unduh</strong> untuk menyimpan kartu sebagai gambar.</li>
+        <li>Klik <strong>Cetak</strong> untuk mencetak kartu via printer.</li>
+        <li>Barcode di kartu ini dipakai Guru/Admin untuk mencatat kehadiran Anda via menu <strong>Absensi Barcode Murid</strong>.</li>
+        <li>Desain bunga matahari melambangkan <em>fotosintesis pertumbuhan belajar</em> — murid tumbuh seperti bunga matahari menyerap cahaya ilmu.</li>
+        <li>Motif batik melambangkan kekayaan budaya lokal Indonesia.</li>
+      </ul>
+    </div>
+  </div>`;
+}
+
+function initSantriBarcode(){
+  // Find the SVG element by ID prefix and render barcode
+  setTimeout(()=>{
+    const svgEl = document.querySelector('[id^="santriBarcode_"]');
+    if(svgEl && typeof JsBarcode !== 'undefined'){
+      try{
+        JsBarcode(svgEl, svgEl.id.replace('santriBarcode_','HAI').slice(0,12), {
+          format:'CODE128',
+          width:2,
+          height:50,
+          displayValue:false,
+          margin:0,
+          background:'transparent',
+          lineColor:'#1c1917'
+        });
+        // Re-render with actual barcode value (need to get from parent context)
+        const sid = state.currentUser.santri_id;
+        const s = getSantri(sid);
+        if(s){
+          const barcodeVal = getSantriBarcode(s);
+          JsBarcode(svgEl, barcodeVal, {
+            format:'CODE128',
+            width:2,
+            height:50,
+            displayValue:false,
+            margin:0,
+            background:'transparent',
+            lineColor:'#1c1917'
+          });
+        }
+      }catch(e){console.warn('Barcode init failed',e)}
+    }
+  },100);
+}
+
+function downloadKartuIdentitas(){
+  toast('Gunakan tombol Cetak (Print) lalu pilih "Save as PDF" untuk mengunduh kartu.','info',5000);
+  setTimeout(()=>window.print(),500);
+}
+
+/* =========================================================================
+   ABSENSI BARCODE MURID — Scan barcode kartu identitas murid
+   Tersedia di login Guru & Admin
+   ========================================================================= */
+function renderScanBarcodeMurid(role){
+  const today = new Date().toISOString().split('T')[0];
+  const todayDisplay = new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const recentAbsensi = (state.data.absensiBarcodeMurid||[]).filter(a=>{
+    if(role==='guru'){
+      // Guru only sees their bimbingan
+      const s = getSantri(a.santri_id);
+      return s && s.guru_id === state.currentUser.guruId;
+    }
+    return true; // admin sees all
+  }).slice(-8).reverse();
+
+  return `<div class="card p-5 mb-5 border-l-4 border-amber-500 bg-amber-50/40">
+    <div class="flex items-start gap-3">
+      <i data-lucide="scan-barcode" class="text-amber-600 mt-0.5" style="width:20px;height:20px"></i>
+      <div class="text-sm flex-1">
+        <p class="font-bold text-amber-800">Absensi Barcode Murid — ${role==='admin'?'Panel Admin':'Panel Guru'}</p>
+        <p class="text-amber-700 text-xs mt-1">Pindai barcode yang ada di <strong>Kartu Identitas Murid</strong> (desain bunga matahari) untuk mencatat kehadiran. Sistem otomatis mendeteksi barcode menggunakan kamera, lalu menyimpannya ke daftar absensi ${role==='admin'?'(terlihat oleh semua guru)':'(murid bimbingan Anda)'}.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-6 mb-5">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+      <div>
+        <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i data-lucide="scan-barcode" style="width:20px;height:20px"></i> Pindai Barcode Kartu Murid</h3>
+        <p class="text-xs text-gray-500 mt-0.5">Hari ini: <strong>${todayDisplay}</strong></p>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <button onclick="startBarcodeScanner('${role}')" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+          <i data-lucide="camera" style="width:16px;height:16px"></i> Mulai Scan Kamera
+        </button>
+        <button onclick="manualInputBarcode('${role}')" class="btn-ghost px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 border-amber-300 text-amber-700 hover:bg-amber-50">
+          <i data-lucide="keyboard" style="width:16px;height:16px"></i> Input Manual
+        </button>
+      </div>
+    </div>
+
+    <div id="barcodeScannerContainer" class="hidden bg-stone-900 rounded-xl overflow-hidden aspect-video relative">
+      <video id="barcodeVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+      <div class="scan-barcode-frame"></div>
+      <div id="barcodeStatus" class="absolute top-3 left-3 right-3 bg-black/70 text-white text-sm font-semibold px-3 py-2 rounded-lg flex items-center gap-2">
+        <i data-lucide="loader-2" class="animate-spin" style="width:14px;height:14px"></i>
+        <span>Menunggu barcode kartu murid...</span>
+      </div>
+      <button onclick="stopBarcodeScanner()" class="absolute bottom-3 right-3 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Batal</button>
+    </div>
+  </div>
+
+  <div class="card p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-gray-800 flex items-center gap-2"><i data-lucide="history" style="width:18px;height:18px"></i> Riwayat Absensi Hari Ini</h3>
+      <span class="text-xs px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-bold">${recentAbsensi.length} scan</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-stone-50 border-b border-stone-200">
+          <tr class="text-left text-xs text-gray-600 uppercase">
+            <th class="px-3 py-2">Waktu</th>
+            <th class="px-3 py-2">Murid</th>
+            <th class="px-3 py-2">NIS</th>
+            <th class="px-3 py-2">Barcode</th>
+            <th class="px-3 py-2">Guru Wali</th>
+            <th class="px-3 py-2 text-center">Metode</th>
+            <th class="px-3 py-2 text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${recentAbsensi.length>0?recentAbsensi.map(a=>{
+            const s = getSantri(a.santri_id);
+            const g = s?getGuru(s.guru_id):null;
+            return `<tr class="border-b border-stone-100">
+              <td class="px-3 py-2 font-mono text-xs">${a.waktu||'-'}</td>
+              <td class="px-3 py-2 font-semibold">${s?.nama||'(Dihapus)'}</td>
+              <td class="px-3 py-2 font-mono text-xs">${s?.nis||'-'}</td>
+              <td class="px-3 py-2 font-mono text-[10px] text-gray-500">${a.barcode_value||'-'}</td>
+              <td class="px-3 py-2 text-xs">${g?.nama||'-'}</td>
+              <td class="px-3 py-2 text-center"><span class="text-xs px-2 py-0.5 rounded-full ${a.metode==='Kamera'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}">${a.metode||'-'}</span></td>
+              <td class="px-3 py-2 text-center"><span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">✓ Terdeteksi</span></td>
+            </tr>`;
+          }).join(''):'<tr><td colspan="7" class="py-8 text-center text-gray-400">Belum ada absensi barcode hari ini</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function startBarcodeScanner(role){
+  const container = document.getElementById('barcodeScannerContainer');
+  if(!container) return;
+  container.classList.remove('hidden');
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    toast('Browser tidak mendukung kamera. Gunakan Input Manual.','error');
+    stopBarcodeScanner();
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(stream=>{
+    state.cameraStream = stream;
+    const video = document.getElementById('barcodeVideo');
+    video.srcObject = stream;
+    video.setAttribute('playsinline', true);
+    video.play();
+    const statusEl = document.getElementById('barcodeStatus');
+    state.scanInterval = setInterval(()=>{
+      if(video.readyState === video.HAVE_ENOUGH_DATA){
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if(code && code.data){
+          // Check if data looks like our barcode format
+          const data = code.data.trim();
+          if(data.startsWith('HAI') || data.length>=8){
+            processBarcodeAbsensi(data, role, 'Kamera');
+            stopBarcodeScanner();
+          }
+        }
+      }
+    }, 300);
+    if(statusEl){
+      statusEl.innerHTML = '<i data-lucide="loader-2" class="animate-spin" style="width:14px;height:14px"></i><span>Menunggu barcode kartu murid... Arahkan kamera ke barcode.</span>';
+      lucide.createIcons();
+    }
+  }).catch(()=>{
+    toast('Tidak dapat mengakses kamera. Gunakan Input Manual.','error');
+    stopBarcodeScanner();
+  });
+}
+
+function stopBarcodeScanner(){
+  if(state.cameraStream){
+    state.cameraStream.getTracks().forEach(t=>t.stop());
+    state.cameraStream = null;
+  }
+  if(state.scanInterval){
+    clearInterval(state.scanInterval);
+    state.scanInterval = null;
+  }
+  const container = document.getElementById('barcodeScannerContainer');
+  if(container) container.classList.add('hidden');
+}
+
+function manualInputBarcode(role){
+  showModal(`<div class="text-center mb-4"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 mb-3"><i data-lucide="keyboard" class="text-amber-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800">Input Manual Barcode</h3><p class="text-sm text-gray-500 mt-1">Ketik kode barcode dari kartu identitas murid</p></div><input id="manualBarcodeInput" type="text" class="input-field font-mono" placeholder="HAI1234560001" style="text-transform:uppercase"><p class="text-xs text-gray-400 mt-2">Format: HAI + 6 digit NIS + 4 digit ID</p><div class="flex gap-3 mt-5"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="submitManualBarcode('${role}')" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Proses Absensi</button></div>`);
+}
+
+function submitManualBarcode(role){
+  const value = document.getElementById('manualBarcodeInput').value.trim().toUpperCase();
+  if(!value){toast('Barcode tidak boleh kosong','error');return}
+  processBarcodeAbsensi(value, role, 'Manual');
+  closeModal();
+}
+
+function processBarcodeAbsensi(barcodeValue, role, metode){
+  if(!barcodeValue){toast('Barcode kosong','error');return}
+  // Find santri by matching barcode value
+  const allSantri = state.data.santri || [];
+  const found = allSantri.find(s => getSantriBarcode(s) === barcodeValue || s.nis === barcodeValue.replace(/^HAI/,''));
+  if(!found){
+    toast(`Barcode "${barcodeValue}" tidak ditemukan di daftar murid`,'error');
+    addLog('Absensi Barcode Gagal', `Barcode "${barcodeValue}" tidak cocok dengan murid manapun`);
+    return;
+  }
+  // Optional: Guru can only absen their bimbingan
+  if(role==='guru' && found.guru_id !== state.currentUser.guruId){
+    toast(`Murid ${found.nama} bukan bimbingan Anda`,'error');
+    return;
+  }
+  const n = new Date();
+  const today = n.toISOString().split('T')[0];
+  const waktu = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
+  if(!state.data.absensiBarcodeMurid) state.data.absensiBarcodeMurid = [];
+  // Check if already absen today
+  const existing = state.data.absensiBarcodeMurid.find(a => a.santri_id === found.id && a.tanggal === today);
+  if(existing){
+    toast(`Murid ${found.nama} sudah absen hari ini pukul ${existing.waktu}`,'warn');
+    showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 mb-3"><i data-lucide="alert-triangle" class="text-amber-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Sudah Absen Hari Ini</h3><p class="text-sm text-gray-600 mb-4">Murid <strong>${found.nama}</strong> (${found.nis}) sudah tercatat absen pada:</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm"><p>Tanggal: <strong>${existing.tanggal}</strong></p><p>Waktu: <strong class="font-mono">${existing.waktu}</strong></p><p>Metode: ${existing.metode}</p></div><button onclick="closeModal()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Tutup</button></div>`);
+    return;
+  }
+  const absId = 'abm' + Date.now();
+  state.data.absensiBarcodeMurid.push({
+    id: absId,
+    santri_id: found.id,
+    santri_nama: found.nama,
+    nis: found.nis,
+    barcode_value: barcodeValue,
+    guru_id: found.guru_id,
+    tanggal: today,
+    waktu: waktu,
+    metode: metode,
+    scanned_by: state.currentUser?.nama || role,
+    scanned_role: role,
+    status: 'Terdeteksi'
+  });
+  saveData();
+  addLog('Absensi Barcode Murid', `${role==='admin'?'Admin':'Guru'} ${state.currentUser?.nama||''} memindai kartu murid ${found.nama} (${found.nis}) via ${metode}`);
+  toast(`Absensi berhasil! Murid ${found.nama} (${found.nis}) tercatat pukul ${waktu}`,'success');
+  showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-50 mb-3"><i data-lucide="check-circle" class="text-emerald-600" style="width:40px;height:40px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Absensi Berhasil!</h3><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mt-4 text-left text-sm"><div class="flex items-center gap-3 mb-3"><div class="avatar-circle w-12 h-12" style="background:${found.gender==='L'?'#0f5c4a':'#c89844'}">${found.nama.charAt(0)}</div><div><p class="font-bold text-gray-800">${found.nama}</p><p class="text-xs text-gray-500 font-mono">${found.nis}</p></div></div><div class="space-y-1 text-xs"><p>Tanggal: <strong>${today}</strong></p><p>Waktu: <strong class="font-mono">${waktu}</strong></p><p>Metode: ${metode}</p><p>Barcode: <span class="font-mono">${barcodeValue}</span></p></div></div><button onclick="closeModal()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Selesai</button></div>`);
+  // Refresh view
+  if(role==='guru') navigateGuru('absensi-barcode');
+  else navigateAdmin('absensi-barcode');
+}
+
+/* Fallback in case initBarcodeScanner is called by guru/admin navigate */
+function initBarcodeScanner(role){
+  // Auto-start scanner view; user must click "Mulai Scan Kamera"
+  // This is a placeholder; the actual scanner starts on button click
+  // Ensure scanner container is hidden initially
+  setTimeout(()=>{
+    const c = document.getElementById('barcodeScannerContainer');
+    if(c) c.classList.add('hidden');
+  },50);
+}
+
+/* =========================================================================
+   JADWAL — Menu utama Guru & Murid (Online/Offline mingguan)
+   - Hari otomatis mengikuti dashboard (highlight hari ini)
+   - ON = Online (Internet, gambar orang menunjuk ke layar)
+   - OFF = Offline (Tatap Muka, orang berkumpul)
+   - Klik ikon globe → buka Google Maps
+   - Guru: Edit, Simpan, Kirim ke Murid
+   - Murid: Lihat saja
+   ========================================================================= */
+const HARI_JADWAL=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+const HARI_DASHBOARD_MAP=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+function getCurrentDayName(){
+  const n=new Date();
+  return HARI_DASHBOARD_MAP[n.getDay()];
+}
+
+function getJadwalKet(status){
+  if(status==='on') return {label:'Internet',icon:'monitor-smartphone',textColor:'text-emerald-600',bgColor:'bg-emerald-100',borderColor:'border-emerald-500',bgSoft:'bg-emerald-50',textBold:'text-emerald-700',textHeader:'text-emerald-800',desc:'Online'};
+  return {label:'Tatap Muka',icon:'users',textColor:'text-red-600',bgColor:'bg-red-100',borderColor:'border-red-500',bgSoft:'bg-red-50',textBold:'text-red-700',textHeader:'text-red-800',desc:'Offline'};
+}
+
+function renderGuruJadwal(){
+  if(!state.data.jadwal) state.data.jadwal={};
+  const today=getCurrentDayName();
+  const jadwal=state.data.jadwal;
+  const publishedAt=state.data.jadwalPublishedAt;
+  const publishedBy=state.data.jadwalPublishedBy;
+  return `<div class="card p-5 mb-5 border-l-4 border-emerald-500 bg-emerald-50/40">
+    <div class="flex items-start gap-3">
+      <i data-lucide="info" class="text-emerald-600 mt-0.5" style="width:20px;height:20px"></i>
+      <div class="text-sm flex-1">
+        <p class="font-bold text-emerald-800">Jadwal Mingguan Online/Offline</p>
+        <p class="text-emerald-700 text-xs mt-1">Hari ini adalah <strong>${today}</strong> — baris hari ini otomatis disorot sesuai dashboard. Klik toggle <strong>ON</strong> (Online/Internet, orang menunjuk layar) atau <strong>OFF</strong> (Offline/Tatap Muka, orang berkumpul). Klik ikon globe untuk membuka Google Maps. Setelah Edit, klik <strong>Simpan</strong> lalu <strong>Kirim</strong> agar jadwal tampil di panel Murid.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-6">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+      <div>
+        <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i data-lucide="calendar-clock" style="width:20px;height:20px"></i> Jadwal Pekan Ini</h3>
+        <p class="text-xs text-gray-500 mt-0.5">Hari ini: <strong class="text-emerald-700">${today}</strong>${publishedAt?` • Terakhir dikirim: ${publishedAt}${publishedBy?` oleh ${publishedBy}`:''}`:''}</p>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <button onclick="enableJadwalEdit()" id="btnJadwalEdit" class="btn-ghost px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 border-amber-300 text-amber-700 hover:bg-amber-50">
+          <i data-lucide="edit-3" style="width:16px;height:16px"></i> Edit
+        </button>
+        <button onclick="saveJadwalGuru()" class="btn-royal px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+          <i data-lucide="save" style="width:16px;height:16px"></i> Simpan
+        </button>
+        <button onclick="sendJadwalToMurid()" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+          <i data-lucide="send" style="width:16px;height:16px"></i> Kirim
+        </button>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm" style="border-collapse:collapse">
+        <thead>
+          <tr style="background:#f3f4f6">
+            <th style="border:1px solid #d9d2c2;padding:10px;text-align:left;color:#374151;font-size:12px;text-transform:uppercase">Hari</th>
+            ${HARI_JADWAL.map(h=>`<th style="border:1px solid #d9d2c2;padding:10px;text-align:center;color:${h===today?'#fff':'#374151'};background:${h===today?'#0f5c4a':'#f3f4f6'};font-size:12px;min-width:120px">${h}${h===today?' <span style=\"font-size:9px;opacity:.8\">(Hari Ini)</span>':''}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="border:1px solid #d9d2c2;padding:8px;background:#ecfdf5;font-weight:bold;color:#065f46;font-size:12px">Waktu</td>
+            ${HARI_JADWAL.map(h=>{const j=jadwal[h]||{waktu:''};return `<td style="border:1px solid #d9d2c2;padding:6px;text-align:center;${h===today?'background:#f0fdf4':''}"><input type="text" id="jadwal_waktu_${h}" value="${j.waktu||''}" class="jadwal-input" placeholder="14:00 - 16:00" style="width:100%;border:none;outline:none;background:transparent;text-align:center;font-size:12px;font-family:monospace" disabled></td>`}).join('')}
+          </tr>
+          <tr>
+            <td style="border:1px solid #d9d2c2;padding:8px;background:#ecfdf5;font-weight:bold;color:#065f46;font-size:12px">On/OFF</td>
+            ${HARI_JADWAL.map(h=>{const j=jadwal[h]||{status:'off'};const isOn=j.status==='on';return `<td style="border:1px solid #d9d2c2;padding:6px;text-align:center;${h===today?'background:#f0fdf4':''}"><button onclick="toggleJadwalStatus('${h}')" id="jadwal_toggle_${h}" class="px-3 py-1.5 rounded-full text-xs font-bold ${isOn?'bg-emerald-500 text-white':'bg-red-500 text-white border-2 border-red-700'}" title="${isOn?'Klik untuk ubah ke Offline (Tatap Muka)':'Klik untuk ubah ke Online (Internet)'}">${isOn?'ON':'OFF'}</button></td>`}).join('')}
+          </tr>
+          <tr>
+            <td style="border:1px solid #d9d2c2;padding:8px;background:#ecfdf5;font-weight:bold;color:#065f46;font-size:12px">Ket</td>
+            ${HARI_JADWAL.map(h=>{const j=jadwal[h]||{status:'off'};const ket=getJadwalKet(j.status);return `<td style="border:1px solid #d9d2c2;padding:6px;text-align:center;${h===today?'background:#f0fdf4':''}"><div class="flex flex-col items-center gap-1"><i data-lucide="${ket.icon}" class="${ket.textColor}" style="width:24px;height:24px"></i><span class="text-xs font-bold ${ket.textBold}">${ket.label}</span><span class="text-[10px] text-gray-500">(${ket.desc})</span></div></td>`}).join('')}
+          </tr>
+          <tr>
+            <td style="border:1px solid #d9d2c2;padding:8px;background:#ecfdf5;font-weight:bold;color:#065f46;font-size:12px">Alamat</td>
+            ${HARI_JADWAL.map(h=>{const j=jadwal[h]||{alamat:''};return `<td style="border:1px solid #d9d2c2;padding:6px;${h===today?'background:#f0fdf4':''}"><input type="text" id="jadwal_alamat_${h}" value="${(j.alamat||'').replace(/"/g,'&quot;')}" class="jadwal-input" placeholder="Alamat/tempat" style="width:100%;border:none;outline:none;background:transparent;font-size:11px" disabled></td>`}).join('')}
+          </tr>
+          <tr>
+            <td style="border:1px solid #d9d2c2;padding:8px;background:#ecfdf5;font-weight:bold;color:#065f46;font-size:12px">Link Maps</td>
+            ${HARI_JADWAL.map(h=>{const j=jadwal[h]||{link_maps:''};const hasLink=!!(j.link_maps&&j.link_maps.trim());return `<td style="border:1px solid #d9d2c2;padding:6px;text-align:center;${h===today?'background:#f0fdf4':''}"><div class="flex flex-col items-center gap-1">${hasLink?`<a href="${j.link_maps}" target="_blank" title="Buka di Google Maps: ${j.link_maps}" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 transition-colors"><i data-lucide="globe" style="width:20px;height:20px"></i></a>`:`<button onclick="editJadwalLinkMaps('${h}')" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-400 transition-colors" title="Belum ada link, klik Edit untuk menambah"><i data-lucide="map-pin-off" style="width:18px;height:18px"></i></button>`}<input type="hidden" id="jadwal_link_${h}" value="${(j.link_maps||'').replace(/"/g,'&quot;')}"></div></td>`}).join('')}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-5 p-4 bg-stone-50 border border-stone-200 rounded-xl">
+      <h4 class="font-bold text-gray-800 text-sm mb-2 flex items-center gap-2"><i data-lucide="info" style="width:16px;height:16px"></i> Petunjuk Penggunaan</h4>
+      <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
+        <li><strong class="text-emerald-700">ON</strong> = Online (Internet) — gambar orang menunjuk ke layar; belajar via daring.</li>
+        <li><strong class="text-red-700">OFF</strong> = Offline (Tatap Muka) — gambar orang berkumpul; belajar langsung di lokasi.</li>
+        <li><strong>Alamat</strong>, <strong>Waktu</strong>, dan <strong>Link Maps Lokasi</strong> tidak perlu diisi panjang — cukup klik ikon globe untuk membuka Google Maps.</li>
+        <li>Klik <strong>Edit</strong> untuk mengaktifkan input, ubah data, lalu klik <strong>Simpan</strong>.</li>
+        <li>Klik <strong>Kirim</strong> untuk menerbitkan jadwal agar tampil di panel Murid.</li>
+      </ul>
+    </div>
+  </div>`;
+}
+
+function enableJadwalEdit(){
+  document.querySelectorAll('.jadwal-input').forEach(el=>{el.disabled=false;el.style.background='#fffbeb';el.style.border='1px solid #fcd34d';el.style.borderRadius='4px';el.style.padding='4px 6px'});
+  toast('Mode edit aktif. Ubah data lalu klik Simpan.','info');
+}
+
+function toggleJadwalStatus(day){
+  const j=state.data.jadwal[day]||{status:'off'};
+  j.status = j.status==='on'?'off':'on';
+  state.data.jadwal[day]=j;
+  saveData();
+  addLog('Toggle Jadwal',`Hari ${day} diubah ke ${j.status==='on'?'ON (Online)':'OFF (Tatap Muka)'}`);
+  toast(`Hari ${day}: ${j.status==='on'?'ON (Online/Internet)':'OFF (Tatap Muka)'}`,'success');
+  navigateGuru('jadwal');
+}
+
+function editJadwalLinkMaps(day){
+  const j=state.data.jadwal[day]||{link_maps:''};
+  showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Link Google Maps — ${day}</h3><p class="text-sm text-gray-500 mb-4">Tempelkan link Google Maps untuk lokasi belajar hari ${day}.</p><input id="jadwal_link_input" type="url" class="input-field" value="${(j.link_maps||'').replace(/"/g,'&quot;')}" placeholder="https://maps.google.com/?q=-6.9175,107.6191"><div class="flex gap-3 mt-5"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="saveJadwalLinkMaps('${day}')" class="btn-primary flex-1 py-3 rounded-xl font-semibold">Simpan Link</button></div>`);
+}
+
+function saveJadwalLinkMaps(day){
+  const link=document.getElementById('jadwal_link_input').value.trim();
+  if(!state.data.jadwal[day]) state.data.jadwal[day]={waktu:'',status:'off',alamat:'',link_maps:''};
+  state.data.jadwal[day].link_maps=link;
+  saveData();
+  addLog('Edit Link Maps',`Link Maps hari ${day} diperbarui`);
+  closeModal();
+  toast(`Link Maps hari ${day} disimpan`,'success');
+  navigateGuru('jadwal');
+}
+
+function saveJadwalGuru(){
+  if(!state.data.jadwal) state.data.jadwal={};
+  HARI_JADWAL.forEach(h=>{
+    const waktuEl=document.getElementById(`jadwal_waktu_${h}`);
+    const alamatEl=document.getElementById(`jadwal_alamat_${h}`);
+    const linkEl=document.getElementById(`jadwal_link_${h}`);
+    if(!state.data.jadwal[h]) state.data.jadwal[h]={waktu:'',status:'off',alamat:'',link_maps:''};
+    if(waktuEl) state.data.jadwal[h].waktu=waktuEl.value.trim();
+    if(alamatEl) state.data.jadwal[h].alamat=alamatEl.value.trim();
+    if(linkEl) state.data.jadwal[h].link_maps=linkEl.value.trim();
+  });
+  saveData();
+  addLog('Simpan Jadwal',`Guru ${state.currentUser?.nama||''} menyimpan jadwal mingguan`);
+  toast('Jadwal tersimpan. Klik Kirim agar tampil di panel Murid.','success');
+}
+
+function sendJadwalToMurid(){
+  saveJadwalGuru();
+  state.data.jadwalPublishedAt=new Date().toLocaleString('id-ID');
+  state.data.jadwalPublishedBy=state.currentUser?.nama||'Guru';
+  saveData();
+  addLog('Kirim Jadwal',`Jadwal diterbitkan ke semua murid oleh ${state.currentUser?.nama||'Guru'}`);
+  toast('Jadwal berhasil dikirim ke panel Murid!','success');
+}
+
+function renderSantriJadwal(){
+  if(!state.data.jadwal) state.data.jadwal={};
+  const today=getCurrentDayName();
+  const jadwal=state.data.jadwal;
+  const publishedAt=state.data.jadwalPublishedAt;
+  const todayJadwal=jadwal[today]||{status:'off',waktu:'-',alamat:'-',link_maps:''};
+  const ket=getJadwalKet(todayJadwal.status);
+  return `<div class="card p-5 mb-5 border-l-4 ${ket.borderColor} ${ket.bgSoft}">
+    <div class="flex items-start gap-3">
+      <i data-lucide="${ket.icon}" class="${ket.textColor} mt-0.5" style="width:24px;height:24px"></i>
+      <div class="text-sm flex-1">
+        <p class="font-bold ${ket.textHeader} text-base">Hari Ini: ${today} — ${ket.desc} (${ket.label})</p>
+        <p class="${ket.textBold} text-xs mt-1">Waktu: <strong>${todayJadwal.waktu||'-'}</strong>${todayJadwal.status==='off' && todayJadwal.alamat?` • Lokasi: <strong>${todayJadwal.alamat}</strong>`:''}${todayJadwal.status==='off' && todayJadwal.link_maps?` • <a href="${todayJadwal.link_maps}" target="_blank" class="underline font-bold text-blue-600">Buka di Google Maps →</a>`:''}</p>
+        <p class="text-gray-500 text-[11px] mt-1">${ket.desc==='Online'?'Belajar daring (Internet) — guru menunjuk ke layar.':'Belajar tatap muka — guru & murid berkumpul di lokasi.'}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-6">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+      <div>
+        <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i data-lucide="calendar-clock" style="width:20px;height:20px"></i> Jadwal Pekan Ini</h3>
+        <p class="text-xs text-gray-500 mt-0.5">Hari ini: <strong class="text-emerald-700">${today}</strong>${publishedAt?` • Diperbarui: ${publishedAt}`:''}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+      ${HARI_JADWAL.map(h=>{
+        const j=jadwal[h]||{status:'off',waktu:'',alamat:'',link_maps:''};
+        const k=getJadwalKet(j.status);
+        const isToday=h===today;
+        return `<div class="card p-3 ${isToday?'ring-2 ring-emerald-500 bg-emerald-50':''} border-2 ${isToday?'border-emerald-500':'border-stone-200'}">
+          <p class="text-xs font-bold ${isToday?'text-emerald-700':'text-gray-700'} text-center mb-2">${h}${isToday?' •':''}</p>
+          <div class="flex flex-col items-center gap-1.5">
+            <div class="w-12 h-12 rounded-full ${k.bgColor} flex items-center justify-center">
+              <i data-lucide="${k.icon}" class="${k.textColor}" style="width:24px;height:24px"></i>
+            </div>
+            <p class="text-xs font-bold ${k.textBold}">${k.desc}</p>
+            <p class="text-[10px] text-gray-500">${k.label}</p>
+            <p class="text-[11px] font-mono text-gray-700 mt-1">${j.waktu||'-'}</p>
+            ${j.status==='off' && j.link_maps?`<a href="${j.link_maps}" target="_blank" class="mt-1 inline-flex items-center gap-1 text-[10px] text-blue-600 hover:underline"><i data-lucide="globe" style="width:11px;height:11px"></i> Maps</a>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm" style="border-collapse:collapse">
+        <thead>
+          <tr style="background:#f3f4f6">
+            <th style="border:1px solid #d9d2c2;padding:10px;text-align:left;color:#374151;font-size:12px;text-transform:uppercase">Hari</th>
+            ${HARI_JADWAL.map(h=>`<th style="border:1px solid #d9d2c2;padding:10px;text-align:center;color:${h===today?'#fff':'#374151'};background:${h===today?'#0f5c4a':'#f3f4f6'};font-size:12px;min-width:120px">${h}${h===today?' <span style=\"font-size:9px;opacity:.8\">(Hari Ini)</span>':''}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="border:1px solid #d9d2c2;padding:8px;background:#ecfdf5;font-weight:bold;color:#065f46;font-size:12px">Waktu</td>
+            ${HARI_JADWAL.map(h=>{const j=jadwal[h]||{waktu:''};return `<td style="border:1px solid #d9d2c2;padding:8px;text-align:center;font-mono;font-size:12px;${h===today?'background:#f0fdf4;font-weight:bold;color:#065f46':''}">${j.waktu||'-'}</td>`}).join('')}
+          </tr>
+          <tr>
+            <td style="border:1px solid #d9d2c2;padding:8px;background:#ecfdf5;font-weight:bold;color:#065f46;font-size:12px">On/Off</td>
+            ${HARI_JADWAL.map(h=>{const j=jadwal[h]||{status:'off'};const isOn=j.status==='on';return `<td style="border:1px solid #d9d2c2;padding:8px;text-align:center;${h===today?'background:#f0fdf4':''}"><span class="px-3 py-1 rounded-full text-xs font-bold ${isOn?'bg-emerald-100 text-emerald-700':'bg-red-100 text-red-700'}">${isOn?'ON':'OFF'}</span></td>`}).join('')}
+          </tr>
+          <tr>
+            <td style="border:1px solid #d9d2c2;padding:8px;background:#ecfdf5;font-weight:bold;color:#065f46;font-size:12px">Ket</td>
+            ${HARI_JADWAL.map(h=>{const j=jadwal[h]||{status:'off'};const k=getJadwalKet(j.status);return `<td style="border:1px solid #d9d2c2;padding:8px;text-align:center;${h===today?'background:#f0fdf4':''}"><div class="flex flex-col items-center gap-1"><i data-lucide="${k.icon}" class="${k.textColor}" style="width:24px;height:24px"></i><span class="text-xs font-bold ${k.textBold}">${k.label}</span><span class="text-[10px] text-gray-500">(${k.desc})</span></div></td>`}).join('')}
+          </tr>
+          <tr>
+            <td style="border:1px solid #d9d2c2;padding:8px;background:#ecfdf5;font-weight:bold;color:#065f46;font-size:12px">Alamat</td>
+            ${HARI_JADWAL.map(h=>{const j=jadwal[h]||{alamat:''};return `<td style="border:1px solid #d9d2c2;padding:8px;text-align:center;font-size:11px;${h===today?'background:#f0fdf4':''}">${j.alamat||'-'}</td>`}).join('')}
+          </tr>
+          <tr>
+            <td style="border:1px solid #d9d2c2;padding:8px;background:#ecfdf5;font-weight:bold;color:#065f46;font-size:12px">Link Maps</td>
+            ${HARI_JADWAL.map(h=>{const j=jadwal[h]||{link_maps:''};const hasLink=!!(j.link_maps&&j.link_maps.trim());return `<td style="border:1px solid #d9d2c2;padding:8px;text-align:center;${h===today?'background:#f0fdf4':''}">${hasLink?`<a href="${j.link_maps}" target="_blank" title="Buka di Google Maps" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 transition-colors"><i data-lucide="globe" style="width:20px;height:20px"></i></a>`:'<span class="text-stone-300 text-xs">—</span>'}</td>`}).join('')}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-5 p-4 bg-stone-50 border border-stone-200 rounded-xl">
+      <h4 class="font-bold text-gray-800 text-sm mb-2 flex items-center gap-2"><i data-lucide="info" style="width:16px;height:16px"></i> Keterangan</h4>
+      <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
+        <li><strong class="text-emerald-700">ON</strong> = Online (Internet) — gambar orang menunjuk ke layar; belajar via daring.</li>
+        <li><strong class="text-red-700">OFF</strong> = Offline (Tatap Muka) — gambar orang berkumpul; belajar langsung di lokasi.</li>
+        <li>Klik ikon <i data-lucide="globe" style="width:12px;height:12px" class="inline text-blue-600"></i> globe untuk membuka Google Maps lokasi belajar.</li>
+        <li>Jadwal diperbarui oleh Guru. Hari ini (${today}) otomatis disorot sesuai dashboard.</li>
+      </ul>
+    </div>
+  </div>`;
 }
 </script>
 </body>
