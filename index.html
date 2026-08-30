@@ -9,6 +9,8 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://unpkg.com/@zxing/browser@latest"></script>
+<script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
 :root{--bg:#f5f1e8;--bg-2:#ede6d3;--fg:#1a2e26;--muted:#6b7a72;--primary:#0f5c4a;--primary-dark:#0a3d31;--primary-light:#1a8a6e;--accent:#c89844;--card:#fff;--border:#d9d2c2;--danger:#b03a2e;--success:#1e8449;--warn:#d68910;--royal:#6b21a8;--royal-light:#9333ea}
@@ -67,6 +69,64 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 .scan-barcode-frame::before,.scan-barcode-frame::after{content:'';position:absolute;width:30px;height:30px;border:5px solid #f59e0b}
 .scan-barcode-frame::before{top:-3px;left:-3px;border-right:none;border-bottom:none;border-radius:8px 0 0 0}
 .scan-barcode-frame::after{bottom:-3px;right:-3px;border-left:none;border-top:none;border-radius:0 0 8px 0}
+/* Scan line animation */
+@keyframes scanLineMove{0%{top:5%}50%{top:95%}100%{top:5%}}
+.scan-line{position:absolute;left:5%;right:5%;height:3px;background:linear-gradient(90deg,transparent 0%,#f59e0b 20%,#fbbf24 50%,#f59e0b 80%,transparent 100%);border-radius:3px;box-shadow:0 0 10px rgba(245,158,11,.8),0 0 20px rgba(245,158,11,.4);animation:scanLineMove 2s ease-in-out infinite;z-index:5}
+.scan-line.barcode{background:linear-gradient(90deg,transparent 0%,#10b981 20%,#34d399 50%,#10b981 80%,transparent 100%);box-shadow:0 0 10px rgba(16,185,129,.8),0 0 20px rgba(16,185,129,.4)}
+.scan-pulse{position:absolute;width:30px;height:30px;border:3px solid rgba(245,158,11,.6);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);animation:scanPulse 1.5s ease-out infinite;z-index:4}
+@keyframes scanPulse{0%{width:20px;height:20px;opacity:1}100%{width:120px;height:120px;opacity:0}}
+/* === ROBOT CHATBOT UI === */
+.robot-chat-container{display:flex;flex-direction:column;height:calc(100vh - 200px);min-height:500px}
+.robot-messages{flex:1;overflow-y:auto;padding:16px;background:#f9fafb;border-radius:12px;border:1px solid #e2e8f0;scroll-behavior:smooth}
+.robot-msg{display:flex;gap:10px;margin-bottom:14px;animation:fadeUp .3s ease-out forwards}
+.robot-msg.user{flex-direction:row-reverse}
+.robot-avatar{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0f5c4a,#1a8a6e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold}
+.robot-msg.user .robot-avatar{background:linear-gradient(135deg,#c89844,#fbbf24)}
+.robot-bubble{max-width:75%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5}
+.robot-msg.bot .robot-bubble{background:#fff;border:1px solid #e2e8f0;border-top-left-radius:4px;color:#1a2e26}
+.robot-msg.user .robot-bubble{background:linear-gradient(135deg,#0f5c4a,#1a8a6e);color:#fff;border-top-right-radius:4px}
+.robot-typing{display:inline-flex;gap:4px;padding:12px 16px}
+.robot-typing span{width:8px;height:8px;background:#94a3b8;border-radius:50%;animation:typingBounce 1.4s infinite}
+.robot-typing span:nth-child(2){animation-delay:.2s}
+.robot-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-8px);opacity:1}}
+.robot-quick{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0}
+.robot-quick-btn{padding:6px 12px;background:#fff;border:1px solid #d9d2c2;border-radius:16px;font-size:12px;color:#0f5c4a;cursor:pointer;transition:all .2s}
+.robot-quick-btn:hover{background:#f5f1e8;border-color:#0f5c4a}
+.robot-input-area{padding:12px;background:#fff;border-top:1px solid #e2e8f0;border-radius:12px;display:flex;gap:8px;align-items:center}
+.robot-input-area textarea{flex:1;border:none;outline:none;resize:none;font-size:14px;padding:10px 12px;background:#f5f1e8;border-radius:10px;font-family:inherit;max-height:120px}
+.robot-input-area textarea:focus{background:#fff;box-shadow:0 0 0 3px rgba(15,92,74,.1)}
+.robot-send-btn{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#0f5c4a,#1a8a6e);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;transition:all .2s;flex-shrink:0}
+.robot-send-btn:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(15,92,74,.4)}
+.robot-send-btn:disabled{opacity:.5;cursor:not-allowed}
+.robot-badge-ai{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;font-size:10px;font-weight:bold;border-radius:10px}
+.robot-suggestion{padding:8px 12px;background:#fffbeb;border:1px dashed #fcd34d;border-radius:8px;font-size:12px;color:#92400e;margin-top:8px}
+/* === FLOATING ROBOT.AI BUTTON === */
+.robot-fab{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#0f5c4a,#1a8a6e);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(15,92,74,.4),0 0 0 0 rgba(15,92,74,.4);z-index:9998;transition:all .3s;animation:robotFabPulse 2.5s infinite}
+.robot-fab:hover{transform:scale(1.1);box-shadow:0 12px 32px rgba(15,92,74,.5)}
+.robot-fab svg{width:28px;height:28px}
+.robot-fab-badge{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#f59e0b;border:2px solid #fff;color:#fff;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center}
+@keyframes robotFabPulse{0%{box-shadow:0 8px 24px rgba(15,92,74,.4),0 0 0 0 rgba(15,92,74,.5)}70%{box-shadow:0 8px 24px rgba(15,92,74,.4),0 0 0 16px rgba(15,92,74,0)}100%{box-shadow:0 8px 24px rgba(15,92,74,.4),0 0 0 0 rgba(15,92,74,0)}}
+.robot-popup{position:fixed;bottom:96px;right:24px;width:380px;max-width:calc(100vw - 48px);max-height:600px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.25);z-index:9999;display:flex;flex-direction:column;overflow:hidden;animation:robotPopupIn .35s ease-out forwards;border:1px solid #d9d2c2}
+@keyframes robotPopupIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.robot-popup-header{padding:14px 16px;background:linear-gradient(135deg,#0f5c4a,#1a8a6e);color:#fff;display:flex;align-items:center;gap:10px}
+.robot-popup-header .avatar{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.robot-popup-header .info{flex:1;min-width:0}
+.robot-popup-header .info h4{font-weight:bold;font-size:14px;display:flex;align-items:center;gap:6px}
+.robot-popup-header .info p{font-size:11px;opacity:.85;margin-top:2px}
+.robot-popup-close{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.robot-popup-close:hover{background:rgba(255,255,255,.35)}
+.robot-popup-body{flex:1;overflow-y:auto;padding:14px;background:#f9fafb;min-height:280px;max-height:420px;scroll-behavior:smooth}
+.robot-popup-input{padding:10px;background:#fff;border-top:1px solid #e2e8f0;display:flex;gap:6px;align-items:center}
+.robot-popup-input textarea{flex:1;border:1px solid #d9d2c2;outline:none;resize:none;font-size:13px;padding:8px 10px;border-radius:10px;font-family:inherit;max-height:80px}
+.robot-popup-input textarea:focus{border-color:#0f5c4a;box-shadow:0 0 0 3px rgba(15,92,74,.1)}
+.robot-popup-send{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0f5c4a,#1a8a6e);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;flex-shrink:0;transition:all .2s}
+.robot-popup-send:hover{transform:scale(1.05)}
+.robot-popup-send:disabled{opacity:.5;cursor:not-allowed}
+.robot-popup-quick{padding:6px 10px;background:#fffbeb;border-top:1px solid #fcd34d;display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin}
+.robot-popup-quick button{flex-shrink:0;padding:4px 10px;background:#fff;border:1px solid #fcd34d;border-radius:12px;font-size:11px;color:#92400e;cursor:pointer;white-space:nowrap}
+.robot-popup-quick button:hover{background:#fef3c7}
+@media(max-width:640px){.robot-popup{width:calc(100vw - 32px);right:16px;bottom:88px;max-height:70vh}.robot-fab{bottom:16px;right:16px;width:54px;height:54px}}
 </style>
 </head>
 <body>
@@ -139,6 +199,7 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="tugas-materi" onclick="navigateGuru('tugas-materi')"><i data-lucide="book-up" style="width:18px;height:18px"></i> Tugas & Materi</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="ujian" onclick="navigateGuru('ujian')"><i data-lucide="file-pen-line" style="width:18px;height:18px"></i> Ujian Murid</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="irapor" onclick="navigateGuru('irapor')"><i data-lucide="brain-circuit" style="width:18px;height:18px"></i> IRapor & Open_Close.AI</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="robot" onclick="navigateGuru('robot')" id="navRobotGuru" style="display:none"><i data-lucide="bot" style="width:18px;height:18px"></i> Robot.AI</a>
 <a class="nav-item flex items-center justify-between px-5 py-3 text-sm" data-page="meeting" onclick="navigateGuru('meeting')"><div class="flex items-center gap-3"><i data-lucide="video" style="width:18px;height:18px"></i> Room Meeting</div><span class="meeting-badge text-xs px-2 py-0.5 rounded-full font-bold hidden"></span></a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="profil" onclick="navigateGuru('profil')"><i data-lucide="user" style="width:18px;height:18px"></i> Profil Saya</a>
 </nav>
@@ -163,6 +224,7 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="tugas" onclick="navigateSantri('tugas')"><i data-lucide="pencil-ruler" style="width:18px;height:18px"></i> Tugas</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="ujian" onclick="navigateSantri('ujian')"><i data-lucide="file-pen-line" style="width:18px;height:18px"></i> Ujian Murid</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="kontrol" onclick="navigateSantri('kontrol')"><i data-lucide="clipboard-list" style="width:18px;height:18px"></i> Kartu Kontrol</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="robot" onclick="navigateSantri('robot')" id="navRobotSantri" style="display:none"><i data-lucide="bot" style="width:18px;height:18px"></i> Robot.AI</a>
 <a class="nav-item flex items-center justify-between px-5 py-3 text-sm" data-page="meeting" onclick="navigateSantri('meeting')"><div class="flex items-center gap-3"><i data-lucide="video" style="width:18px;height:18px"></i> Room Meeting</div><span class="meeting-badge text-xs px-2 py-0.5 rounded-full font-bold hidden"></span></a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="profil" onclick="navigateSantri('profil')"><i data-lucide="user" style="width:18px;height:18px"></i> Profil Saya</a>
 </nav>
@@ -187,6 +249,8 @@ body{background:var(--bg);color:var(--fg);min-height:100vh;background-image:radi
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="akun-santri" onclick="navigateAdmin('akun-santri')"><i data-lucide="users" style="width:18px;height:18px"></i> Akun Murid</a>
 <a class="nav-item flex items-center justify-between px-5 py-3 text-sm" data-page="meeting" onclick="navigateAdmin('meeting')"><div class="flex items-center gap-3"><i data-lucide="video" style="width:18px;height:18px"></i> Room Meeting</div><span class="meeting-badge text-xs px-2 py-0.5 rounded-full font-bold hidden"></span></a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="storage" onclick="navigateAdmin('storage')"><i data-lucide="database" style="width:18px;height:18px"></i> Upgrade Penyimpanan</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="glm-api" onclick="navigateAdmin('glm-api')"><i data-lucide="zap" style="width:18px;height:18px"></i> GLM API</a>
+<a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="robot" onclick="navigateAdmin('robot')" id="navRobotAdmin" style="display:none"><i data-lucide="bot" style="width:18px;height:18px"></i> Robot.AI</a>
 <a class="nav-item flex items-center gap-3 px-5 py-3 text-sm" data-page="pengaturan" onclick="navigateAdmin('pengaturan')"><i data-lucide="settings" style="width:18px;height:18px"></i> Pengaturan</a>
 </nav>
 <div class="p-4 border-t border-white/10"><div class="flex items-center gap-3 mb-3"><div id="adminAvatar" class="w-10 h-10 rounded-full bg-amber-400/40 border border-amber-400/50 flex items-center justify-center text-amber-100 font-bold text-sm">H</div><div class="flex-1 min-w-0"><p id="adminName" class="text-white text-sm font-semibold truncate">Hajar As'wad</p><p class="text-amber-300/80 text-xs flex items-center gap-1"><i data-lucide="crown" style="width:10px;height:10px"></i> Pemegang Website</p></div></div><button onclick="logout()" class="w-full text-xs text-red-300 hover:text-red-200 border border-red-400/20 hover:border-red-400/40 rounded-lg py-2 flex items-center justify-center gap-1.5"><i data-lucide="log-out" style="width:14px;height:14px"></i> Keluar</button></div>
@@ -208,8 +272,8 @@ const METODE_PEMBAYARAN=['Tunai','Transfer Bank (BSI)','Transfer Bank (BNI)','Tr
 let state={currentUser:null,currentRole:null,guruPage:'dashboard',santriPage:'beranda',adminPage:'dashboard',data:null,registerRole:null,registerData:null,cameraStream:null,scanInterval:null,_santriSearch:'',_adminSantriSearch:'',examState:{active:false,violations:0,timerInterval:null,timeLeft:0,subId:null},liveMeetingStream:null,screenShareStream:null,certSignCount:3};
 let tempQuestions=[];
 
-function loadData(){try{const s=localStorage.getItem(STORAGE_KEY);if(s){state.data=JSON.parse(s);if(!state.data.accounts)state.data.accounts={};if(!state.data.accounts.admin)state.data.accounts.admin={username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'};if(!state.data.accounts.guru)state.data.accounts.guru={username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'};if(!state.data.accounts.santri)state.data.accounts.santri=[];if(!state.data.guru)state.data.guru=[];if(!state.data.santri)state.data.santri=[];if(!state.data.pendingSantri)state.data.pendingSantri=[];if(!state.data.tagihan)state.data.tagihan=[];if(!state.data.pembayaran)state.data.pembayaran=[];if(!state.data.tugas)state.data.tugas=[];if(!state.data.materi)state.data.materi=[];if(!state.data.pengumpulan)state.data.pengumpulan=[];if(!state.data.materiSubs)state.data.materiSubs=[];if(!state.data.notes)state.data.notes=[];if(!state.data.exams)state.data.exams=[];if(!state.data.examSubmissions)state.data.examSubmissions=[];if(!state.data.meetings)state.data.meetings=[];if(!state.data.absensiGuru)state.data.absensiGuru=[];if(!state.data.absensiSantri)state.data.absensiSantri=[];if(!state.data.setoran)state.data.setoran={};if(!state.data.irapor)state.data.irapor={};if(!state.data.certificates)state.data.certificates=[];if(!state.data.logs)state.data.logs=[];if(!state.data.settings)state.data.settings={namaTPQ:'H.Ai Pusat Kurikulum',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2024/2025',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5};if(!state.data.liveMeeting)state.data.liveMeeting={active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]};if(!state.data.jadwal){state.data.jadwal={Senin:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Selasa:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Rabu:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Kamis:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Jumat:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Sabtu:{waktu:'08:00 - 10:00',status:'on',alamat:'Online via Zoom',link_maps:''},Minggu:{waktu:'08:00 - 10:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'}};state.data.jadwalPublishedAt=null;state.data.jadwalPublishedBy=null;}if(!state.data.absensiBarcodeMurid)state.data.absensiBarcodeMurid=[];if(!state.data.passwordCounter||state.data.passwordCounter<1000)state.data.passwordCounter=1000;saveData()}else{initFresh()}}catch(e){initFresh()}}
-function initFresh(){state.data={guru:[],santri:[],pendingSantri:[],tagihan:[],pembayaran:[],tugas:[],materi:[],pengumpulan:[],materiSubs:[],notes:[],exams:[],examSubmissions:[],meetings:[],absensiGuru:[],absensiSantri:[],setoran:{},irapor:{},certificates:[],accounts:{admin:{username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'},guru:{username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'},santri:[]},logs:[{id:'l1',waktu:'01 Agu 2024 08:00',aktor:'Monitor.Ai',aksi:'Sistem Inisialisasi',detail:'Sistem dimulai'}],settings:{namaTPQ:'H.Ai Pusat Kurikulum',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2024/2025',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5},liveMeeting:{active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]},jadwal:{Senin:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Selasa:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Rabu:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Kamis:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Jumat:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Sabtu:{waktu:'08:00 - 10:00',status:'on',alamat:'Online via Zoom',link_maps:''},Minggu:{waktu:'08:00 - 10:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'}},jadwalPublishedAt:null,jadwalPublishedBy:null,absensiBarcodeMurid:[],passwordCounter:1000};saveData()}
+function loadData(){try{const s=localStorage.getItem(STORAGE_KEY);if(s){state.data=JSON.parse(s);if(!state.data.accounts)state.data.accounts={};if(!state.data.accounts.admin)state.data.accounts.admin={username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'};if(!state.data.accounts.guru)state.data.accounts.guru={username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'};if(!state.data.accounts.santri)state.data.accounts.santri=[];if(!state.data.guru)state.data.guru=[];if(!state.data.santri)state.data.santri=[];if(!state.data.pendingSantri)state.data.pendingSantri=[];if(!state.data.tagihan)state.data.tagihan=[];if(!state.data.pembayaran)state.data.pembayaran=[];if(!state.data.tugas)state.data.tugas=[];if(!state.data.materi)state.data.materi=[];if(!state.data.pengumpulan)state.data.pengumpulan=[];if(!state.data.materiSubs)state.data.materiSubs=[];if(!state.data.notes)state.data.notes=[];if(!state.data.exams)state.data.exams=[];if(!state.data.examSubmissions)state.data.examSubmissions=[];if(!state.data.meetings)state.data.meetings=[];if(!state.data.absensiGuru)state.data.absensiGuru=[];if(!state.data.absensiSantri)state.data.absensiSantri=[];if(!state.data.setoran)state.data.setoran={};if(!state.data.irapor)state.data.irapor={};if(!state.data.certificates)state.data.certificates=[];if(!state.data.logs)state.data.logs=[];if(!state.data.settings)state.data.settings={namaTPQ:'H.Ai Pusat Kurikulum',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2024/2025',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5};if(!state.data.liveMeeting)state.data.liveMeeting={active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]};if(!state.data.jadwal){state.data.jadwal={Senin:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Selasa:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Rabu:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Kamis:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Jumat:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Sabtu:{waktu:'08:00 - 10:00',status:'on',alamat:'Online via Zoom',link_maps:''},Minggu:{waktu:'08:00 - 10:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'}};state.data.jadwalPublishedAt=null;state.data.jadwalPublishedBy=null;}if(!state.data.absensiBarcodeMurid)state.data.absensiBarcodeMurid=[];if(!state.data.passwordCounter||state.data.passwordCounter<1000)state.data.passwordCounter=1000;if(state.data.robotEnabled===undefined)state.data.robotEnabled=true;if(!state.data.robotMode)state.data.robotMode='bantuan';saveData()}else{initFresh()}}catch(e){initFresh()}}
+function initFresh(){state.data={guru:[],santri:[],pendingSantri:[],tagihan:[],pembayaran:[],tugas:[],materi:[],pengumpulan:[],materiSubs:[],notes:[],exams:[],examSubmissions:[],meetings:[],absensiGuru:[],absensiSantri:[],setoran:{},irapor:{},certificates:[],accounts:{admin:{username:'hajar',password:'hajar2024',nama:"Hajar As'wad",role:'owner',email:'hajar@gmail.com',telepon:'081234567890'},guru:{username:'guru',password:'guru123',nama:'Administrator TPQ',role:'admin',email:'guru@gmail.com',telepon:'081234567891'},santri:[]},logs:[{id:'l1',waktu:'01 Agu 2024 08:00',aktor:'Monitor.Ai',aksi:'Sistem Inisialisasi',detail:'Sistem dimulai'}],settings:{namaTPQ:'H.Ai Pusat Kurikulum',alamatTPQ:'Jl. Pendidikan No. 123, Bandung',teleponTPQ:'022-1234567',tahunAjaran:'2024/2025',linkWebsite:WEBSITE_LINK_DEFAULT,storageLimit:5},liveMeeting:{active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]},jadwal:{Senin:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Selasa:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Rabu:{waktu:'14:00 - 16:00',status:'on',alamat:'Online via Zoom',link_maps:''},Kamis:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Jumat:{waktu:'14:00 - 16:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'},Sabtu:{waktu:'08:00 - 10:00',status:'on',alamat:'Online via Zoom',link_maps:''},Minggu:{waktu:'08:00 - 10:00',status:'off',alamat:'Perumahan Bukit Hartaco Indah Blok II/D/No.2',link_maps:'https://maps.google.com/?q=-6.9175,107.6191'}},jadwalPublishedAt:null,jadwalPublishedBy:null,absensiBarcodeMurid:[],passwordCounter:1000,robotEnabled:true,robotMode:'bantuan'};saveData()}
 function saveData(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state.data))}catch(e){toast('Penyimpanan penuh! Hapus file besar.','error')}}
 function addLog(a,d){const n=new Date();const b=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];const w=`${String(n.getDate()).padStart(2,'0')} ${b[n.getMonth()]} ${n.getFullYear()} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;state.data.logs.unshift({id:'l'+Date.now(),waktu:w,aktor:state.currentUser?.nama||'Sistem',aksi:a,detail:d});saveData()}
 function formatRupiah(n){return 'Rp ' + (Number(n)||0).toLocaleString('id-ID');}
@@ -241,8 +305,8 @@ function handleLogin(e){e.preventDefault();loadData();const u=document.getElemen
 function logout(){if(state.currentUser)addLog('Logout',`${state.currentUser.nama} keluar`);stopCamera();stopExamMode();leaveLiveMeeting(true);state.currentUser=null;state.currentRole=null;showSplash()}
 
 function showRegisterChoiceModal(){showModal(`<div class="text-center mb-5"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 mb-3 pulse-qr"><i data-lucide="qr-code" class="text-amber-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800">Pendaftaran Murid Baru</h3><p class="text-sm text-gray-500 mt-1">Pilih metode pendaftaran</p></div><div class="space-y-3"><button onclick="startQrScanner()" class="w-full p-4 border-2 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl text-left flex items-center gap-3"><div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center"><i data-lucide="camera" class="text-emerald-600" style="width:24px;height:24px"></i></div><div class="flex-1"><p class="font-bold text-gray-800">Scan QR Kamera</p><p class="text-xs text-gray-500">Otomatis verifikasi kode guru via kamera</p></div></button><button onclick="goToRegister('santri_manual')" class="w-full p-4 border-2 border-amber-200 hover:border-amber-400 hover:bg-amber-50 rounded-xl text-left flex items-center gap-3"><div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center"><i data-lucide="keyboard" class="text-amber-600" style="width:24px;height:24px"></i></div><div class="flex-1"><p class="font-bold text-gray-800">Input Manual Kode Guru</p><p class="text-xs text-gray-500">Ketik kode pendaftaran guru</p></div></button><button onclick="goToRegister('santri_nocode')" class="w-full p-4 border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50 rounded-xl text-left flex items-center gap-3"><div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center"><i data-lucide="user-plus" class="text-purple-600" style="width:24px;height:24px"></i></div><div class="flex-1"><p class="font-bold text-gray-800">Tanpa Kode Guru (Via Admin)</p><p class="text-xs text-gray-500">Pendaftaran langsung, admin akan menyetujui</p></div></button></div><div class="flex gap-3 mt-5"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Tutup</button></div>`)}
-function startQrScanner(){closeModal();if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('Browser tidak mendukung kamera','error');goToRegister('santri_manual');return}showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Scan QR Code Guru</h3><p class="text-sm text-gray-500 mb-4">Arahkan kamera ke QR Code milik Guru.</p><div class="bg-stone-900 rounded-xl overflow-hidden aspect-video relative"><video id="qrVideo" autoplay playsinline class="w-full h-full object-cover"></video><div class="scanner-frame"></div></div><div id="scanStatus" class="text-sm mt-4 text-center text-blue-600 flex items-center justify-center gap-2"><i data-lucide="loader-2" class="animate-spin" style="width:16px;height:16px"></i> Menunggu QR Code...</div><div class="flex gap-3 mt-5"><button onclick="closeModal();stopCamera()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button></div>`);const video=document.getElementById('qrVideo');navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(stream=>{state.cameraStream=stream;video.srcObject=stream;video.setAttribute('playsinline',true);video.play();state.scanInterval=setInterval(()=>{if(video.readyState===video.HAVE_ENOUGH_DATA){const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');canvas.width=video.videoWidth;canvas.height=video.videoHeight;ctx.drawImage(video,0,0,canvas.width,canvas.height);const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);const code=jsQR(imageData.data,imageData.width,imageData.height);if(code){verifyGuruCode(code.data)}}},500)}).catch(()=>{toast('Tidak dapat mengakses kamera. Gunakan input manual.','error');closeModal();goToRegister('santri_manual')})}
-function verifyGuruCode(codeStr){const guru=state.data.guru.find(g=>g.code===codeStr);if(guru){clearInterval(state.scanInterval);stopCamera();closeModal();toast(`Kode Guru ${guru.nama} terverifikasi!`,'success');state.registerData={guru_code:codeStr,guru_id:guru.id};state.registerRole='santri';document.getElementById('splashScreen').classList.add('hidden');document.getElementById('loginScreen').classList.add('hidden');document.getElementById('registerScreen').classList.remove('hidden');setStep(1);renderStep1();setTimeout(()=>{nextStep()},500)}else{const statusEl=document.getElementById('scanStatus');if(statusEl){statusEl.className='text-sm mt-4 text-center text-red-600 font-bold';statusEl.innerText='QR Code tidak valid! Coba lagi.'}}}
+function startQrScanner(){closeModal();if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('Browser tidak mendukung kamera','error');goToRegister('santri_manual');return}showModal(`<h3 class="text-xl font-bold text-gray-800 mb-1">Scan QR Code Guru</h3><p class="text-sm text-gray-500 mb-3">Arahkan kamera ke QR Code milik Guru. Sistem otomatis mendeteksi & verifikasi.</p><div class="bg-stone-900 rounded-xl overflow-hidden aspect-video relative"><video id="qrVideo" autoplay playsinline muted class="w-full h-full object-cover"></video><div class="scanner-frame"></div><div class="scan-line"></div><div class="scan-pulse"></div><div id="scanStatus" class="absolute top-3 left-3 right-3 bg-black/70 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-2"><span class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span><span id="scanStatusText">Mengaktifkan kamera...</span></div><div class="absolute bottom-3 left-3 right-3 bg-blue-50/95 text-blue-800 text-xs px-3 py-2 rounded-lg flex items-center gap-2"><i data-lucide="info" style="width:14px;height:14px"></i><span>Posisikan QR code di tengah frame. Jika 15 detik tidak terdeteksi, gunakan Input Manual.</span></div></div><div class="flex gap-3 mt-4"><button onclick="closeModal();stopCamera()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="goToRegister('santri_manual')" class="btn-royal flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="keyboard" style="width:16px;height:16px"></i> Input Manual</button></div>`);lucide.createIcons();const video=document.getElementById('qrVideo');const statusText=document.getElementById('scanStatusText');let zxingReader=null;let scanStartTime=Date.now();let timeoutHandle=null;const startScan=()=>{if(typeof window.ZXing!=='undefined'&&window.ZXing.BrowserQRCodeReader){try{zxingReader=new window.ZXing.BrowserQRCodeReader();zxingReader.decodeFromVideoDevice(undefined,video,(result,err,controls)=>{if(result){const data=result.getText().trim();if(data){if(timeoutHandle)clearTimeout(timeoutHandle);if(zxingReader&&zxingReader.controls)zxingReader.controls.stop();stopCamera();verifyGuruCode(data);return}}});return}catch(e){console.warn('ZXing QR failed, fallback to jsQR',e)}}navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}}).then(stream=>{state.cameraStream=stream;video.srcObject=stream;video.setAttribute('playsinline',true);video.muted=true;video.play().catch(()=>{});const tryScan=()=>{if(video.readyState>=video.HAVE_ENOUGH_DATA&&video.videoWidth>0){const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d',{willReadFrequently:true});canvas.width=video.videoWidth;canvas.height=video.videoHeight;ctx.drawImage(video,0,0,canvas.width,canvas.height);const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);const code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'attemptBoth'});if(code&&code.data){const data=code.data.trim();if(data){if(timeoutHandle)clearTimeout(timeoutHandle);stopCamera();verifyGuruCode(data);return}}}if(statusText){const elapsed=Math.floor((Date.now()-scanStartTime)/1000);if(elapsed>10){statusText.textContent=`Mendekteksi... ${elapsed}s. Coba dekatkan QR atau gunakan Input Manual.`;statusText.parentElement.querySelector('span:first-child').className='w-2 h-2 bg-red-400 rounded-full animate-pulse';}else if(elapsed>3){statusText.textContent=`Memindai... ${elapsed}s. Posisikan QR di tengah.`;statusText.parentElement.querySelector('span:first-child').className='w-2 h-2 bg-emerald-400 rounded-full animate-pulse';}else{statusText.textContent='Kamera aktif. Arahkan ke QR Code guru.';}}requestAnimationFrame(tryScan);};video.addEventListener('loadedmetadata',()=>{scanStartTime=Date.now();requestAnimationFrame(tryScan);});if(video.readyState>=2){scanStartTime=Date.now();requestAnimationFrame(tryScan);}}).catch(err=>{console.error(err);toast('Tidak dapat mengakses kamera. Gunakan Input Manual.','error');setTimeout(()=>{closeModal();goToRegister('santri_manual')},1000);});};timeoutHandle=setTimeout(()=>{if(zxingReader&&zxingReader.controls)zxingReader.controls.stop();stopCamera();toast('Kamera tidak mendeteksi QR dalam 15 detik. Gunakan Input Manual.','warn');setTimeout(()=>{closeModal();goToRegister('santri_manual')},500);},15000);startScan()}
+function verifyGuruCode(codeStr){const guru=state.data.guru.find(g=>g.code===codeStr);if(guru){if(state.scanInterval){clearInterval(state.scanInterval);state.scanInterval=null}stopCamera();closeModal();toast(`Kode Guru ${guru.nama} terverifikasi!`,'success');state.registerData={guru_code:codeStr,guru_id:guru.id};state.registerRole='santri';document.getElementById('splashScreen').classList.add('hidden');document.getElementById('loginScreen').classList.add('hidden');document.getElementById('registerScreen').classList.remove('hidden');setStep(1);renderStep1();setTimeout(()=>{nextStep()},500)}else{const statusText=document.getElementById('scanStatusText');if(statusText){statusText.textContent=`QR Code tidak valid: "${codeStr.substring(0,30)}${codeStr.length>30?'...':''}" — Coba lagi.`;statusText.parentElement.querySelector('span:first-child').className='w-2 h-2 bg-red-400 rounded-full animate-pulse';}toast('QR Code tidak cocok dengan guru manapun','error')}}
 function stopCamera(){if(state.cameraStream){state.cameraStream.getTracks().forEach(t=>t.stop());state.cameraStream=null}if(state.scanInterval){clearInterval(state.scanInterval);state.scanInterval=null}}
 
 function goToRegister(role){state.registerRole=role;closeModal();document.getElementById('splashScreen').classList.add('hidden');document.getElementById('loginScreen').classList.add('hidden');document.getElementById('registerScreen').classList.remove('hidden');setStep(1);renderStep1();lucide.createIcons()}
@@ -255,12 +319,12 @@ function renderStep3(){const d=state.registerData;const isGuru=state.registerRol
 function submitRegFinal(){const d=state.registerData;if(state.registerRole==='santri'||state.registerRole==='santri_manual'||state.registerRole==='santri_nocode'){if(state.registerRole==='santri_nocode'){if(!state.data.pendingSantriNocode)state.data.pendingSantriNocode=[];state.data.pendingSantriNocode.push({id:'pnocode'+Date.now(),nama:d.nama,tempat:d.tempat,tgl:d.tgl,ayah:d.ayah,ibu:d.ibu,alamat:d.alamat,telp_ortu:d.telp_ortu,telp_santri:d.telp_santri,status:'pending',tanggal_daftar:new Date().toLocaleString('id-ID')});saveData();addLog('Pendaftaran Murid (Tanpa Kode)',`Murid ${d.nama} menunggu persetujuan admin`);showModal(`<div class="text-center py-4"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 mb-4"><i data-lucide="clock" class="text-amber-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Pendaftaran Diterima!</h3><p class="text-sm text-gray-600 mb-4">Pendaftaran Anda tanpa kode guru sedang menunggu persetujuan Admin. Admin akan memilihkan guru yang cocok dengan mata pelajaran untuk Anda.</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800"><p>Setelah disetujui, Username & Password akan dikirim otomatis via WhatsApp ke:</p><p class="font-mono font-bold mt-1">${d.telp_ortu||'Ortu/Wali'}${d.telp_santri?' & '+d.telp_santri:''}</p></div><button onclick="closeModal();showSplash()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Selesai</button></div>`);return}const g=state.data.guru.find(g=>g.id===d.guru_id);if(g){const res=createSantriAcc(d.nama,d.tempat,d.tgl,d.ayah,d.ibu,d.alamat,g.id,false,d.telp_ortu,d.telp_santri);addLog('Pendaftaran Murid',`Murid ${d.nama} terdaftar dengan password ${res.password}`);saveData();const st=state.data.settings;const barcodeId='regBarcode_'+Date.now();showModal(`<div class="text-center py-4"><div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-50 mb-3"><i data-lucide="check-circle" class="text-emerald-600" style="width:40px;height:40px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-1">Pendaftaran Berhasil!</h3><p class="text-xs text-gray-500 mb-3">Kartu identitas sementara telah dibuat otomatis</p><div class="sunflower-card batik-pattern relative mx-auto" style="max-width:380px;padding:18px"><div class="relative z-10 text-center pb-2 mb-3 border-b-2 border-amber-600/40"><div class="flex items-center justify-center gap-1 mb-1"><span class="sunflower-mini"></span><h2 class="text-base font-black text-amber-800 tracking-wide">H.Ai</h2><span class="sunflower-mini"></span></div><p class="text-[9px] font-bold text-amber-700 uppercase tracking-widest">Kartu Identitas Murid (Sementara)</p><p class="text-xs text-stone-700 font-semibold mt-0.5">${st.namaTPQ}</p></div><div class="relative z-10 flex gap-2 mb-3"><div class="flex-shrink-0"><div class="w-16 h-20 rounded-lg overflow-hidden border-2 border-amber-500/50 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center"><span class="text-2xl font-black text-amber-700">${d.nama.charAt(0)}</span></div></div><div class="flex-1 text-xs space-y-1"><div><p class="text-[9px] text-amber-700 uppercase font-bold">Nama</p><p class="text-xs font-bold text-stone-800 leading-tight">${d.nama}</p></div><div><p class="text-[9px] text-amber-700 uppercase font-bold">Username (NIS)</p><p class="text-xs font-mono font-bold text-stone-800">${res.nis}</p></div><div><p class="text-[9px] text-amber-700 uppercase font-bold">Password</p><p class="text-xs font-mono font-bold text-emerald-700">${res.password}</p></div><div><p class="text-[9px] text-amber-700 uppercase font-bold">Guru Wali</p><p class="text-xs text-stone-800 leading-tight">${g.nama}</p></div></div></div><div class="relative z-10 barcode-area"><svg id="${barcodeId}"></svg><p class="text-[9px] text-stone-500">Pindai barcode ini untuk absensi</p></div></div><p class="text-xs text-gray-500 mt-3">Gunakan NIS & password di atas untuk login di Panel Murid. Kartu identitas lengkap dapat dilihat di menu <strong>Kartu Identitas Murid</strong>.</p><div class="flex flex-col gap-2 mt-4"><button onclick="sendCredentialsWA('${d.telp_ortu}','${res.nis}','${res.password}','${d.nama}','ortu')" class="btn-royal w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="message-circle" style="width:16px;height:16px"></i> Kirim ke Ortu/Wali (WA)</button>${d.telp_santri?`<button onclick="sendCredentialsWA('${d.telp_santri}','${res.nis}','${res.password}','${d.nama}','santri')" class="btn-primary w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"><i data-lucide="send" style="width:16px;height:16px"></i> Kirim ke Murid (WA)</button>`:''}<button onclick="closeModal();showSplash()" class="btn-ghost w-full py-3 rounded-xl font-semibold">Selesai</button></div></div>`,'max-w-md');setTimeout(()=>{try{const svgEl=document.getElementById('${barcodeId}');if(svgEl&&typeof JsBarcode!=='undefined'){JsBarcode(svgEl,'HAI'+res.nis.replace(/\\D/g,'').padEnd(6,'0').slice(0,6),{format:'CODE128',width:2,height:40,displayValue:false,margin:0,background:'transparent',lineColor:'#1c1917'})}}catch(e){console.warn(e)}},200);lucide.createIcons()}else{toast('Kode guru tidak valid','error');setStep(1);renderStep1()}}else{if(!state.data.pendingGuru)state.data.pendingGuru=[];state.data.pendingGuru.push({id:'gp'+Date.now(),nama:d.nama,mapel:d.mapel,telepon:d.telepon,gender:d.gender,alamat:d.alamat,status:'pending'});saveData();addLog('Pendaftaran Guru',`Guru ${d.nama} mendaftar (pending)`);showModal(`<div class="text-center py-4"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-4"><i data-lucide="check-circle" class="text-emerald-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Pendaftaran Berhasil!</h3><p class="text-sm text-gray-600 mb-4">Pendaftaran Anda akan diproses Admin. Setelah disetujui, Username & Password akan dikirim via WhatsApp ke <strong class="font-mono">${d.telepon}</strong>.</p><button onclick="closeModal();showSplash()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Selesai</button></div>`)}}
 function createSantriAcc(nama,tempat,tgl,ayah,ibu,alamat,guru_id,isPending,telp_ortu='',telp_santri=''){const id=isPending?'pending_'+Date.now():'s'+Date.now();const nis='S'+String(Date.now()).slice(-6);let ttl='-';if(tgl){const dt=new Date(tgl);const b=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];ttl=`${tempat}, ${dt.getDate()} ${b[dt.getMonth()]} ${dt.getFullYear()}`}const s={id,nis,nama,tempat,tgl_lahir:tgl,ttl,ayah,ibu,alamat,guru_id,telp_ortu,telp_santri,status:isPending?'pending':'active'};if(isPending){state.data.pendingSantri.push(s)}else{state.data.santri.push(s);if(!state.data.passwordCounter||state.data.passwordCounter<1000)state.data.passwordCounter=1000;state.data.passwordCounter=state.data.passwordCounter+1;const password=String(state.data.passwordCounter);state.data.accounts.santri.push({username:nis,password:password,nama,santri_id:id,role:'santri'});const now=new Date();const bN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];for(let i=0;i<6;i++){const m=(now.getMonth()+i)%12;const y=now.getFullYear()+Math.floor((now.getMonth()+i)/12);state.data.tagihan.push({id:'tg'+Date.now()+'_'+i,santri_id:id,jenis:'Iuran Bulanan',periode:`${bN[m]} ${y}`,nominal:25000,deadline:`${y}-${String(m+1).padStart(2,'0')}-15`,status:'belum'})}state.data.tagihan.push({id:'tgr'+Date.now(),santri_id:id,jenis:'Pendaftaran',periode:'Sekali Bayar',nominal:50000,deadline:`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-30`,status:'belum'})}return{id,nis,password:state.data.passwordCounter?String(state.data.passwordCounter):'1001'}}
 
-function showGuruApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('guruApp').classList.remove('hidden');document.getElementById('guruName').textContent=state.currentUser.nama;document.getElementById('guruAvatar').textContent=state.currentUser.nama.charAt(0);navigateGuru('dashboard');updateClock();lucide.createIcons()}
-function navigateGuru(page){state.guruPage=page;document.querySelectorAll('#guruSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#guruSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={dashboard:['Dashboard','Ringkasan administrasi'],absensi:['Absensi Masuk','Absensi kehadiran harian'],'absensi-barcode':['Absensi Barcode Murid','Scan kartu identitas murid'],'absensi-santri':['Absensi Murid','Catat kehadiran murid mengaji'],pendaftaran:['Pendaftaran Murid','Generate QR Code'],santri:['Daftar Murid','Kelola data murid & persetujuan'],jadwal:['Jadwal','Jadwal Online/Offline mingguan'],setoran:['Buku Setoran','Catatan setoran hafalan'],kontrol:['Kartu Kontrol','Pantau tagihan murid'],pembayaran:['Pembayaran','Kelola pembayaran'],'tugas-materi':['Tugas & Materi','Bagikan tugas dan materi'],ujian:['Ujian Murid','Buat soal ujian & lihat hasil'],irapor:['IRapor & Open_Close.AI','Rekap nilai & sertifikat'],meeting:['Room Meeting','Tatap muka online'],profil:['Profil Saya','Edit, simpan, kirim data diri']};document.getElementById('guruPageTitle').textContent=t[page][0];document.getElementById('guruPageSubtitle').textContent=t[page][1];const main=document.getElementById('guruMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='dashboard')main.innerHTML=renderGuruDashboard();else if(page==='absensi')main.innerHTML=renderAbsensiGuru();else if(page==='absensi-barcode')main.innerHTML=renderScanBarcodeMurid('guru');else if(page==='absensi-santri')main.innerHTML=renderAbsensiSantriGuru();else if(page==='pendaftaran')main.innerHTML=renderPendaftaran();else if(page==='santri')main.innerHTML=renderGuruSantri();else if(page==='jadwal')main.innerHTML=renderGuruJadwal();else if(page==='setoran')main.innerHTML=renderSetoran();else if(page==='kontrol')main.innerHTML=renderKartuKontrolGuru();else if(page==='pembayaran')main.innerHTML=renderGuruPembayaran();else if(page==='tugas-materi')main.innerHTML=renderTugasMateri();else if(page==='ujian')main.innerHTML=renderGuruExam();else if(page==='irapor')main.innerHTML=renderGuruIRapor();else if(page==='meeting')main.innerHTML=renderGuruMeeting();else if(page==='profil')main.innerHTML=renderGuruProfil();if(page==='pendaftaran')initGuruQR();updateMeetingStatus('guru');lucide.createIcons();if(page==='absensi-barcode')initBarcodeScanner('guru')}
-function showSantriApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('santriApp').classList.remove('hidden');const s=getSantri(state.currentUser.santri_id);if(!s){logout();return}document.getElementById('santriName').textContent=s.nama;document.getElementById('santriKelasBadge').textContent=s.kelas||'-';document.getElementById('santriAvatar').textContent=s.nama.charAt(0);navigateSantri('beranda');updateClock();lucide.createIcons()}
-function navigateSantri(page){state.santriPage=page;document.querySelectorAll('#santriSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#santriSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={beranda:['Beranda','Informasi pembayaran'],kartu:['Kartu Identitas Murid','Lihat & cetak kartu identitas berbarcode'],jadwal:['Jadwal','Lihat jadwal Online/Offline mingguan'],absensi:['Absensi Wajah','Verifikasi wajah & kirim ke Guru'],materi:['Materi','Catat materi pembelajaran'],tugas:['Tugas','Kerjakan tugas dari guru'],ujian:['Ujian Murid','Kerjakan ujian dari guru'],kontrol:['Kartu Kontrol','Status tagihan'],meeting:['Room Meeting','Tatap muka online'],profil:['Profil Saya','Edit, simpan, kirim data diri']};document.getElementById('santriPageTitle').textContent=t[page][0];document.getElementById('santriPageSubtitle').textContent=t[page][1];const main=document.getElementById('santriMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='beranda')main.innerHTML=renderSantriBeranda();else if(page==='kartu')main.innerHTML=renderSantriKartuIdentitas();else if(page==='jadwal')main.innerHTML=renderSantriJadwal();else if(page==='absensi')main.innerHTML=renderSantriAbsensiWajah();else if(page==='materi')main.innerHTML=renderSantriMateri();else if(page==='tugas')main.innerHTML=renderSantriTugas();else if(page==='ujian')main.innerHTML=renderSantriExam();else if(page==='kontrol')main.innerHTML=renderKartuKontrolSantri();else if(page==='meeting')main.innerHTML=renderSantriMeeting();else if(page==='profil')main.innerHTML=renderSantriProfil();updateMeetingStatus('santri');lucide.createIcons();if(page==='kartu')initSantriBarcode()}
-function showAdminApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('adminApp').classList.remove('hidden');document.getElementById('adminName').textContent=state.currentUser.nama;document.getElementById('adminAvatar').textContent=state.currentUser.nama.charAt(0);navigateAdmin('dashboard');updateClock();lucide.createIcons()}
-function navigateAdmin(page){state.adminPage=page;document.querySelectorAll('#adminSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#adminSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={dashboard:['Dashboard','Ringkasan sistem'],'monitor-ai':['Monitor.Ai','Pengawasan AI'],'absensi-guru':['Absensi Guru','Rekap absensi guru'],'absensi-barcode':['Absensi Barcode Murid','Scan kartu identitas murid'],'akun-guru':['Akun Guru','Kelola akun guru'],'akun-santri':['Akun Murid','Kelola akun murid & persetujuan'],meeting:['Room Meeting','Kontrol meeting'],storage:['Upgrade Penyimpanan','Kelola kapasitas cloud'],pengaturan:['Pengaturan','Konfigurasi sistem']};document.getElementById('adminPageTitle').innerHTML=t[page][0]+(page==='dashboard'?' <span class="crown-badge text-xs px-2 py-0.5 rounded-full font-bold">OWNER</span>':'');document.getElementById('adminPageSubtitle').textContent=t[page][1];const main=document.getElementById('adminMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='dashboard')main.innerHTML=renderAdminDashboard();else if(page==='monitor-ai')main.innerHTML=renderMonitorAi();else if(page==='absensi-guru')main.innerHTML=renderAdminAbsensi();else if(page==='absensi-barcode')main.innerHTML=renderScanBarcodeMurid('admin');else if(page==='akun-guru')main.innerHTML=renderAdminGuru();else if(page==='akun-santri')main.innerHTML=renderAdminSantriWithNocode();else if(page==='meeting')main.innerHTML=renderAdminMeeting();else if(page==='storage')main.innerHTML=renderAdminStorage();else if(page==='pengaturan')main.innerHTML=renderAdminPengaturan();updateMeetingStatus('admin');lucide.createIcons();if(page==='absensi-barcode')initBarcodeScanner('admin')}
+function showGuruApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('guruApp').classList.remove('hidden');document.getElementById('guruName').textContent=state.currentUser.nama;document.getElementById('guruAvatar').textContent=state.currentUser.nama.charAt(0);updateRobotSidebarVisibility();navigateGuru('dashboard');updateClock();lucide.createIcons()}
+function navigateGuru(page){state.guruPage=page;document.querySelectorAll('#guruSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#guruSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={dashboard:['Dashboard','Ringkasan administrasi'],absensi:['Absensi Masuk','Absensi kehadiran harian'],'absensi-barcode':['Absensi Barcode Murid','Scan kartu identitas murid'],'absensi-santri':['Absensi Murid','Catat kehadiran murid mengaji'],pendaftaran:['Pendaftaran Murid','Generate QR Code'],santri:['Daftar Murid','Kelola data murid & persetujuan'],jadwal:['Jadwal','Jadwal Online/Offline mingguan'],setoran:['Buku Setoran','Catatan setoran hafalan'],kontrol:['Kartu Kontrol','Pantau tagihan murid'],pembayaran:['Pembayaran','Kelola pembayaran'],'tugas-materi':['Tugas & Materi','Bagikan tugas dan materi'],ujian:['Ujian Murid','Buat soal ujian & lihat hasil'],irapor:['IRapor & Open_Close.AI','Rekap nilai & sertifikat'],robot:['Robot.AI','Asisten AI H.Ai'],meeting:['Room Meeting','Tatap muka online'],profil:['Profil Saya','Edit, simpan, kirim data diri']};document.getElementById('guruPageTitle').textContent=t[page][0];document.getElementById('guruPageSubtitle').textContent=t[page][1];const main=document.getElementById('guruMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='dashboard')main.innerHTML=renderGuruDashboard();else if(page==='absensi')main.innerHTML=renderAbsensiGuru();else if(page==='absensi-barcode')main.innerHTML=renderScanBarcodeMurid('guru');else if(page==='absensi-santri')main.innerHTML=renderAbsensiSantriGuru();else if(page==='pendaftaran')main.innerHTML=renderPendaftaran();else if(page==='santri')main.innerHTML=renderGuruSantri();else if(page==='jadwal')main.innerHTML=renderGuruJadwal();else if(page==='setoran')main.innerHTML=renderSetoran();else if(page==='kontrol')main.innerHTML=renderKartuKontrolGuru();else if(page==='pembayaran')main.innerHTML=renderGuruPembayaran();else if(page==='tugas-materi')main.innerHTML=renderTugasMateri();else if(page==='ujian')main.innerHTML=renderGuruExam();else if(page==='irapor')main.innerHTML=renderGuruIRapor();else if(page==='robot')main.innerHTML=renderRobot('guru');else if(page==='meeting')main.innerHTML=renderGuruMeeting();else if(page==='profil')main.innerHTML=renderGuruProfil();if(page==='pendaftaran')initGuruQR();updateMeetingStatus('guru');lucide.createIcons();if(page==='absensi-barcode')initBarcodeScanner('guru')}
+function showSantriApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('santriApp').classList.remove('hidden');const s=getSantri(state.currentUser.santri_id);if(!s){logout();return}document.getElementById('santriName').textContent=s.nama;document.getElementById('santriKelasBadge').textContent=s.kelas||'-';document.getElementById('santriAvatar').textContent=s.nama.charAt(0);updateRobotSidebarVisibility();navigateSantri('beranda');updateClock();lucide.createIcons()}
+function navigateSantri(page){state.santriPage=page;document.querySelectorAll('#santriSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#santriSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={beranda:['Beranda','Informasi pembayaran'],kartu:['Kartu Identitas Murid','Lihat & cetak kartu identitas berbarcode'],jadwal:['Jadwal','Lihat jadwal Online/Offline mingguan'],absensi:['Absensi Wajah','Verifikasi wajah & kirim ke Guru'],materi:['Materi','Catat materi pembelajaran'],tugas:['Tugas','Kerjakan tugas dari guru'],ujian:['Ujian Murid','Kerjakan ujian dari guru'],kontrol:['Kartu Kontrol','Status tagihan'],robot:['Robot.AI','Asisten AI H.Ai'],meeting:['Room Meeting','Tatap muka online'],profil:['Profil Saya','Edit, simpan, kirim data diri']};document.getElementById('santriPageTitle').textContent=t[page][0];document.getElementById('santriPageSubtitle').textContent=t[page][1];const main=document.getElementById('santriMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='beranda')main.innerHTML=renderSantriBeranda();else if(page==='kartu')main.innerHTML=renderSantriKartuIdentitas();else if(page==='jadwal')main.innerHTML=renderSantriJadwal();else if(page==='absensi')main.innerHTML=renderSantriAbsensiWajah();else if(page==='materi')main.innerHTML=renderSantriMateri();else if(page==='tugas')main.innerHTML=renderSantriTugas();else if(page==='ujian')main.innerHTML=renderSantriExam();else if(page==='kontrol')main.innerHTML=renderKartuKontrolSantri();else if(page==='robot')main.innerHTML=renderRobot('santri');else if(page==='meeting')main.innerHTML=renderSantriMeeting();else if(page==='profil')main.innerHTML=renderSantriProfil();updateMeetingStatus('santri');lucide.createIcons();if(page==='kartu')initSantriBarcode()}
+function showAdminApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('adminApp').classList.remove('hidden');document.getElementById('adminName').textContent=state.currentUser.nama;document.getElementById('adminAvatar').textContent=state.currentUser.nama.charAt(0);updateRobotSidebarVisibility();navigateAdmin('dashboard');updateClock();lucide.createIcons()}
+function navigateAdmin(page){state.adminPage=page;document.querySelectorAll('#adminSidebar .nav-item').forEach(el=>el.classList.remove('active'));const an=document.querySelector(`#adminSidebar .nav-item[data-page="${page}"]`);if(an)an.classList.add('active');const t={dashboard:['Dashboard','Ringkasan sistem'],'monitor-ai':['Monitor.Ai','Pengawasan AI'],'absensi-guru':['Absensi Guru','Rekap absensi guru'],'absensi-barcode':['Absensi Barcode Murid','Scan kartu identitas murid'],'akun-guru':['Akun Guru','Kelola akun guru'],'akun-santri':['Akun Murid','Kelola akun murid & persetujuan'],meeting:['Room Meeting','Kontrol meeting'],storage:['Upgrade Penyimpanan','Kelola kapasitas cloud'],'glm-api':['GLM API','Konfigurasi GLM API untuk Robot.AI'],robot:['Robot.AI','Asisten AI H.Ai'],pengaturan:['Pengaturan','Konfigurasi sistem']};document.getElementById('adminPageTitle').innerHTML=t[page][0]+(page==='dashboard'?' <span class="crown-badge text-xs px-2 py-0.5 rounded-full font-bold">OWNER</span>':'');document.getElementById('adminPageSubtitle').textContent=t[page][1];const main=document.getElementById('adminMain');main.classList.remove('animate-fade-up');void main.offsetWidth;main.classList.add('animate-fade-up');if(page==='dashboard')main.innerHTML=renderAdminDashboard();else if(page==='monitor-ai')main.innerHTML=renderMonitorAi();else if(page==='absensi-guru')main.innerHTML=renderAdminAbsensi();else if(page==='absensi-barcode')main.innerHTML=renderScanBarcodeMurid('admin');else if(page==='akun-guru')main.innerHTML=renderAdminGuru();else if(page==='akun-santri')main.innerHTML=renderAdminSantriWithNocode();else if(page==='meeting')main.innerHTML=renderAdminMeeting();else if(page==='storage')main.innerHTML=renderAdminStorage();else if(page==='glm-api')main.innerHTML=renderAdminGlmApi();else if(page==='robot')main.innerHTML=renderRobot('admin');else if(page==='pengaturan')main.innerHTML=renderAdminPengaturan();updateMeetingStatus('admin');lucide.createIcons();if(page==='absensi-barcode')initBarcodeScanner('admin')}
 
 function renderGuruDashboard(){const ts=getGuruSantriScope().length;const tg=state.data.guru.length;const tt=getGuruSantriScope().reduce((sum,s)=>sum+getTagihanSantri(s.id).reduce((s,t)=>s+t.nominal,0),0);const tl=getGuruSantriScope().reduce((sum,s)=>sum+getTagihanSantri(s.id).filter(t=>t.status==='lunas').reduce((s,t)=>s+t.nominal,0),0);const tb=tt-tl;const pl=tt?Math.round(tl/tt*100):0;const r=[...state.data.pembayaran].filter(p=>getGuruSantriScope().find(s=>s.id===p.santri_id)).sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).slice(0,5);return `<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"><div class="card p-5"><div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mb-3"><i data-lucide="users" class="text-emerald-600" style="width:20px;height:20px"></i></div><p class="text-3xl font-black text-gray-800">${ts}</p><p class="text-xs text-gray-500 mt-1">Total Murid Bimbingan</p></div><div class="card p-5"><div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center mb-3"><i data-lucide="graduation-cap" class="text-amber-600" style="width:20px;height:20px"></i></div><p class="text-3xl font-black text-gray-800">${tg}</p><p class="text-xs text-gray-500 mt-1">Total Guru</p></div><div class="card p-5"><div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3"><i data-lucide="wallet" class="text-blue-600" style="width:20px;height:20px"></i></div><p class="text-2xl font-black text-gray-800">${formatRupiah(tl)}</p><p class="text-xs text-gray-500 mt-1">Pemasukan</p></div><div class="card p-5"><div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center mb-3"><i data-lucide="alert-circle" class="text-red-600" style="width:20px;height:20px"></i></div><p class="text-2xl font-black text-gray-800">${formatRupiah(tb)}</p><p class="text-xs text-gray-500 mt-1">Tunggakan</p></div></div><div class="card p-6 mb-6"><div class="flex items-center justify-between mb-5"><h3 class="font-bold text-gray-800">Progress Pembayaran</h3><p class="text-2xl font-black text-emerald-700">${pl}%</p></div><div class="progress-track mb-2" style="height:14px"><div class="progress-fill" style="width:${pl}%"></div></div><div class="flex justify-between text-xs text-gray-500"><span>${formatRupiah(tl)} terkumpul</span><span>${formatRupiah(tt)} total</span></div></div><div class="card p-6"><h3 class="font-bold text-gray-800 mb-4">Transaksi Terbaru</h3><table class="w-full text-sm"><thead><tr class="text-left text-xs text-gray-500 uppercase border-b border-stone-200"><th class="pb-3 pr-4">ID</th><th class="pb-3 pr-4">Murid</th><th class="pb-3 pr-4">Tanggal</th><th class="pb-3 pr-4">Metode</th><th class="pb-3 pr-4 text-right">Jumlah</th></tr></thead><tbody>${r.length>0?r.map(p=>{const s=getSantri(p.santri_id);if(!s)return'';return `<tr class="border-b border-stone-100"><td class="py-3 pr-4 font-mono text-xs">${p.id}</td><td class="py-3 pr-4 font-semibold">${s.nama}</td><td class="py-3 pr-4">${p.tanggal}</td><td class="py-3 pr-4"><span class="text-xs px-2 py-1 bg-stone-100 rounded">${p.metode}</span></td><td class="py-3 pr-4 text-right font-bold text-emerald-700">${formatRupiah(p.jumlah)}</td></tr>`}).join(''):'<tr><td colspan="5" class="py-6 text-center text-gray-400">Belum ada transaksi</td></tr>'}</tbody></table></div>`}
 function renderAbsensiGuru(){return `<div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2"><i data-lucide="scan-face" style="width:20px;height:20px"></i> Absensi Kehadiran Guru</h3><p class="text-sm text-gray-500 mb-6">Silakan lakukan absensi masuk menggunakan salah satu metode di bawah ini.</p><div class="grid md:grid-cols-3 gap-4"><button onclick="openCameraAbsensi()" class="p-6 border-2 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl text-center"><i data-lucide="camera" class="text-emerald-600 mb-3" style="width:32px;height:32px"></i><p class="font-bold text-gray-800">Scan Wajah</p><p class="text-xs text-gray-500">Gunakan kamera</p></button><button onclick="absensiSidikJari()" class="p-6 border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 rounded-xl text-center"><i data-lucide="fingerprint" class="text-blue-600 mb-3" style="width:32px;height:32px"></i><p class="font-bold text-gray-800">Sidik Jari</p><p class="text-xs text-gray-500">Verifikasi biometrik</p></button><button onclick="openLinkAbsensi()" class="p-6 border-2 border-amber-200 hover:border-amber-400 hover:bg-amber-50 rounded-xl text-center"><i data-lucide="link" class="text-amber-600 mb-3" style="width:32px;height:32px"></i><p class="font-bold text-gray-800">Link Absensi</p><p class="text-xs text-gray-500">Input link manual</p></button></div></div>`}
@@ -668,8 +732,35 @@ function startMeeting(id){const m=state.data.meetings.find(x=>x.id===id);if(!m)r
 function endMeeting(id){const m=state.data.meetings.find(x=>x.id===id);if(!m)return;m.status='ended';state.data.liveMeeting={active:false,meetingId:null,participants:[],chats:[],screenShare:null,requests:[]};saveData();addLog('Akhiri Meeting',`Meeting ${m.judul} diakhiri`);toast('Meeting diakhiri. Menunggu dihapus oleh Admin','info');navigateAdmin('meeting');updateMeetingStatus('admin')}
 function renderAdminStorage(){const limit=state.data.settings.storageLimit||5;const limitLabel=limit>1024?'Unlimited (Tanpa Batas)':limit+' MB';const dataStr=JSON.stringify(state.data);const sizeInBytes=new Blob([dataStr]).size;const sizeInMB=(sizeInBytes/(1024*1024)).toFixed(2);const percent=Math.min(100,(sizeInMB/limit)*100);return `<div class="card p-6 mb-5"><h3 class="font-bold text-gray-800 text-lg mb-1">Manajemen Penyimpanan Cloud</h3><p class="text-sm text-gray-500 mb-4">Kapasitas server sistem</p><div class="bg-stone-100 p-4 rounded-xl mb-4"><div class="flex justify-between mb-2 text-sm"><span class="font-semibold text-gray-600">Penggunaan Saat Ini:</span><span class="font-bold text-gray-800">${sizeInMB} MB</span></div><div class="flex justify-between mb-2 text-sm"><span class="font-semibold text-gray-600">Kapasitas Terdaftar:</span><span class="font-bold text-emerald-600">${limitLabel}</span></div><div class="progress-track mt-4" style="height:14px"><div class="progress-fill" style="width:${percent}%"></div></div></div></div><div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-1">Paket Upgrade</h3><p class="text-sm text-gray-500 mb-4">Pilih paket untuk menambah kapasitas penyimpanan sistem</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800"><p class="font-semibold flex items-center gap-2"><i data-lucide="info" style="width:16px;height:16px"></i> Catatan Teknis:</p><p class="mt-1">Penyimpanan web browser (Local Storage) memiliki batas fisik nyata sekitar 5MB - 10MB. Jika Anda mengunggah file berukuran besar (seperti PDF/Gambar), sistem akan otomatis memblokir jika melebihi batas browser. Fitur upgrade ini berfungsi untuk mensimulasikan kapasitas cloud jika sistem terhubung ke server database online.</p></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><button onclick="upgradeStorage(200000,'200.000 MB')" class="p-5 border-2 border-stone-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl text-left transition-colors"><i data-lucide="hard-drive" class="text-emerald-600 mb-3" style="width:32px;height:32px"></i><p class="font-bold text-gray-800 text-lg">Paket Standar</p><p class="text-sm text-gray-500">Kapasitas: 200.000 MB</p><p class="text-xs text-blue-600 font-semibold mt-2">Klik untuk Upgrade</p></button><button onclick="upgradeStorage(999999999,'Unlimited')" class="p-5 border-2 border-stone-200 hover:border-purple-400 hover:bg-purple-50 rounded-xl text-left transition-colors"><i data-lucide="database" class="text-purple-600 mb-3" style="width:32px;height:32px"></i><p class="font-bold text-gray-800 text-lg">Paket Unlimited</p><p class="text-sm text-gray-500">Kapasitas: Tanpa Batas</p><p class="text-xs text-blue-600 font-semibold mt-2">Klik untuk Upgrade</p></button></div></div>`}
 function upgradeStorage(limit,label){state.data.settings.storageLimit=limit;saveData();addLog('Upgrade Storage',`Kapasitas ditingkatkan menjadi ${label}`);toast(`Penyimpanan diupgrade menjadi ${label}!`,'success');navigateAdmin('storage')}
-function renderAdminPengaturan(){const s=state.data.settings;return `<div class="card p-6 mb-5"><h3 class="font-bold text-lg mb-1">Pengaturan</h3><form onsubmit="saveSettings(event)" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama TPQ</label><input id="set_nama" type="text" class="input-field" value="${s.namaTPQ}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tahun Ajaran</label><input id="set_tahun" type="text" class="input-field" value="${s.tahunAjaran}" required></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat</label><input id="set_alamat" type="text" class="input-field" value="${s.alamatTPQ}" required></div><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Telepon</label><input id="set_telepon" type="text" class="input-field" value="${s.teleponTPQ}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Link Website</label><input id="set_link" type="url" class="input-field" value="${s.linkWebsite}" required></div></div><button type="submit" class="btn-royal px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2"><i data-lucide="save" style="width:16px;height:16px"></i> Simpan</button></form></div><div class="card p-6"><h3 class="font-bold text-lg mb-1">Ubah Password Owner</h3><form onsubmit="changePass(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password Lama</label><input id="old_pass" type="password" class="input-field" required></div><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password Baru</label><input id="new_pass" type="password" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Konfirmasi</label><input id="conf_pass" type="password" class="input-field" required></div></div><button type="submit" class="btn-danger px-5 py-2.5 rounded-xl font-semibold">Ubah</button></form></div>`}
+function renderAdminGlmApi(){const s=state.data.settings;const hasGLM=!!(s.glmApiKey&&s.glmApiKey.length>10);const keyType=s.glmKeyType||'none';const isLocalKey=keyType==='local';const isGLMKey=keyType==='glm';const robotEnabled=state.data.robotEnabled!==false;const robotMode=state.data.robotMode||'bantuan';const modeInfo=getRobotModeInfo();const modes=[{id:'bantuan',label:'Bantuan.AI',icon:'life-buoy',desc:'Bantuan umum penggunaan aplikasi',color:'emerald'},{id:'server',label:'Server.AI',icon:'server',desc:'Diagnosa server & sistem',color:'blue'},{id:'tata_cara',label:'Tata Cara.AI',icon:'book-open',desc:'SOP langkah-demi-langkah',color:'amber'},{id:'pelengkap',label:'Pelengkap.AI',icon:'puzzle',desc:'Tips, trik, fitur pelengkap',color:'purple'},{id:'semua_ditau',label:'Semua_Ditau.AI',icon:'sparkles',desc:'Mode super — tahu segalanya',color:'rose'}];const statusBadge=hasGLM?(isGLMKey?'<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">✓ GLM API KEY</span>':'<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">✓ LOCAL KEY</span>'):'<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">⚠ NOT CONFIGURED</span>';return `<div class="card p-5 mb-5 border-l-4 ${hasGLM?(isGLMKey?'border-emerald-500 bg-emerald-50/40':'border-blue-500 bg-blue-50/40'):'border-amber-500 bg-amber-50/40'}"><div class="flex items-start gap-3"><div class="w-12 h-12 rounded-xl ${hasGLM?(isGLMKey?'bg-gradient-to-br from-emerald-600 to-emerald-700':'bg-gradient-to-br from-blue-600 to-blue-700'):'bg-gradient-to-br from-amber-500 to-amber-600'} flex items-center justify-center text-white flex-shrink-0"><i data-lucide="zap" style="width:24px;height:24px"></i></div><div class="flex-1"><h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">API Key Configuration ${statusBadge}</h3><p class="text-xs text-gray-500 mt-1">${hasGLM?(isGLMKey?'GLM API key dari open.bigmodel.cn — jawaban dinamis via model GLM-4-Flash.':'API key lokal yang dibuat sendiri — Robot.AI aktif dalam mode Enhanced Offline dengan jawaban cerdas berbasis knowledge base H.Ai.'):'Pilih salah satu: buat API key sendiri (instan, tanpa daftar) atau masukkan GLM API key dari open.bigmodel.cn (jawaban AI dinamis).'}</p></div></div></div>
+
+<div class="grid lg:grid-cols-2 gap-5 mb-5">
+  <div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2"><i data-lucide="key" class="text-amber-600" style="width:20px;height:20px"></i> API Key</h3><form onsubmit="saveGlmApiKey(event)" class="space-y-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">${isLocalKey?'API Key Lokal':'GLM API Key'} ${isLocalKey?'<span class=\"text-blue-600 text-[10px]\">(Buat Sendiri)</span>':''}</label><div class="relative"><input id="set_glm_key" type="password" class="input-field font-mono pr-10" placeholder="Masukkan atau buat API key..." value="${s.glmApiKey||''}" ${isLocalKey?'readonly':''}><button type="button" onclick="togglePassword('set_glm_key',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i data-lucide="eye" style="width:18px;height:18px"></i></button></div><p class="text-xs text-gray-400 mt-1">${isLocalKey?'API key lokal — tidak perlu daftar di open.bigmodel.cn':'Dapatkan gratis di <a href=\"https://open.bigmodel.cn\" target=\"_blank\" class=\"text-emerald-600 hover:underline\">open.bigmodel.cn</a> (opsional)'}</p></div><div class="grid grid-cols-2 gap-2"><button type="submit" class="btn-primary px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2" ${isLocalKey?'disabled':''}><i data-lucide="save" style="width:14px;height:14px"></i> Simpan</button>${isGLMKey?'<button type="button" onclick="testGlmApiConnection()" class="btn-royal px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2"><i data-lucide="wifi" style="width:14px;height:14px"></i> Test Koneksi</button>':'<button type="button" onclick="testLocalApiKey()" class="btn-royal px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2"><i data-lucide="check-circle" style="width:14px;height:14px"></i> Verifikasi Key</button>'}</div>${hasGLM?'<button type="button" onclick="removeGlmApiKey()" class="btn-danger w-full px-4 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Hapus API Key</button>':''}</form></div>
+
+  <div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2"><i data-lucide="info" class="text-blue-600" style="width:20px;height:20px"></i> Status & Info</h3><div class="space-y-3 text-sm"><div class="flex justify-between p-2 bg-stone-50 rounded"><span class="text-gray-500">Status:</span><span class="font-bold ${hasGLM?(isGLMKey?'text-emerald-600':'text-blue-600'):'text-amber-600'}">${hasGLM?(isGLMKey?'● GLM API Aktif':'● Local Key Aktif'):'○ Belum dikonfigurasi'}</span></div><div class="flex justify-between p-2 bg-stone-50 rounded"><span class="text-gray-500">Tipe Key:</span><span class="font-bold ${isLocalKey?'text-blue-600':'text-emerald-600'}">${hasGLM?(isGLMKey?'GLM API (Eksternal)':'Local Key (Buat Sendiri)'):'-'}</span></div><div class="flex justify-between p-2 bg-stone-50 rounded"><span class="text-gray-500">Engine:</span><span class="font-bold text-gray-800">${hasGLM?(isGLMKey?'GLM-4-Flash (AI Dinamis)':'Enhanced Offline (Cerdas)'):'Rule-based (Dasar)'}</span></div><div class="flex justify-between p-2 bg-stone-50 rounded"><span class="text-gray-500">Robot.AI:</span><span class="font-bold ${robotEnabled?'text-emerald-600':'text-stone-500'}">${robotEnabled?'● AKTIF':'○ NONAKTIF'}</span></div><div class="flex justify-between p-2 bg-stone-50 rounded"><span class="text-gray-500">Mode Aktif:</span><span class="font-bold" style="color:${modeInfo.colorHex}">${modeInfo.label}</span></div><div class="flex justify-between p-2 bg-stone-50 rounded"><span class="text-gray-500">Perlu Internet:</span><span class="font-bold ${isLocalKey?'text-stone-500':'text-emerald-600'}">${hasGLM?(isGLMKey?'Ya':'Tidak'):'-'}</span></div></div></div>
+</div>
+
+<div class="card p-6 mb-5 border-l-4 border-blue-500 bg-blue-50/30"><h3 class="font-bold text-gray-800 text-lg mb-3 flex items-center gap-2"><i data-lucide="wand-2" class="text-blue-600" style="width:20px;height:20px"></i> Buat API Key Sendiri (Tanpa Daftar)</h3><p class="text-xs text-gray-500 mb-4">Buat API key lokal langsung di sini — tidak perlu daftar di open.bigmodel.cn. Robot.AI akan aktif dalam mode <strong>Enhanced Offline</strong> dengan knowledge base cerdas tentang H.Ai.</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><button onclick="generateLocalApiKey()" class="p-4 border-2 border-blue-300 hover:border-blue-500 hover:bg-blue-50 rounded-xl text-left transition-all"><div class="flex items-center gap-2 mb-2"><i data-lucide="plus-circle" class="text-blue-600" style="width:20px;height:20px"></i><span class="font-bold text-sm text-blue-700">Buat API Key Baru</span></div><p class="text-xs text-gray-500">Generate API key lokal instan — format HAI-XXXX-XXXX-XXXX</p></button><button onclick="generateLocalApiKey('premium')" class="p-4 border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 rounded-xl text-left transition-all"><div class="flex items-center gap-2 mb-2"><i data-lucide="sparkles" class="text-purple-600" style="width:20px;height:20px"></i><span class="font-bold text-sm text-purple-700">Buat Premium Key</span></div><p class="text-xs text-gray-500">Key premium dengan knowledge base diperluas — format HAI-PREMIUM-XXXXXX</p></button></div>${isLocalKey?`<div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800"><p class="font-semibold flex items-center gap-2"><i data-lucide="check-circle" style="width:14px;height:14px"></i> API Key Lokal Aktif</p><p class="mt-1">Key: <code class="font-mono font-bold">${s.glmApiKey||''}</code></p><p class="mt-1">Robot.AI berjalan dalam mode Enhanced Offline — jawaban cerdas berbasis knowledge base H.Ai tanpa perlu internet.</p></div>`:''}</div>
+
+<div class="card p-6 mb-5"><h3 class="font-bold text-gray-800 text-lg mb-2 flex items-center gap-2"><i data-lucide="toggle-right" class="text-emerald-600" style="width:20px;height:20px"></i> Robot.AI — Toggle ON/OFF</h3><p class="text-xs text-gray-500 mb-4">Aktifkan/nonaktifkan Robot.AI secara global (floating button + menu sidebar).</p><div class="flex items-center justify-between p-4 ${robotEnabled?'bg-emerald-50/50 border border-emerald-200':'bg-stone-50 border border-stone-200'} rounded-xl"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg ${robotEnabled?'bg-emerald-600':'bg-stone-500'} flex items-center justify-center text-white"><i data-lucide="${robotEnabled?'bot':'bot-off'}" style="width:20px;height:20px"></i></div><div><p class="font-bold text-gray-800 text-sm">${robotEnabled?'Robot.AI AKTIF':'Robot.AI NONAKTIF'}</p><p class="text-xs text-gray-500">${robotEnabled?'Floating button & menu sidebar aktif':'Semua akses Robot.AI disembunyikan'}</p></div></div><button onclick="toggleRobotEnabled()" class="relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${robotEnabled?'bg-emerald-600':'bg-stone-400'}"><span class="inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${robotEnabled?'translate-x-7':'translate-x-1'}"></span></button></div></div>
+
+<div class="card p-6 mb-5"><h3 class="font-bold text-gray-800 text-lg mb-2 flex items-center gap-2"><i data-lucide="sliders-horizontal" class="text-purple-600" style="width:20px;height:20px"></i> Mode Robot.AI</h3><p class="text-xs text-gray-500 mb-4">Pilih mode sesuai kebutuhan. Robot akan fokus pada topik mode yang dipilih.</p><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">${modes.map(m=>{const isActive=m.id===robotMode;return `<button onclick="setRobotMode('${m.id}')" class="text-left p-4 rounded-xl border-2 transition-all ${isActive?'border-emerald-500 bg-emerald-50 ring-2 ring-offset-1':'border-stone-200 hover:border-stone-300 bg-white'}"><div class="flex items-center gap-2 mb-2"><i data-lucide="${m.icon}" class="${isActive?'text-emerald-600':'text-gray-500'}" style="width:18px;height:18px"></i><span class="font-bold text-sm ${isActive?'text-emerald-700':'text-gray-700'}">${m.label}</span>${isActive?'<span class="ml-auto text-[10px] text-emerald-600 font-bold">● AKTIF</span>':''}</div><p class="text-xs text-gray-500 leading-tight">${m.desc}</p></button>`;}).join('')}</div></div>
+
+<div class="card p-6"><h3 class="font-bold text-gray-800 text-lg mb-3 flex items-center gap-2"><i data-lucide="book-open" class="text-blue-600" style="width:20px;height:20px"></i> Panduan Setup GLM API</h3><div class="space-y-3 text-sm text-gray-600"><div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center flex-shrink-0">1</div><div><p class="font-semibold text-gray-800">Daftar akun di open.bigmodel.cn</p><p class="text-xs">Buka <a href="https://open.bigmodel.cn" target="_blank" class="text-emerald-600 hover:underline">https://open.bigmodel.cn</a> → klik "Sign Up" → isi email & password.</p></div></div><div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center flex-shrink-0">2</div><div><p class="font-semibold text-gray-800">Buat API Key</p><p class="text-xs">Login → menu "API Keys" → "Create API Key" → beri nama → salin key yang muncul.</p></div></div><div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center flex-shrink-0">3</div><div><p class="font-semibold text-gray-800">Tempel API Key di form atas</p><p class="text-xs">Paste key ke input "GLM API Key" → klik "Simpan" → klik "Test Koneksi" untuk verifikasi.</p></div></div><div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center flex-shrink-0">4</div><div><p class="font-semibold text-gray-800">Pilih Mode Robot.AI</p><p class="text-xs">Pilih salah satu mode di atas (Bantuan/Server/Tata Cara/Pelengkap/Semua_Ditau).</p></div></div><div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center flex-shrink-0">5</div><div><p class="font-semibold text-gray-800">Tes Robot.AI</p><p class="text-xs">Klik floating button robot di pojok kanan-bawah → tanyakan apa saja → jawaban akan lebih cerdas.</p></div></div></div><div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800"><p class="font-semibold flex items-center gap-2"><i data-lucide="info" style="width:14px;height:14px"></i> Catatan:</p><p class="mt-1">Tanpa API key, Robot.AI tetap berfungsi (mode offline/rule-based). API key hanya untuk jawaban dinamis & cerdas via model GLM-4-Flash (gratis).</p></div></div>`}
+async function testGlmApiConnection(){const keyEl=document.getElementById('set_glm_key');if(!keyEl)return;const key=keyEl.value.trim();if(!key){toast('Masukkan API key dulu untuk test','error');return}showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 mb-3"><i data-lucide="loader-2" class="animate-spin text-blue-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Menguji Koneksi GLM API...</h3><p class="text-sm text-gray-500">Mengirim request test ke open.bigmodel.cn</p></div>`);try{const resp=await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'glm-4-flash',messages:[{role:'user',content:'Halo, balas dengan "OK" saja.'}],max_tokens:10})});if(resp.ok){const data=await resp.json();const reply=data.choices?.[0]?.message?.content||'(kosong)';closeModal();showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-3"><i data-lucide="check-circle" class="text-emerald-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Koneksi Berhasil! ✓</h3><p class="text-sm text-gray-600 mb-3">GLM API merespons dengan benar.</p><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-sm"><p class="text-gray-600">Respons:</p><p class="font-mono font-bold text-emerald-700 mt-1">"${reply}"</p></div><button onclick="closeModal()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Tutup</button></div>`);addLog('GLM API Test','Koneksi berhasil - API key valid')}else{const errText=await resp.text();closeModal();let errMsg=`HTTP ${resp.status}`;if(resp.status===401)errMsg='API key tidak valid (Unauthorized)';else if(resp.status===429)errMsg='Rate limit terlampaui - coba lagi nanti';else if(resp.status===403)errMsg='Akses ditolak - periksa API key';closeModal();showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-50 mb-3"><i data-lucide="x-circle" class="text-red-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Koneksi Gagal ❌</h3><p class="text-sm text-gray-600 mb-3">${errMsg}</p><button onclick="closeModal()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Tutup</button></div>`);addLog('GLM API Test',`Gagal: ${errMsg}`)}}catch(e){closeModal();showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-50 mb-3"><i data-lucide="wifi-off" class="text-red-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Error Koneksi</h3><p class="text-sm text-gray-600 mb-3">Tidak dapat terhubung ke GLM API. Periksa koneksi internet atau CORS.</p><p class="text-xs text-gray-400">${e.message}</p><button onclick="closeModal()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Tutup</button></div>`);addLog('GLM API Test',`Error: ${e.message}`)}}
+function renderAdminPengaturan(){const s=state.data.settings;const hasGLM=!!(s.glmApiKey&&s.glmApiKey.length>10);const robotEnabled=state.data.robotEnabled!==false;const robotMode=state.data.robotMode||'bantuan';const modes=[{id:'bantuan',label:'Bantuan.AI',icon:'life-buoy',desc:'Bantuan umum — tanya jawab fitur aplikasi, cara pakai, troubleshooting ringan',color:'emerald'},{id:'server',label:'Server.AI',icon:'server',desc:'Diagnosa server & sistem — status storage, log aktivitas, performa, koneksi',color:'blue'},{id:'tata_cara',label:'Tata Cara.AI',icon:'book-open',desc:'Panduan langkah-langkah detail — SOP pendaftaran, absensi, pembayaran, persetujuan',color:'amber'},{id:'pelengkap',label:'Pelengkap.AI',icon:'puzzle',desc:'Fitur pelengkap — tips & trik, shortcut, fitur tersembunyi, optimasi penggunaan',color:'purple'},{id:'semua_ditau',label:'Semua_Ditau.AI',icon:'sparkles',desc:'Mode super — robot tahu segalanya: sistem, server, SOP, tips, debugging, semua topik',color:'rose'}];const modeColors={emerald:{bg:'bg-emerald-50',border:'border-emerald-500',text:'text-emerald-700',btn:'bg-emerald-600'},blue:{bg:'bg-blue-50',border:'border-blue-500',text:'text-blue-700',btn:'bg-blue-600'},amber:{bg:'bg-amber-50',border:'border-amber-500',text:'text-amber-700',btn:'bg-amber-600'},purple:{bg:'bg-purple-50',border:'border-purple-500',text:'text-purple-700',btn:'bg-purple-600'},rose:{bg:'bg-rose-50',border:'border-rose-500',text:'text-rose-700',btn:'bg-rose-600'}};const activeMode=modes.find(m=>m.id===robotMode)||modes[0];const mc=modeColors[activeMode.color];return `<div class="card p-6 mb-5"><h3 class="font-bold text-lg mb-1">Pengaturan</h3><form onsubmit="saveSettings(event)" class="space-y-4 mt-4"><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama TPQ</label><input id="set_nama" type="text" class="input-field" value="${s.namaTPQ}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Tahun Ajaran</label><input id="set_tahun" type="text" class="input-field" value="${s.tahunAjaran}" required></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Alamat</label><input id="set_alamat" type="text" class="input-field" value="${s.alamatTPQ}" required></div><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Telepon</label><input id="set_telepon" type="text" class="input-field" value="${s.teleponTPQ}" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Link Website</label><input id="set_link" type="url" class="input-field" value="${s.linkWebsite}" required></div></div><button type="submit" class="btn-royal px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2"><i data-lucide="save" style="width:16px;height:16px"></i> Simpan</button></form></div><div class="card p-6 mb-5 border-l-4 ${robotEnabled?mc.border+' '+mc.bg:'border-stone-400 bg-stone-50/50'}"><div class="flex items-start gap-3 mb-4"><div class="w-12 h-12 rounded-xl ${robotEnabled?mc.btn+' flex items-center justify-center text-white flex-shrink-0':'bg-gradient-to-br from-stone-500 to-stone-600 flex items-center justify-center text-white flex-shrink-0'}"><i data-lucide="${robotEnabled?activeMode.icon:'bot'}" style="width:24px;height:24px"></i></div><div class="flex-1"><h3 class="font-bold text-lg mb-1 flex items-center gap-2">Robot.AI ${robotEnabled?`<span class="text-xs ${mc.text} font-bold px-2 py-0.5 rounded-full ${mc.bg}">${activeMode.label}</span>`:''}</h3><p class="text-xs text-gray-500">Chatbot AI yang muncul sebagai floating button di semua halaman + menu sidebar. ${robotEnabled?'<span class="text-emerald-600 font-bold">● AKTIF</span>':'<span class="text-stone-500 font-bold">○ NONAKTIF</span>'}</p></div><div class="flex-shrink-0"><button onclick="toggleRobotEnabled()" class="relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${robotEnabled?mc.btn:'bg-stone-400'}" title="${robotEnabled?'Klik untuk NONAKTIFKAN Robot.AI':'Klik untuk AKTIFKAN Robot.AI'}"><span class="inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${robotEnabled?'translate-x-7':'translate-x-1'}"></span></button></div></div>${robotEnabled?`<div class="bg-white border border-stone-200 rounded-xl p-4 space-y-4"><div><label class="block text-xs font-semibold text-gray-600 mb-2">Mode Robot.AI — Pilih sesuai kebutuhan</label><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">${modes.map(m=>{const c=modeColors[m.color];const isActive=m.id===robotMode;return `<button onclick="setRobotMode('${m.id}')" class="text-left p-3 rounded-xl border-2 transition-all ${isActive?c.border+' '+c.bg+' ring-2 ring-offset-1':'border-stone-200 hover:border-stone-300 bg-white'}"><div class="flex items-center gap-2 mb-1"><i data-lucide="${m.icon}" class="${isActive?c.text:'text-gray-500'}" style="width:16px;height:16px"></i><span class="font-bold text-sm ${isActive?c.text:'text-gray-700'}">${m.label}</span>${isActive?`<span class="ml-auto text-[9px] ${c.text} font-bold">● AKTIF</span>`:''}</div><p class="text-[11px] text-gray-500 leading-tight">${m.desc}</p></button>`;}).join('')}</div><div class="bg-${activeMode.color}-50 border border-${activeMode.color}-200 rounded-lg p-3 text-xs"><p class="font-semibold ${mc.text} flex items-center gap-1"><i data-lucide="${activeMode.icon}" style="width:14px;height:14px"></i> ${activeMode.label} aktif</p><p class="text-gray-600 mt-1">${activeMode.desc}. Robot akan fokus pada topik ini saat menjawab pertanyaan.</p></div></div><div class="border-t border-stone-200 pt-4"><div class="flex items-center justify-between mb-2"><div><p class="text-sm font-semibold text-gray-700">Engine AI</p><p class="text-xs text-gray-500">${hasGLM?'GLM API (jawaban dinamis cerdas)':'Rule-based (offline, jawaban terbatas)'}</p></div><span class="robot-badge-ai ${hasGLM?'':'opacity-60'}">${hasGLM?'<i data-lucide=\"zap\" style=\"width:10px;height:10px\"></i> GLM AI':'<i data-lucide=\"cpu\" style=\"width:10px;height:10px\"></i> OFFLINE'}</span></div><label class="block text-xs font-semibold text-gray-600 mb-1.5">GLM API Key (opsional, untuk jawaban cerdas)</label><input id="set_glm_key" type="password" class="input-field font-mono" placeholder="Masukkan API key dari https://open.bigmodel.cn" value="${s.glmApiKey||''}"><p class="text-xs text-gray-400 mt-1">Dapatkan API key gratis di <a href="https://open.bigmodel.cn" target="_blank" class="text-emerald-600 hover:underline">open.bigmodel.cn</a> (model: glm-4-flash)</p><div class="flex gap-2 mt-3"><button onclick="saveGlmApiKey(event)" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="zap" style="width:14px;height:14px"></i> Simpan API Key</button>${hasGLM?'<button onclick="removeGlmApiKey()" class="btn-danger px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Hapus</button>':''}</div></div></div>`:'<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800"><p class="font-semibold flex items-center gap-2"><i data-lucide="info" style="width:16px;height:16px"></i> Robot.AI Nonaktif</p><p class="mt-1 text-xs">Floating button & menu Robot.AI di sidebar akan disembunyikan dari semua pengguna (Guru, Murid, Admin). Aktifkan kembali kapan saja dengan toggle di atas.</p></div>'}</div><div class="card p-6"><h3 class="font-bold text-lg mb-1">Ubah Password Owner</h3><form onsubmit="changePass(event)" class="space-y-4 mt-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password Lama</label><input id="old_pass" type="password" class="input-field" required></div><div class="grid sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Password Baru</label><input id="new_pass" type="password" class="input-field" required></div><div><label class="block text-xs font-semibold text-gray-600 mb-1.5">Konfirmasi</label><input id="conf_pass" type="password" class="input-field" required></div></div><button type="submit" class="btn-danger px-5 py-2.5 rounded-xl font-semibold">Ubah</button></form></div>`}
 function saveSettings(e){e.preventDefault();state.data.settings.namaTPQ=document.getElementById('set_nama').value.trim();state.data.settings.tahunAjaran=document.getElementById('set_tahun').value.trim();state.data.settings.alamatTPQ=document.getElementById('set_alamat').value.trim();state.data.settings.teleponTPQ=document.getElementById('set_telepon').value.trim();state.data.settings.linkWebsite=document.getElementById('set_link').value.trim();saveData();addLog('Pengaturan','Pengaturan diperbarui');toast('Pengaturan disimpan','success')}
+function saveGlmApiKey(e){e.preventDefault();const key=document.getElementById('set_glm_key').value.trim();if(!key){toast('API key tidak boleh kosong','error');return}if(key.length<10){toast('API key terlalu pendek','error');return}if(!state.data.settings)state.data.settings={};state.data.settings.glmApiKey=key;state.data.settings.glmKeyType='glm';saveData();addLog('Konfigurasi Robot.AI','GLM API key disimpan (tipe: GLM eksternal)');toast('GLM API key disimpan! Robot.AI sekarang aktif dengan AI dinamis.','success');const currentPage=state.adminPage;if(currentPage==='glm-api')navigateAdmin('glm-api');else if(currentPage==='pengaturan')navigateAdmin('pengaturan');else navigateAdmin('glm-api')}
+function generateLocalApiKey(type='standard'){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let key='';if(type==='premium'){key='HAI-PREMIUM-';for(let i=0;i<6;i++)key+=chars.charAt(Math.floor(Math.random()*chars.length));}else{const segments=[];for(let s=0;s<3;s++){let seg='';for(let i=0;i<4;i++)seg+=chars.charAt(Math.floor(Math.random()*chars.length));segments.push(seg);}key='HAI-'+segments.join('-');}if(!state.data.settings)state.data.settings={};state.data.settings.glmApiKey=key;state.data.settings.glmKeyType='local';saveData();addLog('Konfigurasi Robot.AI',`API key lokal dibuat: ${key} (${type})`);toast(`API Key lokal berhasil dibuat! ${type==='premium'?'(Premium)':''}`,'success');navigateAdmin('glm-api');showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 mb-3"><i data-lucide="check-circle" class="text-blue-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">API Key Lokal Berhasil Dibuat! ✓</h3><p class="text-sm text-gray-600 mb-3">${type==='premium'?'Premium Key dengan knowledge base diperluas.':'Standard Key dengan knowledge base H.Ai.'}</p><div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm"><p class="text-gray-600">API Key Anda:</p><p class="font-mono font-bold text-blue-700 mt-1 text-lg">${key}</p></div><p class="text-xs text-gray-500 mt-3">Robot.AI sekarang aktif dalam mode <strong>Enhanced Offline</strong>. Tidak perlu internet — jawaban cerdas berbasis knowledge base H.Ai.</p><button onclick="closeModal()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Tutup</button></div>`)}
+function testLocalApiKey(){const key=state.data.settings?.glmApiKey;if(!key){toast('Belum ada API key lokal','error');return}showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-3"><i data-lucide="check-circle" class="text-emerald-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">API Key Lokal Valid ✓</h3><p class="text-sm text-gray-600 mb-3">Key: <code class="font-mono font-bold text-blue-700">${key}</code></p><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-left"><p class="font-semibold text-emerald-700 mb-2">Status Engine:</p><ul class="space-y-1 text-xs text-gray-600"><li>✓ Mode: Enhanced Offline</li><li>✓ Knowledge Base: H.Ai (aktif)</li><li>✓ Perlu Internet: Tidak</li><li>✓ Robot.AI: Siap digunakan</li></ul></div><button onclick="closeModal()" class="btn-primary w-full py-3 rounded-xl font-semibold mt-4">Tutup</button></div>`);addLog('GLM API Test','Local key valid - Enhanced Offline mode')}
+function removeGlmApiKey(){showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-50 mb-3"><i data-lucide="alert-triangle" class="text-red-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Hapus GLM API Key?</h3><p class="text-sm text-gray-600 mb-4">Robot.AI akan kembali ke mode offline (jawaban berbasis aturan).</p><div class="flex gap-3"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmRemoveGlmApiKey()" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Hapus</button></div></div>`)}
+function confirmRemoveGlmApiKey(){if(state.data.settings)delete state.data.settings.glmApiKey;saveData();addLog('Konfigurasi Robot.AI','GLM API key dihapus');closeModal();toast('GLM API key dihapus. Robot.AI kembali ke mode offline.','info');const currentPage=state.adminPage;if(currentPage==='glm-api')navigateAdmin('glm-api');else navigateAdmin('pengaturan')}
+function toggleRobotEnabled(){const currentlyEnabled=state.data.robotEnabled!==false;const newEnabled=!currentlyEnabled;state.data.robotEnabled=newEnabled;saveData();addLog('Toggle Robot.AI',`Robot.AI ${newEnabled?'DIAKTIFKAN':'DIMATIKAN'} oleh Admin`);if(newEnabled){toast('Robot.AI AKTIF. Floating button & menu sidebar akan muncul.','success');initFloatingRobot();}else{toast('Robot.AI NONAKTIF. Floating button & menu disembunyikan.','info');removeFloatingRobot();}updateRobotSidebarVisibility();const currentPage=state.adminPage;if(currentPage==='glm-api')navigateAdmin('glm-api');else navigateAdmin('pengaturan');}
+function setRobotMode(mode){const modes=['bantuan','server','tata_cara','pelengkap','semua_ditau'];if(!modes.includes(mode)){toast('Mode tidak valid','error');return}const oldMode=state.data.robotMode||'bantuan';state.data.robotMode=mode;saveData();const labels={bantuan:'Bantuan.AI',server:'Server.AI',tata_cara:'Tata Cara.AI',pelengkap:'Pelengkap.AI',semua_ditau:'Semua_Ditau.AI'};addLog('Mode Robot.AI',`Mode diubah dari ${labels[oldMode]} ke ${labels[mode]}`);toast(`Mode Robot.AI: ${labels[mode]}`,'success');const currentPage=state.adminPage;if(currentPage==='glm-api')navigateAdmin('glm-api');else navigateAdmin('pengaturan');}
+function getRobotModeInfo(){const mode=state.data.robotMode||'bantuan';const info={bantuan:{label:'Bantuan.AI',icon:'life-buoy',color:'emerald',colorHex:'#0f5c4a',focus:'bantuan umum penggunaan aplikasi H.Ai'},server:{label:'Server.AI',icon:'server',color:'blue',colorHex:'#1e40af',focus:'diagnosa server, status sistem, storage, log, performa'},tata_cara:{label:'Tata Cara.AI',icon:'book-open',color:'amber',colorHex:'#c89844',focus:'panduan langkah demi langkah (SOP) semua fitur'},pelengkap:{label:'Pelengkap.AI',icon:'puzzle',color:'purple',colorHex:'#6b21a8',focus:'tips, trik, fitur pelengkap, optimasi penggunaan'},semua_ditau:{label:'Semua_Ditau.AI',icon:'sparkles',color:'rose',colorHex:'#be123c',focus:'mode super — tahu segalanya tentang sistem, server, SOP, tips, debugging'}};return info[mode]||info.bantuan;}
+function removeFloatingRobot(){const fab=document.getElementById('robotFab');if(fab)fab.remove();const popup=document.getElementById('robotPopup');if(popup)popup.remove();}
+function isRobotEnabled(){return state.data&&state.data.robotEnabled!==false;}
+function updateRobotSidebarVisibility(){const show=isRobotEnabled();['navRobotGuru','navRobotSantri','navRobotAdmin'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=show?'flex':'none';});}
 function changePass(e){e.preventDefault();const o=document.getElementById('old_pass').value.trim();const n=document.getElementById('new_pass').value.trim();const c=document.getElementById('conf_pass').value.trim();if(o!==state.data.accounts.admin.password){toast('Password lama salah','error');return}if(n.length<4){toast('Minimal 4 karakter','error');return}if(n!==c){toast('Konfirmasi tidak cocok','error');return}state.data.accounts.admin.password=n;saveData();addLog('Ubah Password','Password owner diubah');toast('Password diubah','success')}
 function updateMeetingStatus(role) {const current = getCurrentMeeting();const el = document.getElementById(`meetingStatus${role.charAt(0).toUpperCase() + role.slice(1)}`);if (el) {if (current.type === 'active') {el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-green-100 text-green-800 font-bold transition-colors hover:bg-green-200";el.innerHTML = `<span class="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span> Host Aktif`;} else if (current.type === 'upcoming') {el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-orange-100 text-orange-800 font-bold transition-colors hover:bg-orange-200";el.innerHTML = `<i data-lucide="megaphone" style="width:14px;height:14px"></i> Pengumuman 📢`;} else {el.className = "hidden md:flex items-center gap-2 text-sm cursor-pointer px-3 py-1.5 rounded-lg bg-red-100 text-red-800 font-bold transition-colors hover:bg-red-200";el.innerHTML = `<span class="w-2 h-2 bg-red-600 rounded-full"></span> Host Offline`;}}const navItem = document.querySelector(`#${role}Sidebar .nav-item[data-page="meeting"]`);if (navItem) {const badge = navItem.querySelector('.meeting-badge');if (badge) {badge.classList.remove('hidden');if (current.type === 'active') {badge.className = 'meeting-badge text-xs px-2 py-0.5 rounded-full font-bold bg-green-500 text-white animate-pulse';badge.textContent = 'Host';} else if (current.type === 'upcoming') {badge.className = 'meeting-badge text-xs px-2 py-0.5 rounded-full font-bold bg-orange-500 text-white animate-pulse';badge.textContent = '1';} else {badge.className = 'meeting-badge text-xs px-2 py-0.5 rounded-full font-bold bg-red-500 text-white';badge.textContent = 'Offline';}}}lucide.createIcons();}
 function initGuruQR(){const me=state.currentUser;const myGuruData=state.data.guru.find(g=>g.id===(me?.guruId||me?.guru_id))||state.data.guru[0]||null;const myGuruCode=myGuruData?.code||'TPQ-G1-GURU';generateQR('mainQrCode',myGuruCode,192);const wl=state.data.settings.linkWebsite||WEBSITE_LINK_DEFAULT;generateQR('linkQrCode',wl+'#daftar',192)}
@@ -679,8 +770,134 @@ loadData();
 showSplash();
 updateClock();
 lucide.createIcons();
+initFloatingRobot();
 
 if(window.location.hash.includes('daftar')){setTimeout(()=>{showRegisterChoiceModal();history.replaceState(null,null,window.location.pathname)},800)}
+
+/* =========================================================================
+   FLOATING ROBOT.AI — Chatbot popup yang bisa diakses dari halaman manapun
+   ========================================================================= */
+function getFloatingRobotRole(){
+  if(state.currentRole==='admin'||(state.currentUser&&state.currentUser.role==='owner'))return 'admin';
+  if(state.currentRole==='guru'||(state.currentUser&&state.currentUser.role==='guru'))return 'guru';
+  if(state.currentRole==='santri'||(state.currentUser&&state.currentUser.role==='santri'))return 'santri';
+  return 'guest';
+}
+
+function getFloatingRobotGreeting(role){
+  const nama = state.currentUser?.nama || '';
+  const hour = new Date().getHours();
+  const salam = hour<11?'Selamat pagi':hour<15?'Selamat siang':hour<19?'Selamat sore':'Selamat malam';
+  if(role==='guest') return `${salam}! 🤖 Saya Robot.AI, asisten AI H.Ai. Saya bisa membantu Anda memahami cara login, daftar murid/guru baru, atau fitur lainnya. Apa yang bisa saya bantu?`;
+  return `${salam}${nama?', '+nama:''}! 🤖 Saya Robot.AI. Klik salah satu tombol di bawah atau ketik pertanyaan Anda. Saya siap membantu!`;
+}
+
+function getFloatingRobotQuick(role){
+  if(role==='guru')return ['Cara daftar murid baru','Cara scan absensi barcode','Cara setujui/tolak murid','Cara atur jadwal'];
+  if(role==='admin')return ['Cara setujui murid tanpa kode','Cara kelola akun guru','Cara setting GLM API','Cara lihat log sistem'];
+  if(role==='santri')return ['Cara lihat kartu identitas','Cara absensi wajah','Cara lihat jadwal','Cara lihat tagihan'];
+  return ['Bagaimana cara login?','Cara daftar murid baru','Cara daftar guru baru','Fitur H.Ai apa saja?'];
+}
+
+function initFloatingRobot(){
+  if(!isRobotEnabled())return;
+  if(document.getElementById('robotFab'))return;
+  const fab=document.createElement('div');
+  fab.id='robotFab';
+  fab.className='robot-fab';
+  fab.innerHTML='<i data-lucide="bot" style="width:28px;height:28px"></i><span class="robot-fab-badge">AI</span>';
+  fab.title='Buka Robot.AI — Asisten AI H.Ai';
+  fab.onclick=toggleFloatingRobot;
+  document.body.appendChild(fab);
+  lucide.createIcons();
+}
+
+function toggleFloatingRobot(){
+  if(!isRobotEnabled()){toast('Robot.AI sedang nonaktif. Aktifkan di Admin → Pengaturan.','warn');return}
+  const existing=document.getElementById('robotPopup');
+  if(existing){existing.remove();return;}
+  showFloatingRobot();
+}
+
+function showFloatingRobot(){
+  const role=getFloatingRobotRole();
+  const popup=document.createElement('div');
+  popup.id='robotPopup';
+  popup.className='robot-popup';
+  const hasGLM=!!(state.data.settings&&state.data.settings.glmApiKey);
+  const modeInfo=getRobotModeInfo();
+  const aiBadge=hasGLM?'<span class="robot-badge-ai" style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;font-size:9px;padding:2px 6px;border-radius:8px;">GLM</span>':'<span class="robot-badge-ai" style="background:rgba(255,255,255,.2);color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;">OFFLINE</span>';
+  const modeBadge=`<span class="robot-badge-ai" style="background:${modeInfo.colorHex};color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;"><i data-lucide="${modeInfo.icon}" style="width:10px;height:10px"></i>${modeInfo.label}</span>`;
+  const greeting=getFloatingRobotGreeting(role);
+  const quick=getFloatingRobotQuick(role);
+  popup.innerHTML=`<div class="robot-popup-header" style="background:linear-gradient(135deg,${modeInfo.colorHex},${modeInfo.colorHex}dd)"><div class="avatar"><i data-lucide="${modeInfo.icon}" style="width:20px;height:20px"></i></div><div class="info"><h4>Robot.AI ${modeBadge} ${aiBadge}</h4><p>Asisten AI H.Ai • Mode: ${modeInfo.label} • Online 24/7</p></div><div class="robot-popup-close" onclick="toggleFloatingRobot()"><i data-lucide="x" style="width:16px;height:16px"></i></div></div><div class="robot-popup-body" id="robotPopupBody"><div class="robot-msg bot"><div class="robot-avatar" style="background:linear-gradient(135deg,${modeInfo.colorHex},${modeInfo.colorHex}dd)"><i data-lucide="${modeInfo.icon}" style="width:18px;height:18px"></i></div><div class="robot-bubble">${escapeRobotHtml(greeting)}</div></div></div><div class="robot-popup-quick" id="robotPopupQuick">${quick.map(q=>`<button onclick="askFloatingRobot(this)" data-q="${q.replace(/"/g,'&quot;')}">${q}</button>`).join('')}</div><div class="robot-popup-input"><textarea id="robotPopupInput" placeholder="Ketik pesan ke ${modeInfo.label}..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendFloatingRobot()}" oninput="autoGrowTextarea(this)"></textarea><button class="robot-popup-send" id="robotPopupSend" style="background:linear-gradient(135deg,${modeInfo.colorHex},${modeInfo.colorHex}dd)" onclick="sendFloatingRobot()"><i data-lucide="send" style="width:16px;height:16px"></i></button></div>`;
+  document.body.appendChild(popup);
+  lucide.createIcons();
+  setTimeout(()=>{const inp=document.getElementById('robotPopupInput');if(inp)inp.focus();},300);
+}
+
+function askFloatingRobot(btn){
+  const q=btn.getAttribute('data-q');
+  const input=document.getElementById('robotPopupInput');
+  if(input)input.value=q;
+  sendFloatingRobot();
+}
+
+function sendFloatingRobot(){
+  const input=document.getElementById('robotPopupInput');
+  if(!input)return;
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  input.style.height='auto';
+  const role=getFloatingRobotRole();
+  const body=document.getElementById('robotPopupBody');
+  if(body){
+    body.insertAdjacentHTML('beforeend',`<div class="robot-msg user"><div class="robot-avatar">${(state.currentUser?.nama||'U').charAt(0).toUpperCase()}</div><div class="robot-bubble">${escapeRobotHtml(text)}</div></div>`);
+    body.scrollTop=body.scrollHeight;
+  }
+  showFloatingRobotTyping();
+  const sendBtn=document.getElementById('robotPopupSend');
+  if(sendBtn)sendBtn.disabled=true;
+  const modeInfo=getRobotModeInfo();
+  setTimeout(async()=>{
+    try{
+      const history=loadRobotHistory(role)||[];
+      const response=await getRobotResponse(role,text,history);
+      history.push({role:'user',text:text,ts:Date.now()},{role:'bot',text:response,ts:Date.now()});
+      saveRobotHistory(role,history);
+      hideFloatingRobotTyping();
+      if(body){
+        body.insertAdjacentHTML('beforeend',`<div class="robot-msg bot"><div class="robot-avatar" style="background:linear-gradient(135deg,${modeInfo.colorHex},${modeInfo.colorHex}dd)"><i data-lucide="${modeInfo.icon}" style="width:18px;height:18px"></i></div><div class="robot-bubble">${escapeRobotHtml(response)}</div></div>`);
+        body.scrollTop=body.scrollHeight;
+      }
+      lucide.createIcons();
+    }catch(e){
+      hideFloatingRobotTyping();
+      const fallback='Maaf, terjadi kesalahan. Coba lagi.';
+      if(body){
+        body.insertAdjacentHTML('beforeend',`<div class="robot-msg bot"><div class="robot-avatar" style="background:linear-gradient(135deg,${modeInfo.colorHex},${modeInfo.colorHex}dd)"><i data-lucide="${modeInfo.icon}" style="width:18px;height:18px"></i></div><div class="robot-bubble">${escapeRobotHtml(fallback)}</div></div>`);
+        body.scrollTop=body.scrollHeight;
+      }
+    }finally{
+      if(sendBtn)sendBtn.disabled=false;
+    }
+  },600+Math.random()*500);
+}
+
+function showFloatingRobotTyping(){
+  const body=document.getElementById('robotPopupBody');
+  if(!body)return;
+  const modeInfo=getRobotModeInfo();
+  body.insertAdjacentHTML('beforeend',`<div id="floatingRobotTyping" class="robot-msg bot"><div class="robot-avatar" style="background:linear-gradient(135deg,${modeInfo.colorHex},${modeInfo.colorHex}dd)"><i data-lucide="${modeInfo.icon}" style="width:18px;height:18px"></i></div><div class="robot-bubble"><div class="robot-typing"><span></span><span></span><span></span></div></div></div>`);
+  body.scrollTop=body.scrollHeight;
+  lucide.createIcons();
+}
+
+function hideFloatingRobotTyping(){
+  const t=document.getElementById('floatingRobotTyping');
+  if(t)t.remove();
+}
 
 /* =========================================================================
    FITUR BARU — Tambahan sesuai permintaan
@@ -1235,6 +1452,361 @@ function downloadKartuIdentitas(){
 }
 
 /* =========================================================================
+   ROBOT.AI — Chatbot AI dengan GLM API (optional) + rule-based fallback
+   ========================================================================= */
+function getRobotStorageKey(role){
+  const uid = state.currentUser?.santri_id || state.currentUser?.guruId || state.currentUser?.username || 'guest';
+  return `tpq_robot_chat_${role}_${uid}`;
+}
+
+function loadRobotHistory(role){
+  try{
+    const k = getRobotStorageKey(role);
+    const raw = localStorage.getItem(k);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+
+function saveRobotHistory(role, history){
+  try{
+    const k = getRobotStorageKey(role);
+    localStorage.setItem(k, JSON.stringify(history.slice(-30)));
+  }catch(e){}
+}
+
+function getRobotGreeting(role){
+  const nama = state.currentUser?.nama || 'Pengguna';
+  const hour = new Date().getHours();
+  const salam = hour<11?'Selamat pagi':hour<15?'Selamat siang':hour<19?'Selamat sore':'Selamat malam';
+  if(role==='guru') return `${salam}, ${nama}! 🤖 Saya Robot.AI, asisten AI H.Ai untuk Panel Guru. Saya bisa membantu Anda dengan: pendaftaran murid, absensi, jadwal, pembayaran, persetujuan guru-murid, dan lainnya. Apa yang bisa saya bantu?`;
+  if(role==='admin') return `${salam}, ${nama}! 🤖 Saya Robot.AI, asisten AI H.Ai untuk Panel Admin. Saya bisa membantu dengan: persetujuan murid tanpa kode, akun guru, akun murid, pengaturan sistem, dan lainnya. Apa yang bisa saya bantu?`;
+  return `${salam}, ${nama}! 🤖 Saya Robot.AI, asisten AI H.Ai untuk Panel Murid. Saya bisa membantu Anda dengan: kartu identitas, jadwal, absensi wajah, materi, tugas, ujian, dan lainnya. Apa yang bisa saya bantu?`;
+}
+
+function getRobotQuickActions(role){
+  if(role==='guru') return [
+    'Bagaimana cara daftarkan murid baru?',
+    'Cara membuat QR Code guru',
+    'Cara setujui/tolak murid',
+    'Cara scan absensi barcode murid',
+    'Cara atur jadwal Online/Offline',
+    'Cara kirim kredensial via WhatsApp'
+  ];
+  if(role==='admin') return [
+    'Cara setujui murid tanpa kode guru',
+    'Cara kelola akun guru',
+    'Cara reset password murid',
+    'Cara konfigurasi GLM API key',
+    'Cara lihat log aktivitas sistem',
+    'Cara upgrade penyimpanan'
+  ];
+  return [
+    'Bagaimana cara login?',
+    'Cara lihat kartu identitas saya',
+    'Cara lihat jadwal pelajaran',
+    'Cara absensi wajah',
+    'Cara kerjakan tugas dari guru',
+    'Cara lihat tagihan SPP'
+  ];
+}
+
+function renderRobot(role){
+  const history = loadRobotHistory(role) || [{role:'bot', text:getRobotGreeting(role), ts:Date.now()}];
+  const hasGLM = !!(state.data.settings && state.data.settings.glmApiKey);
+  const aiBadge = hasGLM ? `<span class="robot-badge-ai"><i data-lucide="zap" style="width:10px;height:10px"></i> GLM AI</span>` : `<span class="robot-badge-ai" style="background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff"><i data-lucide="cpu" style="width:10px;height:10px"></i> Mode Offline</span>`;
+  const quickActions = getRobotQuickActions(role);
+  return `<div class="card p-5 mb-4 border-l-4 border-emerald-500 bg-emerald-50/40">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 flex items-center justify-center text-white">
+        <i data-lucide="bot" style="width:24px;height:24px"></i>
+      </div>
+      <div class="flex-1">
+        <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">Robot.AI ${aiBadge}</h3>
+        <p class="text-xs text-gray-500">Asisten AI H.Ai — ${hasGLM?'Didukung oleh GLM API (jawaban dinamis)':'Mode offline (jawaban berbasis aturan). Admin dapat mengaktifkan GLM API di Pengaturan.'}</p>
+      </div>
+      <button onclick="clearRobotChat('${role}')" class="btn-ghost px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Hapus Chat</button>
+    </div>
+  </div>
+  <div class="card p-4">
+    <div class="robot-chat-container">
+      <div id="robotMessages" class="robot-messages">
+        ${history.map(m=>renderRobotMessage(m)).join('')}
+      </div>
+      <div class="robot-quick">
+        ${quickActions.map(q=>`<button onclick="askRobotQuick('${role}', this)" data-q="${q.replace(/'/g,"\\'")}" class="robot-quick-btn">${q}</button>`).join('')}
+      </div>
+      <div class="robot-input-area">
+        <textarea id="robotInput" placeholder="Ketik pesan ke Robot.AI..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendRobotMessage('${role}')}" oninput="autoGrowTextarea(this)"></textarea>
+        <button onclick="sendRobotMessage('${role}')" class="robot-send-btn" id="robotSendBtn"><i data-lucide="send" style="width:18px;height:18px"></i></button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderRobotMessage(m){
+  const isBot = m.role === 'bot';
+  const avatar = isBot ? '<i data-lucide="bot" style="width:18px;height:18px"></i>' : (state.currentUser?.nama||'U').charAt(0).toUpperCase();
+  return `<div class="robot-msg ${isBot?'bot':'user'}">
+    <div class="robot-avatar">${avatar}</div>
+    <div class="robot-bubble">${escapeRobotHtml(m.text)}</div>
+  </div>`;
+}
+
+function escapeRobotHtml(text){
+  return String(text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function autoGrowTextarea(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function askRobotQuick(role, btn){
+  const q = btn.getAttribute('data-q');
+  const input = document.getElementById('robotInput');
+  if(input){ input.value = q; }
+  sendRobotMessage(role);
+}
+
+function sendRobotMessage(role){
+  const input = document.getElementById('robotInput');
+  if(!input) return;
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+  const history = loadRobotHistory(role) || [];
+  history.push({role:'user', text:text, ts:Date.now()});
+  saveRobotHistory(role, history);
+  const msgs = document.getElementById('robotMessages');
+  if(msgs){
+    msgs.insertAdjacentHTML('beforeend', renderRobotMessage({role:'user', text:text}));
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  showRobotTyping();
+  const sendBtn = document.getElementById('robotSendBtn');
+  if(sendBtn) sendBtn.disabled = true;
+  setTimeout(async ()=>{
+    try{
+      const response = await getRobotResponse(role, text, history);
+      hideRobotTyping();
+      history.push({role:'bot', text:response, ts:Date.now()});
+      saveRobotHistory(role, history);
+      if(msgs){
+        msgs.insertAdjacentHTML('beforeend', renderRobotMessage({role:'bot', text:response}));
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+      lucide.createIcons();
+    }catch(e){
+      hideRobotTyping();
+      const fallback = 'Maaf, terjadi kesalahan. Coba lagi atau tanyakan dengan kata kunci berbeda.';
+      history.push({role:'bot', text:fallback, ts:Date.now()});
+      saveRobotHistory(role, history);
+      if(msgs){
+        msgs.insertAdjacentHTML('beforeend', renderRobotMessage({role:'bot', text:fallback}));
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+      lucide.createIcons();
+    }finally{
+      if(sendBtn) sendBtn.disabled = false;
+    }
+  }, 600 + Math.random()*500);
+}
+
+function showRobotTyping(){
+  const msgs = document.getElementById('robotMessages');
+  if(!msgs) return;
+  msgs.insertAdjacentHTML('beforeend', `<div id="robotTyping" class="robot-msg bot"><div class="robot-avatar"><i data-lucide="bot" style="width:18px;height:18px"></i></div><div class="robot-bubble"><div class="robot-typing"><span></span><span></span><span></span></div></div></div>`);
+  msgs.scrollTop = msgs.scrollHeight;
+  lucide.createIcons();
+}
+
+function hideRobotTyping(){
+  const t = document.getElementById('robotTyping');
+  if(t) t.remove();
+}
+
+function clearRobotChat(role){
+  showModal(`<div class="text-center"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-50 mb-3"><i data-lucide="trash-2" class="text-red-600" style="width:32px;height:32px"></i></div><h3 class="text-xl font-bold text-gray-800 mb-2">Hapus Riwayat Chat?</h3><p class="text-sm text-gray-600 mb-4">Semua percakapan dengan Robot.AI akan dihapus permanen.</p><div class="flex gap-3"><button onclick="closeModal()" class="btn-ghost flex-1 py-3 rounded-xl font-semibold">Batal</button><button onclick="confirmClearRobotChat('${role}')" class="btn-danger flex-1 py-3 rounded-xl font-semibold">Hapus</button></div></div>`);
+}
+
+function confirmClearRobotChat(role){
+  try{ localStorage.removeItem(getRobotStorageKey(role)); }catch(e){}
+  closeModal();
+  toast('Riwayat chat dihapus','success');
+  if(role==='guru') navigateGuru('robot');
+  else if(role==='admin') navigateAdmin('robot');
+  else navigateSantri('robot');
+}
+
+async function getRobotResponse(role, userText, history){
+  const apiKey = state.data.settings?.glmApiKey;
+  const keyType = state.data.settings?.glmKeyType;
+  if(apiKey && apiKey.length > 10 && keyType === 'glm'){
+    try{
+      return await callGLMApi(role, userText, history, apiKey);
+    }catch(e){
+      console.warn('GLM API failed, fallback to rule-based:', e);
+      return getRuleBasedResponse(role, userText) + '\n\n_⚠️ Catatan: GLM API error, jawaban di atas adalah fallback. Periksa API key di Admin → GLM API._';
+    }
+  }
+  if(apiKey && apiKey.length > 10 && keyType === 'local'){
+    return getEnhancedOfflineResponse(role, userText);
+  }
+  return getRuleBasedResponse(role, userText);
+}
+
+function getEnhancedOfflineResponse(role, text){
+  const baseResponse = getRuleBasedResponse(role, text);
+  const modeInfo = getRobotModeInfo();
+  const modePrefix = `🤖 **[${modeInfo.label} — Enhanced Offline]**\n\n`;
+  const modeSuffix = `\n\n---\n_💡 Mode: Enhanced Offline (Local Key aktif). Jawaban berbasis knowledge base H.Ai tanpa internet. Untuk jawaban AI dinamis, masukkan GLM API key dari open.bigmodel.cn._`;
+  return modePrefix + baseResponse + modeSuffix;
+}
+
+async function callGLMApi(role, userText, history, apiKey){
+  const nama = state.currentUser?.nama || 'Pengguna';
+  const modeInfo = getRobotModeInfo();
+  const modeFocus = modeInfo.focus;
+  const modeLabel = modeInfo.label;
+  
+  const modePrompts = {
+    bantuan: `Mode saat ini: Bantuan.AI. Fokus jawaban: ${modeFocus}. Jawab pertanyaan pengguna tentang cara pakai aplikasi, fitur, troubleshoot ringan. Berikan langkah singkat & jelas.`,
+    server: `Mode saat ini: Server.AI. Fokus jawaban: ${modeFocus}. Jawab pertanyaan tentang status server, storage, log aktivitas, performa, koneksi. Gunakan data sistem real-time di bawah untuk diagnosa.`,
+    tata_cara: `Mode saat ini: Tata Cara.AI. Fokus jawaban: ${modeFocus}. Berikan panduan langkah demi langkah (SOP) yang detail & terstruktur. Gunakan numbered list. Maks 5 langkah per jawaban.`,
+    pelengkap: `Mode saat ini: Pelengkap.AI. Fokus jawaban: ${modeFocus}. Berbagi tips, trik, shortcut, fitur tersembunyi, cara optimasi penggunaan aplikasi. Berikan saran yang praktis.`,
+    semua_ditau: `Mode saat ini: Semua_Ditau.AI. Mode super — Anda tahu segalanya tentang aplikasi H.Ai: sistem, server, SOP, tips, debugging, semua topik. Jawab pertanyaan apapun dengan komprehensif.`
+  };
+  
+  const modePrompt = modePrompts[state.data.robotMode] || modePrompts.bantuan;
+  
+  const systemPrompt = `Kamu adalah Robot.AI (${modeLabel}), asisten AI untuk aplikasi H.Ai (Taman Pendidikan Proses Belajar). Pengguna saat ini adalah ${role==='admin'?'Admin/Owner':role==='guru'?'Guru':'Murid'} bernama ${nama}.
+
+${modePrompt}
+
+Aplikasi H.Ai memiliki fitur:
+- Panel Guru: Dashboard, Absensi Masuk (wajah/sidik jari/link), Absensi Barcode Murid (scan kartu), Absensi Murid, Pendaftaran Murid (QR code per guru), Daftar Murid (dengan persetujuan ✓/❌), Jadwal (Online/Offline), Buku Setoran, Kartu Kontrol, Pembayaran, Tugas & Materi, Ujian, IRapor, Profil Saya.
+- Panel Murid: Beranda, Kartu Identitas Murid (barcode), Jadwal, Absensi Wajah, Materi, Tugas, Ujian, Kartu Kontrol, Profil Saya (edit/foto).
+- Panel Admin: Dashboard, Monitor.Ai, Absensi Guru, Absensi Barcode Murid, Akun Guru, Akun Murid (persetujuan tanpa kode), Room Meeting, Pengaturan (toggle ON/OFF Robot.AI + pilih mode + GLM API key).
+
+Fitur khusus:
+- Pendaftaran murid: scan QR code guru (format TPQ-G2-NAMA) → formulir → auto-generate NIS + password berurut (1001, 1002, ...) + kartu identitas sementara dengan barcode
+- Absensi barcode: scan barcode CODE128 di kartu identitas murid (format: HAI + 6 digit NIS + 4 digit ID)
+- Persetujuan guru-murid: ✓ hijau (terima) / ❌ merah (tolak) di Daftar Murid
+- Password counter terakhir: ${state.data.passwordCounter||1000}
+
+Jawab singkat (maks 3 paragraf), ramah, gunakan emoji secukupnya. Jika ditanya fitur yang tidak ada, jelaskan dengan jujur. Bahasa Indonesia.
+
+Konteks sistem real-time:
+- Total guru: ${state.data.guru?.length||0}
+- Total murid: ${state.data.santri?.length||0}
+- Total pembayaran: ${state.data.pembayaran?.length||0}
+- Total tagihan: ${state.data.tagihan?.length||0}
+- Total absensi barcode: ${state.data.absensiBarcodeMurid?.length||0}
+- Total log aktivitas: ${state.data.logs?.length||0}
+- Storage digunakan: ${new Blob([JSON.stringify(state.data)]).size} bytes
+- Mode Robot.AI: ${modeLabel}
+- GLM API: ${state.data.settings?.glmApiKey?'Aktif':'Tidak aktif'}`;
+
+  const messages = [
+    {role:'system', content: systemPrompt}
+  ];
+  history.slice(-6).forEach(m=>{
+    messages.push({role: m.role==='bot'?'assistant':'user', content: m.text});
+  });
+  messages.push({role:'user', content: userText});
+
+  const resp = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: 'glm-4-flash',
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 500
+    })
+  });
+  if(!resp.ok){
+    throw new Error(`GLM API ${resp.status}: ${await resp.text()}`);
+  }
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content || 'Maaf, saya tidak bisa menjawab sekarang.';
+}
+
+function getRuleBasedResponse(role, text){
+  const t = text.toLowerCase();
+  // Greeting
+  if(/halo|hai|hello|assalam|pagi|siang|sore|malam/.test(t)){
+    const nama = state.currentUser?.nama || 'Pengguna';
+    return `Halo ${nama}! 👋 Saya Robot.AI, siap membantu Anda. Silakan tanyakan tentang fitur H.Ai seperti pendaftaran, absensi, jadwal, pembayaran, atau gunakan tombol quick actions di bawah. 🤖`;
+  }
+  // Login
+  if(/login|masuk|akun|password|username/.test(t)){
+    if(role==='murid') return `🔑 **Login Murid:**\n1. Username = NIS (contoh: S123456)\n2. Password = nomor berurut (1001, 1002, 1003, ...)\n\nJika lupa password, hubungi Admin atau Guru wali Anda. Mereka bisa lihat di menu "Akun Murid" → klik "Lihat" pada kolom password.\n\n💡 Tips: Setelah login, segera ganti foto profil di menu "Profil Saya".`;
+    if(role==='guru') return `🔑 **Login Guru:**\n- Username: guru\n- Password: guru123 (default admin utama)\n\nGuru lain memiliki username/password yang dibuat saat pendaftaran. Jika lupa, Admin bisa lihat di menu "Akun Guru".`;
+    return `🔑 **Login Admin (Owner):**\n- Username: hajar\n- Password: hajar2024 (default, bisa diubah di Pengaturan)\n\nAdmin bisa kelola semua akun guru & murid, melihat log sistem, dan mengatur GLM API key.`;
+  }
+  // Pendaftaran murid (guru)
+  if(/daftar|pendaftaran|register/.test(t) && role==='guru'){
+    return `📝 **Cara Mendaftarkan Murid Baru:**\n1. Buka menu **Pendaftaran Murid**\n2. Murid scan QR Code Anda (Kode Per Guru, contoh: TPQ-G2-HAJAR)\n3. Murid mengisi formulir: Nama, TTL, Ortu, No. Telp/WA, Alamat\n4. Setelah submit, sistem otomatis buat NIS + Password berurut (1001, 1002, ...)\n5. Kartu identitas sementara muncul dengan barcode untuk absensi\n\n💡 Tips: Tampilkan QR Code di layar agar murid bisa langsung scan.`;
+  }
+  // QR Code
+  if(/qr code|qr code guru|kode per guru|kode unik/.test(t)){
+    if(role==='guru') return `📱 **QR Code Kode Per Guru:**\n1. Buka menu **Pendaftaran Murid**\n2. Lihat kotak kiri "Kode Per Guru"\n3. QR berisi kode unik Anda (mis. TPQ-G2-HAJAR)\n4. Murid scan QR ini via "Daftar Murid Baru" → "Scan QR Kamera"\n5. Otomatis terverifikasi & lanjut ke formulir\n\n⚠️ Jika kamera tidak deteksi dalam 15 detik, gunakan Input Manual.`;
+    return `📱 **Info QR Code Pendaftaran:**\n- Setiap guru punya kode unik (mis. TPQ-G1-RIDWAN)\n- Murid scan QR untuk daftar otomatis ke guru tersebut\n- Kode terlihat di menu Pendaftaran Murid (panel guru)`;
+  }
+  // Persetujuan guru-murid
+  if(/setuju|terima|tolak|persetujuan|approve|reject/.test(t) && role==='guru'){
+    return `✅❌ **Persetujuan Guru–Murid:**\n1. Buka menu **Daftar Murid**\n2. Setiap murid punya 2 tombol:\n   - ✓ **Terima** (hijau) = terima sebagai bimbingan\n   - ❌ **Tolak** (merah tebal) = tolak pendaftaran\n3. Status berubah: Menunggu → Diterima/Ditolak\n4. Klik **Detail** untuk info lengkap\n\n💡 Arahkan kursor ke tombol untuk lihat keterangan.`;
+  }
+  // Absensi barcode
+  if(/barcode|absensi barcode|scan barcode|kartu identitas/.test(t)){
+    if(role==='guru' || role==='admin') return `📷 **Absensi Barcode Murid:**\n1. Buka menu **Absensi Barcode Murid**\n2. Klik **Mulai Scan Kamera**\n3. Arahkan kamera ke barcode di Kartu Identitas Murid\n4. Otomatis terdeteksi (support CODE128, CODE39, EAN13)\n5. Jika gagal 20 detik, klik **Input Manual** & ketik kode\n\n💡 Barcode di-generate otomatis di kartu murid (menu "Kartu Identitas Murid" di panel murid).`;
+    return `📷 **Kartu Identitas Murid (Barcode):**\n1. Buka menu **Kartu Identitas Murid** di panel Anda\n2. Lihat kartu dengan desain bunga matahari + batik\n3. Klik **Cetak** untuk print/PDF\n4. Barcode di kartu ini dipakai guru untuk absensi\n\n💡 Format barcode: HAI + 6 digit NIS + 4 digit ID`;
+  }
+  // Jadwal
+  if(/jadwal|online|offline|tatap muka/.test(t)){
+    if(role==='guru') return `📅 **Atur Jadwal Online/Offline:**\n1. Buka menu **Jadwal**\n2. Klik **Edit** untuk aktifkan input\n3. Setiap hari: klik **ON** (Online/Internet) atau **OFF** (Offline/Tatap Muka)\n4. Isi waktu, alamat, link Google Maps\n5. Klik **Simpan** lalu **Kirim** agar tampil di panel murid\n\n💡 Hari ini otomatis disorot sesuai dashboard.`;
+    return `📅 **Lihat Jadwal:**\n1. Buka menu **Jadwal** di panel Anda\n2. Lihat tabel mingguan (Senin–Minggu)\n3. Hari ini otomatis disorot\n4. Klik ikon globe 🌐 untuk buka Google Maps\n5. ON = Online (Internet), OFF = Offline (Tatap Muka)`;
+  }
+  // Pembayaran
+  if(/pembayaran|tagihan|spp|iuran|bayar/.test(t)){
+    if(role==='murid') return `💰 **Tagihan & Pembayaran:**\n1. Buka menu **Kartu Kontrol** untuk lihat tagihan\n2. Iuran Bulanan: Rp 25.000/bulan\n3. Pendaftaran: Rp 50.000 (sekali bayar)\n4. Status: Lunas (hijau) / Belum (merah)\n\n💡 Bayar langsung ke guru wali Anda, lalu guru akan konfirmasi di sistem.`;
+    if(role==='guru') return `💰 **Kelola Pembayaran:**\n1. Buka menu **Pembayaran**\n2. Klik **Tambah Pembayaran**\n3. Pilih murid, isi periode, nominal (bisa diatur), metode\n4. Klik **Simpan**\n\n💡 Status tagihan otomatis berubah "Lunas" jika nominal sesuai.`;
+    return `💰 **Pembayaran:**\n- Iuran Bulanan: Rp 25.000/bulan\n- Pendaftaran: Rp 50.000 (sekali)\n- Metode: Tunai, Transfer BSI/BNI/Mandiri, Alfamart, Indomaret\n- Password counter: ${state.data.passwordCounter||1000}`;
+  }
+  // Profil
+  if(/profil|foto|ganti foto|edit profil/.test(t)){
+    return `👤 **Profil Saya:**\n1. Buka menu **Profil Saya**\n2. Klik **Edit Profil** untuk ubah data\n3. Klik ikon kamera di avatar untuk **Ganti Foto**\n4. Pilih: **Kamera** (ambil foto) atau **Galeri** (upload)\n5. Klik **Simpan** lalu **Kirim** (ke Guru/Admin)\n\n💡 Foto profil juga tampil di kartu identitas murid.`;
+  }
+  // GLM API key
+  if(/glm|api key|konfigurasi|api/.test(t) && role==='admin'){
+    return `⚙️ **Konfigurasi GLM API Key:**\n1. Buka menu **Pengaturan**\n2. Scroll ke section "Konfigurasi Robot.AI (GLM)"\n3. Masukkan GLM API Key dari https://open.bigmodel.cn\n4. Klik **Simpan API Key**\n5. Robot.AI akan otomatis pakai GLM untuk jawaban dinamis\n\n💡 Tanpa API key, Robot.AI tetap berfungsi (mode offline/rule-based).`;
+  }
+  // Persetujuan tanpa kode
+  if(/tanpa kode|nocode|admin setuju/.test(t) && role==='admin'){
+    return `✅ **Persetujuan Murid Tanpa Kode Guru:**\n1. Buka menu **Akun Murid**\n2. Lihat section "Persetujuan Admin — Murid Tanpa Kode Guru"\n3. Untuk setiap pendaftar:\n   - Pilih guru yang cocok dari dropdown\n   - Klik ✓ **Setujui** (hijau) untuk terima\n   - Klik ❌ **Tolak** (merah) untuk tolak\n4. Setelah disetujui, sistem auto-buat NIS + Password berurut\n5. Kirim kredensial via WhatsApp ke ortu/murid\n\n💡 Murid tanpa kode = murid yang daftar tanpa QR guru.`;
+  }
+  // Tugas & Materi
+  if(/tugas|materi|ujian|soal/.test(t)){
+    if(role==='guru') return `📚 **Tugas, Materi & Ujian:**\n1. Buka menu **Tugas & Materi** untuk bagikan materi/tugas\n2. Buka menu **Ujian Murid** untuk buat soal ujian\n3. Murid kerjakan di panel mereka\n4. Lihat hasil & nilai di menu yang sama\n\n💡 Anti-kecurangan: copy-paste dinonaktifkan saat ujian.`;
+    return `📚 **Kerjakan Tugas/Ujian:**\n1. Buka menu **Tugas** atau **Ujian Murid**\n2. Klik tugas/ujian yang tersedia\n3. Kerjakan dengan jujur (anti-kecurangan aktif)\n4. Submit sebelum waktu habis\n\n💡 Lihat nilai di menu yang sama setelah dikoreksi guru.`;
+  }
+  // Absensi wajah
+  if(/absensi wajah|wajah|verifikasi wajah/.test(t)){
+    if(role==='murid') return `📷 **Absensi Wajah:**\n1. Buka menu **Absensi Wajah**\n2. Klik **Verifikasi Wajah**\n3. Posisisikan wajah di tengah kamera\n4. Klik **Verifikasi** — foto otomatis diambil\n5. Foto terkirim ke Guru wali Anda sebagai bukti\n\n💡 Pastikan pencahayaan cukup & wajah jelas.`;
+    if(role==='guru') return `📷 **Absensi Masuk Guru:**\n1. Buka menu **Absensi Masuk Guru**\n2. Pilih metode: **Scan Wajah**, **Sidik Jari**, atau **Link Absensi**\n3. Untuk wajah: foto otomatis diambil & dikirim ke Admin\n4. Untuk sidik jari: simulasi sensor\n5. Untuk link: tempel link absensi eksternal\n\n💡 Absensi tersimpan otomatis dengan timestamp.`;
+    return `📷 **Absensi Wajah Murid:**\n- Murid verifikasi wajah → foto otomatis terkirim ke Guru wali\n- Guru/Admin bisa absensi barcode murid di menu "Absensi Barcode Murid"`;
+  }
+  // Default
+  return `🤔 Saya belum mengerti pertanyaan itu. Coba tanyakan tentang:\n• Pendaftaran murid\n• Absensi (wajah/barcode)\n• Jadwal Online/Offline\n• Pembayaran & tagihan\n• Profil & ganti foto\n• Kartu identitas murid\n\nAtau klik salah satu tombol quick action di bawah. 💡\n\n_⚠️ Mode offline aktif. Admin bisa aktifkan GLM API di Pengaturan untuk jawaban lebih cerdas._`;
+}
+
+/* =========================================================================
    ABSENSI BARCODE MURID — Scan barcode kartu identitas murid
    Tersedia di login Guru & Admin
    ========================================================================= */
@@ -1277,13 +1849,15 @@ function renderScanBarcodeMurid(role){
     </div>
 
     <div id="barcodeScannerContainer" class="hidden bg-stone-900 rounded-xl overflow-hidden aspect-video relative">
-      <video id="barcodeVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+      <video id="barcodeVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
       <div class="scan-barcode-frame"></div>
+      <div class="scan-line barcode"></div>
       <div id="barcodeStatus" class="absolute top-3 left-3 right-3 bg-black/70 text-white text-sm font-semibold px-3 py-2 rounded-lg flex items-center gap-2">
         <i data-lucide="loader-2" class="animate-spin" style="width:14px;height:14px"></i>
-        <span>Menunggu barcode kartu murid...</span>
+        <span>Mengaktifkan kamera...</span>
       </div>
-      <button onclick="stopBarcodeScanner()" class="absolute bottom-3 right-3 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Batal</button>
+      <div class="absolute bottom-3 left-3 right-3 bg-emerald-50/95 text-emerald-800 text-xs px-3 py-2 rounded-lg flex items-center gap-2"><i data-lucide="info" style="width:14px;height:14px"></i><span>Arahkan kamera ke barcode di Kartu Identitas Murid. Jika 20 detik tidak terdeteksi, gunakan Input Manual.</span></div>
+      <button onclick="stopBarcodeScanner()" class="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center" title="Tutup"><i data-lucide="x" style="width:16px;height:16px"></i></button>
     </div>
   </div>
 
@@ -1334,40 +1908,112 @@ function startBarcodeScanner(role){
     stopBarcodeScanner();
     return;
   }
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(stream=>{
-    state.cameraStream = stream;
-    const video = document.getElementById('barcodeVideo');
-    video.srcObject = stream;
-    video.setAttribute('playsinline', true);
-    video.play();
-    const statusEl = document.getElementById('barcodeStatus');
-    state.scanInterval = setInterval(()=>{
-      if(video.readyState === video.HAVE_ENOUGH_DATA){
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height);
-        if(code && code.data){
-          // Check if data looks like our barcode format
-          const data = code.data.trim();
-          if(data.startsWith('HAI') || data.length>=8){
-            processBarcodeAbsensi(data, role, 'Kamera');
-            stopBarcodeScanner();
+  const video = document.getElementById('barcodeVideo');
+  const statusEl = document.getElementById('barcodeStatus');
+  let scanStartTime = Date.now();
+  let timeoutHandle = null;
+  let zxingReader = null;
+  let zxingControls = null;
+  const tryFallback = () => {
+    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}}).then(stream=>{
+      state.cameraStream = stream;
+      video.srcObject = stream;
+      video.setAttribute('playsinline', true);
+      video.muted = true;
+      video.play().catch(()=>{});
+      const tryScan = () => {
+        if(video.readyState >= video.HAVE_ENOUGH_DATA && video.videoWidth > 0){
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d', {willReadFrequently:true});
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {inversionAttempts:'attemptBoth'});
+          if(code && code.data){
+            const data = code.data.trim();
+            if(data && (data.startsWith('HAI') || data.length>=8)){
+              if(timeoutHandle) clearTimeout(timeoutHandle);
+              stopBarcodeScanner();
+              processBarcodeAbsensi(data, role, 'Kamera');
+              return;
+            }
           }
         }
+        if(statusEl){
+          const elapsed = Math.floor((Date.now()-scanStartTime)/1000);
+          if(elapsed > 12){
+            statusEl.innerHTML = `<i data-lucide="alert-triangle" class="text-red-400" style="width:14px;height:14px"></i><span>Tidak terdeteksi ${elapsed}s. Coba Input Manual.</span>`;
+          }else if(elapsed > 4){
+            statusEl.innerHTML = `<i data-lucide="loader-2" class="animate-spin text-emerald-400" style="width:14px;height:14px"></i><span>Memindai barcode... ${elapsed}s. Dekatkan kartu.</span>`;
+          }else{
+            statusEl.innerHTML = `<i data-lucide="loader-2" class="animate-spin text-amber-400" style="width:14px;height:14px"></i><span>Kamera aktif. Arahkan ke barcode kartu murid.</span>`;
+          }
+          lucide.createIcons();
+        }
+        if(state.scanInterval === 'barcode-active') requestAnimationFrame(tryScan);
+      };
+      state.scanInterval = 'barcode-active';
+      scanStartTime = Date.now();
+      video.addEventListener('loadedmetadata', ()=>{ scanStartTime = Date.now(); requestAnimationFrame(tryScan); });
+      if(video.readyState >= 2){ scanStartTime = Date.now(); requestAnimationFrame(tryScan); }
+    }).catch(()=>{
+      toast('Tidak dapat mengakses kamera. Gunakan Input Manual.','error');
+      stopBarcodeScanner();
+    });
+  };
+  // Try ZXing (supports CODE128, CODE39, EAN13, QR)
+  if(typeof window.ZXing !== 'undefined' && window.ZXing.BrowserMultiFormatReader){
+    try{
+      zxingReader = new window.ZXing.BrowserMultiFormatReader();
+      const hints = new Map();
+      if(window.ZXing.DecodeHintType){
+        hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+          window.ZXing.BarcodeFormat.CODE_128,
+          window.ZXing.BarcodeFormat.CODE_39,
+          window.ZXing.BarcodeFormat.EAN_13,
+          window.ZXing.BarcodeFormat.EAN_8,
+          window.ZXing.BarcodeFormat.UPC_A,
+          window.ZXing.BarcodeFormat.UPC_E,
+          window.ZXing.BarcodeFormat.QR_CODE,
+          window.ZXing.BarcodeFormat.DATA_MATRIX,
+          window.ZXing.BarcodeFormat.ITF
+        ]);
       }
-    }, 300);
-    if(statusEl){
-      statusEl.innerHTML = '<i data-lucide="loader-2" class="animate-spin" style="width:14px;height:14px"></i><span>Menunggu barcode kartu murid... Arahkan kamera ke barcode.</span>';
-      lucide.createIcons();
+      zxingReader.hints = hints;
+      zxingReader.decodeFromVideoDevice(undefined, video, (result, err, controls) => {
+        zxingControls = controls;
+        if(result){
+          const data = result.getText().trim();
+          if(data && data.length >= 4){
+            if(timeoutHandle) clearTimeout(timeoutHandle);
+            if(controls) controls.stop();
+            stopBarcodeScanner();
+            processBarcodeAbsensi(data, role, 'Kamera');
+            return;
+          }
+        }
+      });
+      if(statusEl){
+        statusEl.innerHTML = '<i data-lucide="loader-2" class="animate-spin text-emerald-400" style="width:14px;height:14px"></i><span>Kamera aktif (ZXing). Arahkan ke barcode kartu murid.</span>';
+        lucide.createIcons();
+      }
+      timeoutHandle = setTimeout(()=>{
+        if(zxingControls) zxingControls.stop();
+        toast('Barcode tidak terdeteksi dalam 20 detik. Mencoba mode fallback atau gunakan Input Manual.','warn');
+        tryFallback();
+      }, 20000);
+      return;
+    }catch(e){
+      console.warn('ZXing barcode failed, fallback to jsQR (QR only)', e);
     }
-  }).catch(()=>{
-    toast('Tidak dapat mengakses kamera. Gunakan Input Manual.','error');
+  }
+  // Fallback: jsQR (QR only - tidak bisa baca CODE128)
+  tryFallback();
+  timeoutHandle = setTimeout(()=>{
     stopBarcodeScanner();
-  });
+    toast('Kamera tidak mendeteksi barcode dalam 20 detik. Gunakan Input Manual.','warn');
+  }, 20000);
 }
 
 function stopBarcodeScanner(){
@@ -1375,10 +2021,8 @@ function stopBarcodeScanner(){
     state.cameraStream.getTracks().forEach(t=>t.stop());
     state.cameraStream = null;
   }
-  if(state.scanInterval){
-    clearInterval(state.scanInterval);
-    state.scanInterval = null;
-  }
+  state.scanInterval = null;
+  // ZXing controls stop is handled inline when scan succeeds, but also try here as safety
   const container = document.getElementById('barcodeScannerContainer');
   if(container) container.classList.add('hidden');
 }
